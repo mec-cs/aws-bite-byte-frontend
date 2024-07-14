@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FoodRecipeUiDemo</string>
+    <string name="title_activity_home_page">HomePageActivity</string>
+    <string name="title_activity_email">EmailActivity</string>
+</resources>
