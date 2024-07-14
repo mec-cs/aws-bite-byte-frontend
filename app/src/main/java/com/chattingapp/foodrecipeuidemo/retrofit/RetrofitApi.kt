@@ -24,6 +24,7 @@ interface RetrofitAPI {
     fun getUserByToken(@Query("token") token:String) : Call<User>
 
 
+
     // SEARCH API
     @POST("/search-profile/search")
     fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
