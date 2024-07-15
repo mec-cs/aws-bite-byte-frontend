@@ -51,6 +51,7 @@ android {
 
 dependencies {
 
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.activity:activity-compose:1.9.0")
@@ -89,7 +90,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
 
     implementation("org.mindrot:jbcrypt:0.4")
-
+    implementation ("io.coil-kt:coil-compose:2.2.2")
 
 
 }
