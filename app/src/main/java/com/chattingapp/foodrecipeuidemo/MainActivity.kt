@@ -19,6 +19,7 @@ import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
+import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
@@ -47,6 +48,7 @@ class MainActivity : ComponentActivity() {
                             override fun onResponse(call: Call<User>, response: Response<User>) {
                                 val user = response.body()
                                 if (user != null) {
+                                    Constant.user = user
                                     if(user.verified){
                                         navigateToHomePage()
                                     }
@@ -56,6 +58,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                             override fun onFailure(call: Call<User>, t: Throwable) {
+                                
                             }
                         })
                     }

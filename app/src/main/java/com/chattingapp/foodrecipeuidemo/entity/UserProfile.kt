@@ -1,11 +1,12 @@
 package com.chattingapp.foodrecipeuidemo.entity
 
-class UserProfile {
+import android.graphics.Bitmap
 
-    val id: Long? = null
+class UserProfile(
+    var username: String,
+    var profilePicture: String,
+    var id: Long = 0L, // Add an ID to identify users
+    var bm: Bitmap? = null
 
-    // Getters and setters
-    var username: String? = null
-
-    var profilePicture: String? = null
+) {
 }

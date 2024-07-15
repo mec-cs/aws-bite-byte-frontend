@@ -33,6 +33,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
+import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import retrofit2.Call
@@ -90,23 +92,28 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-            lateinit var user:User
-            user = User(email, password, null)
+            val authenticationDTO = AuthenticationDTO()
+
+            authenticationDTO.email = email
+            authenticationDTO.password = password
             if (rememberMe) {
                 val token = generateToken()
                 Log.d("TOKEN", token)
                 storeToken(token, context)
-                user = User(email, password, token)
+
+                authenticationDTO.token = token
+
 
             }
 
             val apiService = RetrofitHelper.apiService
 
-            apiService.checkLoginCredentials(user).enqueue(object : Callback<User> {
+            apiService.checkLoginCredentials(authenticationDTO).enqueue(object : Callback<User> {
 
                 override fun onResponse(call: Call<User>, response: Response<User>) {
                     if (response.isSuccessful) {
                         if (response.body() != null) {
+                            Constant.user = response.body()!!
                             // Display or process the response body for successful cases
                             if(response.body()!!.verified)
                                 navigateToHomePageActivity(context)

@@ -1,5 +1,4 @@
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
@@ -46,7 +45,6 @@ import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.ByteArrayInputStream
 
 
 class MainActivity : ComponentActivity() {
@@ -57,11 +55,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-/// IS IMAGE RENRERED BOOLEAN ADD
+
+
 @Composable
 fun SearchPageCall() {
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
     var isRecipeSelected by remember { mutableStateOf(true) }
+    var isImageRendered by remember { mutableStateOf(false) }
     var userProfiles by remember { mutableStateOf(listOf<UserProfile>()) }
     val recipes = listOf(
         Recipe(1, "Spaghetti Carbonara", R.drawable.spaghetti_carbonara),
@@ -100,10 +100,11 @@ fun SearchPageCall() {
                                                     val encodedString = encodedStrings.getOrNull(index)
                                                     if (encodedString != null) {
                                                         val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
-                                                        val decodedString = String(decodedBytes)
-                                                        userProfile.profilePicture = decodedString
+                                                        val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                                                        userProfile.bm = bitm
                                                     }
                                                 }
+                                                isImageRendered = true
 
                                             } else {
                                                 Log.e("ProfilePictureFetch", "Error: ${response.errorBody()?.string()}")
@@ -138,7 +139,7 @@ fun SearchPageCall() {
         if (isRecipeSelected) {
             RecipeList(recipes.filter { it.name.contains(searchText.text.trim(), ignoreCase = true) })
         } else {
-            UserProfileList(userProfiles)
+            UserProfileList(userProfiles, isImageRendered)
         }
     }
 }
@@ -190,10 +191,10 @@ fun RecipeList(recipes: List<Recipe>) {
 }
 
 @Composable
-fun UserProfileList(userProfiles: List<UserProfile>) {
+fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean) {
     Column {
         userProfiles.forEach { userProfile ->
-            UserProfileItem(userProfile)
+            UserProfileItem(userProfile, isImgRendered)
             Divider()
         }
     }
@@ -214,7 +215,7 @@ fun RecipeItem(recipe: Recipe) {
 }
 
 @Composable
-fun UserProfileItem(userProfile: UserProfile) {
+fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,34 +224,18 @@ fun UserProfileItem(userProfile: UserProfile) {
     ) {
         Text(userProfile.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
         Text(userProfile.username ?: "", fontSize = 20.sp, modifier = Modifier.weight(1f))
-        userProfile.profilePicture?.let { base64String ->
-            val bitmapOfStr = decodeBase64ToBitmap(base64String)
-            bitmapOfStr?.let {
+        if(isImgRendered) {
+            userProfile.bm?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp)
+                    contentDescription = null, // Provide a content description if needed
+                    modifier = Modifier
+                        .size(50.dp)
                 )
-            } ?: run {
-                Text("Image not available", fontSize = 16.sp) // Fallback UI
             }
-        } ?: run {
-            Text("No image", fontSize = 16.sp) // Fallback UI
         }
-        // You can add an Image composable here if userProfile.profilePicture is a URL or resource ID
+
     }
 }
 
 data class Recipe(val number: Int, val name: String, val image: Int)
-
-fun decodeBase64ToBitmap(base64String: String): Bitmap? {
-    return try {
-        // Ensure the Base64 string is correctly formatted
-        val cleanBase64 = base64String.replace("data:image/jpeg;base64,", "")
-        val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
-        BitmapFactory.decodeStream(ByteArrayInputStream(decodedBytes))
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
