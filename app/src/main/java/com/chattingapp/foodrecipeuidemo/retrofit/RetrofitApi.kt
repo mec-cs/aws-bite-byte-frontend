@@ -54,4 +54,5 @@ interface RetrofitAPICredentials {
 
     @GET("/profile-picture-downloader/download/{fileName}")
     fun getImage(@Path("fileName") imageName:String): Call<String>
+
 }
