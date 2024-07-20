@@ -2,6 +2,7 @@ package com.chattingapp.foodrecipeuidemo.retrofit
 
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
+import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -55,9 +56,13 @@ interface RetrofitAPICredentials {
     @GET("/profile-picture-downloader/download/{fileName}")
     fun getImage(@Path("fileName") imageName:String): Call<String>
 
+    @GET("/recipe-picture-downloader/download/{fileName}")
+    fun getImageRecipe(@Path("fileName") imageName:String): Call<String>
+
 
     // RECIPE API
 
-
+    @GET("profile-recipe/get-recipe/{ownerId}/{page}")
+    fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
 
 }

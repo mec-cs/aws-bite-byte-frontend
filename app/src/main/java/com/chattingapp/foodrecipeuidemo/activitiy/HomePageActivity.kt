@@ -72,11 +72,31 @@ class HomePageActivity : ComponentActivity() {
                             startDestination = "home",
                             modifier = Modifier.padding(innerPadding)
                         ) {
-                            composable("home") { HomeScreen(navController) }
-                            composable("search") { SearchScreen(navController) }
-                            composable("create recipe") { CreateRecipeScreen(navController) }
-                            composable("feed") { Feed(navController) }
-                            composable("profile") { ProfileScreen(navController) }
+                            composable("home") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                HomeScreen(navController)
+                            }
+                            composable("search") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                SearchScreen(navController)
+                            }
+                            composable("create recipe") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                CreateRecipeScreen(navController)
+                            }
+                            composable("feed") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                Feed(navController)
+                            }
+                            composable("profile") {
+                                Constant.targetUserProfile = null
+                                Constant.isProfilePage = true
+                                ProfileScreen(navController)
+                            }
 
                             // Add more destinations as needed
 
