@@ -44,7 +44,7 @@ interface RetrofitAPICredentials {
 
 
     // SEARCH API
-    @POST("/search-profile/search")
+    @POST("search-profile/search")
     fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
 
 

@@ -81,16 +81,18 @@ fun SearchPageCall() {
                 Log.d("SearchPageCall", "Search box value: $trimmedText")
 
                 var searchCriteria = SearchCriteria(trimmedText, 0)
-
+                isImageRendered = false
                 RetrofitHelper.apiService.getUsersByUsername(searchCriteria) // Pass username and page as query parameters
                     .enqueue(object : Callback<List<UserProfile>> {
                         override fun onResponse(call: Call<List<UserProfile>>, response: Response<List<UserProfile>>) {
                             if (response.isSuccessful) {
+                                //isImageRendered = false
                                 userProfiles = response.body() ?: listOf()
                                 val profilePictures: List<String> = userProfiles.mapNotNull { it.profilePicture }
 
                                 RetrofitHelper.apiService.getProfilePicturesList(profilePictures) // Pass the list of profile picture URLs
                                     .enqueue(object : Callback<List<String>> {
+
                                         override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
                                             if (response.isSuccessful) {
                                                 val encodedStrings: List<String> = response.body() ?: listOf()
@@ -102,6 +104,7 @@ fun SearchPageCall() {
                                                         val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
                                                         val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                                                         userProfile.bm = bitm
+                                                        //isImageRendered = true
                                                     }
                                                 }
                                                 isImageRendered = true
