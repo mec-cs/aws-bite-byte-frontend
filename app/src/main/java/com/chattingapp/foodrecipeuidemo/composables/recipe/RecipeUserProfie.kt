@@ -1,41 +1,74 @@
 package com.chattingapp.foodrecipeuidemo.composables.recipe
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 
 @Composable
-fun RecipeUserProfile(bm: ImageBitmap, username:String){
+fun RecipeUserProfile(bm: ImageBitmap, username: String, recipeId: Long) {
+    val favoriteViewModel: FavoriteViewModel = viewModel()
+
+    val isFavoriteMap by favoriteViewModel.isFavoriteMap.collectAsState()
+    val isFavorite = isFavoriteMap[recipeId] ?: false
+
+    LaunchedEffect(Constant.userProfile.id, recipeId) {
+        favoriteViewModel.checkFavorite(Constant.userProfile.id, recipeId)
+    }
+
     Row(
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = Modifier
-        //.padding(10.dp)
-        .fillMaxWidth()
-) {
-
-
-    Image(
-        bitmap = bm,
-        contentDescription = null,
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .size(30.dp)
-            .padding(end = 10.dp)
-    )
-
-    Text(
-        text = username,
-        fontSize = 16.sp,
-        modifier = Modifier
+            .padding(10.dp)
             .fillMaxWidth()
-    )
-}
+    ) {
+        Image(
+            bitmap = bm,
+            contentDescription = null,
+            modifier = Modifier
+                .size(30.dp)
+                .padding(end = 10.dp)
+        )
+
+        Text(
+            text = username,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f)
+        )
+
+        Icon(
+            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+            tint = if (isFavorite) Color.Red else Color.Gray,
+            modifier = Modifier
+                .padding(16.dp)
+                .clickable {
+                    if (isFavorite) {
+                        // Call method to delete favorite
+                        favoriteViewModel.deleteFavorite(Constant.userProfile.id, recipeId)
+                    } else {
+                        // Call method to add favorite
+                        favoriteViewModel.addFavorite(Constant.userProfile.id, recipeId)
+                    }
+
+                }
+        )
+    }
 }

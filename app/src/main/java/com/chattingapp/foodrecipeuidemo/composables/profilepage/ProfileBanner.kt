@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
@@ -40,20 +41,26 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 @Composable
 fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel) {
     val recipeList by recipeViewModel.recipeList.observeAsState(emptyList())
-
     RetrofitHelper.apiService
+    var userProfile: UserProfile
+    if(Constant.targetUserProfile != null){
+        userProfile = Constant.targetUserProfile!!
+    }
+    else{
+        userProfile = Constant.userProfile
+    }
 
-    LaunchedEffect(Constant.userProfile.id) {
-        viewModel.fetchFollowersCount(Constant.userProfile.id)
-        recipeViewModel.fetchRecipes(Constant.userProfile.id)
+    LaunchedEffect(userProfile.id) {
+        viewModel.fetchFollowersCount(userProfile.id)
+        recipeViewModel.fetchRecipes(userProfile.id)
     }
 
     val followCounts by viewModel.followCounts.observeAsState()
     var displayProfileImage by remember { mutableStateOf(false) }
 
-    if (Constant.userProfile.bm == null) {
-        LaunchedEffect(Constant.userProfile.profilePicture) {
-            profileImageViewModel.fetchProfileImage(Constant.userProfile.profilePicture)
+    if (userProfile.bm == null) {
+        LaunchedEffect(userProfile.profilePicture) {
+            profileImageViewModel.fetchProfileImage(userProfile.profilePicture)
         }
 
         val profileImage by profileImageViewModel.profileImage.observeAsState()
@@ -72,7 +79,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
 
     Column {
         Text(
-            Constant.userProfile.username,
+            userProfile.username,
             fontWeight = FontWeight.Bold,
             fontSize = 25.sp,
             modifier = Modifier
@@ -83,7 +90,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
             painterResource(id = R.drawable.ic_launcher_background)
 
             if (displayProfileImage) {
-                Constant.userProfile.bm?.let {
+                userProfile.bm?.let {
                     Image(
                         bitmap = it.asImageBitmap(),
                         contentDescription = null,
@@ -143,7 +150,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
                     .collect { lastVisibleItem ->
                         if (lastVisibleItem != null && lastVisibleItem.index >= recipeList.size - 1) {
-                            recipeViewModel.loadMoreRecipes(Constant.userProfile.id)
+                            recipeViewModel.loadMoreRecipes(userProfile.id)
                         }
                     }
             }

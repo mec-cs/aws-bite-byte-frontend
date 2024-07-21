@@ -2,6 +2,8 @@ package com.chattingapp.foodrecipeuidemo.retrofit
 
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
+import com.chattingapp.foodrecipeuidemo.entity.Like
+import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.User
@@ -9,6 +11,7 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -65,4 +68,24 @@ interface RetrofitAPICredentials {
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
     fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
 
+    @GET("favorite/check-favorite")
+    fun checkFavorite(@Query("userId") userId:Long, @Query("recipeId") recipeId:Long): Call<Boolean>
+
+    @DELETE("favorite/delete/{userId}/{recipeId}")
+    fun deleteFavorite(@Path("userId") userId: Long, @Path("recipeId") recipeId: Long): Call<Void>
+
+    @POST("favorite/add")
+    fun addFavorite(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long): Call<Boolean>
+
+    @GET("like-dislike/count")
+    fun getLikeCounts(@Query("recipeId") recipeId: Long): Call<LikeCountResponse>
+
+    @GET("like-dislike/check-like")
+    fun getLike(@Query("recipeId") recipeId: Long, @Query("userId") userId:Long): Call<Like>
+
+    @POST("like-dislike/add-like")
+    fun addLike(@Body like:Like): Call<Like>
+
+    @DELETE("like-dislike/remove-like/{recipeId}/{userId}")
+    fun deleteLike(@Path("recipeId") recipeId: Long , @Path("userId") userId: Long): Call<Void>
 }
