@@ -81,7 +81,7 @@ interface RetrofitAPICredentials {
     fun getLikeCounts(@Query("recipeId") recipeId: Long): Call<LikeCountResponse>
 
     @GET("like-dislike/check-like")
-    fun getLike(@Query("recipeId") recipeId: Long, @Query("userId") userId:Long): Call<Like>
+    fun getLike(@Query("recipeId") recipeId: Long, @Query("userId") userId:Long): Call<Boolean>
 
     @POST("like-dislike/add-like")
     fun addLike(@Body like:Like): Call<Like>

@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,43 +15,65 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.await
 import retrofit2.awaitResponse
+import androidx.compose.runtime.State
 
-class LikeViewModel(private val recipeApiService: RetrofitAPICredentials = RetrofitHelper.apiService) : ViewModel() {
+class LikeViewModel() : ViewModel() {
 
     private val _likeCount = MutableLiveData<LikeCountResponse>()
     val likeCount: LiveData<LikeCountResponse> get() = _likeCount
 
-    private val _isLiked = MutableLiveData<Boolean>()
+    private val _isLiked = MutableLiveData<Boolean>(false)
     val isLiked: LiveData<Boolean> get() = _isLiked
 
-    private val _isDisliked = MutableLiveData<Boolean>()
-    val isDisliked: LiveData<Boolean> get() = _isDisliked
+    private val _loadingState = MutableStateFlow<Map<Long, Boolean>>(emptyMap()) // New loading state
+    val loadingState: StateFlow<Map<Long, Boolean>> = _loadingState
 
     private var isLoading = false
-    private val _isLikedMap = MutableStateFlow<Map<Long, Like>>(emptyMap())
-    val isLikedMap: StateFlow<Map<Long, Like>> = _isLikedMap
+    private val _isLikedMap = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+    val isLikedMap: StateFlow<Map<Long, Boolean>> = _isLikedMap
 
-    fun checkLike(userId: Long, recipeId: Long) {
+    /*fun checkLike(userId: Long, recipeId: Long) {
         if (isLoading) return
         isLoading = true
 
         viewModelScope.launch {
             try {
-                val response = recipeApiService.getLike(recipeId, userId).await()
+                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                     put(recipeId, response)
                 }
-                _isLiked.value = response.type
-                _isDisliked.value = !response.type
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(recipeId, Like(-1, -1, -1, false))
+                    put(recipeId, false)
                 }
                 _isLiked.value = false
-                _isDisliked.value = false
+
             } finally {
                 isLoading = false
+            }
+        }
+    }*/
+    fun checkLike(userId: Long, recipeId: Long) {
+        viewModelScope.launch {
+            _loadingState.value = _loadingState.value.toMutableMap().apply {
+                put(recipeId, true)
+            }
+            try {
+                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(recipeId, response)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(recipeId, false)
+                }
+            } finally {
+                _loadingState.value = _loadingState.value.toMutableMap().apply {
+                    put(recipeId, false)
+                }
             }
         }
     }
@@ -58,84 +81,80 @@ class LikeViewModel(private val recipeApiService: RetrofitAPICredentials = Retro
     fun toggleLike(like: Like) {
         viewModelScope.launch {
             try {
-                if (_isDisliked.value == true) {
-                    _isDisliked.value = false
+                val currentLikeState = _isLikedMap.value[like.recipeId] ?: false
+                val newLikeState = !currentLikeState
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(like.recipeId, newLikeState)
                 }
 
-                _isLiked.value = !_isLiked.value!! // Toggle the like state
-
-                if (_isLiked.value == true) {
-                    val response = recipeApiService.addLike(like).awaitResponse()
+                if (newLikeState) {
+                    val response = RetrofitHelper.apiService.addLike(like).awaitResponse()
                     if (response.isSuccessful) {
+                        updateLikeCount(like.recipeId, 1)
+
                         // Handle successful addition of like
                         Log.d("LikeToggle", "Like added successfully")
                     } else {
                         // Handle error response
                         Log.e("LikeToggle", "Error adding like: ${response.errorBody()?.string()}")
-                        _isLiked.value = false // Revert state if the request failed
+                        _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                            put(like.recipeId, false)
+                        }
                     }
                 } else {
-                    val response = recipeApiService.deleteLike(like.recipeId, like.userId).awaitResponse()
+                    val response = RetrofitHelper.apiService.deleteLike(like.recipeId, like.userId).awaitResponse()
                     if (response.isSuccessful) {
                         // Handle successful removal of like
+                        updateLikeCount(like.recipeId, -1)
+
                         Log.d("LikeToggle", "Like removed successfully")
                     } else {
                         // Handle error response
-                        Log.e("LikeToggle", "Error removing like: ${response.errorBody()?.string()}")
-                        _isLiked.value = true // Revert state if the request failed
+                        _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                            put(like.recipeId, true)
+                        }
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                _isLiked.value = !_isLiked.value!! // Revert the like state in case of an error
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(like.recipeId, _isLikedMap.value[like.recipeId] ?: false)
+                }
             }
         }
     }
 
-
-    fun toggleDislike(like: Like) {
-        if (_isLiked.value == true) {
-            _isLiked.value = false
-        }
-        _isDisliked.value = _isDisliked.value != true
-
+    private fun updateLikeCount(recipeId: Long, delta: Int) {
         viewModelScope.launch {
-            try {
-                if (_isDisliked.value == true) {
-                    val response = recipeApiService.addLike(like).awaitResponse()
-                    if (response.isSuccessful) {
-                        // Handle successful addition of dislike
-                    } else {
-                        // Handle error response
-                        _isDisliked.value = false
-                    }
-                } else {
-                    val response = recipeApiService.deleteLike(like.recipeId, like.userId).awaitResponse()
-                    if (response.isSuccessful) {
-                        // Handle successful removal of dislike
-                    } else {
-                        // Handle error response
-                        _isDisliked.value = true
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isDisliked.value = !_isDisliked.value!! // Revert the dislike state in case of an error
+            val currentCount = _likeCounts.value[recipeId]?.likes ?: 0
+            _likeCounts.value = _likeCounts.value.toMutableMap().apply {
+                put(recipeId, LikeCountResponse(likes = currentCount + delta))
             }
         }
     }
+
+
+    private val _likeCounts = MutableStateFlow<Map<Long, LikeCountResponse?>>(emptyMap())
+    val likeCounts: StateFlow<Map<Long, LikeCountResponse?>> = _likeCounts
 
     fun fetchLikeCounts(recipeId: Long) {
         viewModelScope.launch {
+            if (_likeCounts.value.containsKey(recipeId)) {
+                // Like counts for this recipe already fetched, no need to fetch again
+                return@launch
+            }
+
             try {
-                val response = recipeApiService.getLikeCounts(recipeId).awaitResponse()
+                val response = RetrofitHelper.apiService.getLikeCounts(recipeId).awaitResponse()
                 if (response.isSuccessful) {
-                    _likeCount.value = response.body()
+                    _likeCounts.value = _likeCounts.value + (recipeId to response.body())
                 } else {
                     // Handle the error here
+                    _likeCounts.value = _likeCounts.value + (recipeId to null)
                 }
             } catch (e: Exception) {
                 // Handle the exception here
+                _likeCounts.value = _likeCounts.value + (recipeId to null)
             }
         }
     }

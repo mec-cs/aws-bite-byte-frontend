@@ -54,10 +54,13 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
         var expanded by remember { mutableStateOf(false) } // State to toggle description
         var bitmap by remember { mutableStateOf<Bitmap?>(null) }
         var isLoading by remember { mutableStateOf(true) } // State to track loading
-        val likeViewModel = LikeViewModel()
+        /*val likeViewModel = LikeViewModel()
 
         val likeCount by likeViewModel.likeCount.observeAsState()
         likeViewModel.fetchLikeCounts(recipe.id!!)
+
+        val isLikeMap by likeViewModel.isLikedMap.collectAsState()
+        val isLiked = isLikeMap[recipe.id] ?: false*/
 
         LaunchedEffect(recipe.image) {
             viewModel.fetchImage(recipe) {
@@ -114,114 +117,13 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
                             .clip(RoundedCornerShape(8.dp))
                     )
 
-                    val isLiked by likeViewModel.isLiked.observeAsState(false)
-                    val isDisliked by likeViewModel.isDisliked.observeAsState(false)
-
-                    LaunchedEffect(recipe.id) {
-                        likeViewModel.checkLike(Constant.userProfile.id, recipe.id)
-                    }
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(), // Ensure the Row takes up full width
                         horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between items
                     ) {
-                        likeCount?.let {
-                            // Like Button
-                            IconButton(modifier = Modifier
-                                .size(30.dp) // Adjust the size of the button
-                                .clip(RoundedCornerShape(8.dp)) // Clip the icon to have rounded corners
-
-                                , onClick = {
-                                    val likeClicked = Like(-1, Constant.userProfile.id, recipe.id, true)
-                                    likeViewModel.toggleLike(likeClicked)
-                                }) {
-                                val icon = if (isLiked) R.drawable.like_filled else R.drawable.like
-                                Icon(
-                                    painter = painterResource(id = icon),
-                                    contentDescription = "Like",
-                                    modifier = Modifier.size(24.dp), // Adjust the size of the icon
-                                    tint = Color.Unspecified
-                                )
-                            }
-                            // Like Count
-                            Text(
-                                text = it.likes.toString(),
-                                fontSize = 15.sp
-                            )
-
-                            // Dislike Button
-                            IconButton( modifier = Modifier
-                                .size(30.dp) // Adjust the size of the button
-                                .clip(RoundedCornerShape(8.dp)),onClick = {
-                                    val likeClicked = Like(-1, Constant.userProfile.id, recipe.id, false)
-                                    likeViewModel.toggleDislike(likeClicked)
-                                }) {
-                                val icon = if (isDisliked) R.drawable.dislike_filled else R.drawable.dislike
-                                Icon(
-                                    painter = painterResource(id = icon),
-                                    contentDescription = "Dislike",
-                                    modifier = Modifier.size(24.dp), // Adjust the size of the icon
-                                    tint = Color.Unspecified
-                                )
-                            }
-                            // Dislike Count
-                            Text(
-                                text = it.dislikes.toString(),
-                                fontSize = 15.sp
-                            )
-
-                            IconButton( modifier = Modifier
-                                .size(30.dp) // Adjust the size of the button
-                                .clip(RoundedCornerShape(8.dp)),onClick = {
-
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.comment),
-                                    contentDescription = "Comment",
-                                    modifier = Modifier.size(24.dp), // Adjust the size of the icon
-                                    tint = Color.Unspecified
-                                )
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .weight(1f) // This will make sure the Column takes the remaining width
-                                    .padding(start = 16.dp), // Optional: Add padding to the start
-                                horizontalArrangement = Arrangement.End // Align items to the start (left)
-
-                            )  {
-                                val percentage = calculateLikePercentage(it.likes, it.dislikes)
-                                val percentageColor = when (percentage) {
-                                    in 81..100 -> Color.Green
-                                    in 61..80 -> Color.Cyan
-                                    in 41..60 -> Color.Gray
-                                    else -> Color.Red // Default color for percentages below 40
-                                }
-                                if(percentage != -1) {
-                                    Text(
-                                        text = "$percentage%",
-                                        fontSize = 15.sp,
-                                        color = percentageColor, modifier = Modifier.padding(end = 8.dp)
-                                    )
-                                }
-                                val emoji = when (percentage) {
-                                    in 0..40 -> "😔" // Adjust emojis as needed
-                                    in 41..60 -> "😐"
-                                    in 61..80 -> "🙂"
-                                    in 81..100 -> "😋"
-                                    else -> "❓" // Fallback emoji
-                                }
-
-                                Text(
-                                    text = emoji,
-                                    fontSize = 20.sp, // Adjust the size of the emoji
-                                )
-                            }
-
-                        }
-
+                        LikeRecipe(recipeId = recipe.id!!)
 
                     }
 
@@ -279,9 +181,4 @@ fun formatDateForUser(dateString: String): String {
         durationMinutes > 0 -> "${durationMinutes} minute(s) ago"
         else -> "Just now"
     }
-}
-
-fun calculateLikePercentage(likes: Long, dislikes: Long): Int {
-    val total = likes + dislikes
-    return if (total == 0L) -1 else ((likes.toDouble() / total) * 100).toInt()
 }
