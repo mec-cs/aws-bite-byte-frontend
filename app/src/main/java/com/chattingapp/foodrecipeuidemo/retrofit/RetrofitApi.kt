@@ -4,17 +4,22 @@ import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
+import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -64,7 +69,6 @@ interface RetrofitAPICredentials {
 
 
     // RECIPE API
-
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
     fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
 
@@ -88,4 +92,41 @@ interface RetrofitAPICredentials {
 
     @DELETE("like-dislike/remove-like/{recipeId}/{userId}")
     fun deleteLike(@Path("recipeId") recipeId: Long , @Path("userId") userId: Long): Call<Void>
+
+
+    // MANAGE RECIPE API
+    @Multipart
+    @POST("create-recipe/create-draft")
+    fun saveRecipeAsDraft(
+        @Part file: MultipartBody.Part,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("cuisine") cuisine: RequestBody,
+        @Part("course") course: RequestBody,
+        @Part("diet") diet: RequestBody,
+        @Part("prepTime") prepTime: RequestBody,
+        @Part("ingredients") ingredients: RequestBody,
+        @Part("instructions") instructions: RequestBody,
+        @Part("image") image: RequestBody,
+        @Part("ownerId") ownerId: RequestBody,
+        @Part("type") type: RequestBody,
+        @Part("isImgChanged") isImgChanged: RequestBody
+    ): Call<Recipe>
+
+    @Multipart
+    @POST("create-recipe/create-recipe")
+    fun createTheRecipe(
+        @Part file: MultipartBody.Part,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody,
+        @Part("cuisine") cuisine: RequestBody,
+        @Part("course") course: RequestBody,
+        @Part("diet") diet: RequestBody,
+        @Part("prepTime") prepTime: RequestBody,
+        @Part("ingredients") ingredients: RequestBody,
+        @Part("instructions") instructions: RequestBody,
+        @Part("image") image: RequestBody,
+        @Part("ownerId") ownerId: RequestBody,
+        @Part("type") type: RequestBody
+    ): Call<Recipe>
 }

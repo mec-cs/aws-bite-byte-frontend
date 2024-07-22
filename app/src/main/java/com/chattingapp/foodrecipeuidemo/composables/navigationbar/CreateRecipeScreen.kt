@@ -1,8 +1,11 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
+import android.content.ContentResolver
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,16 +35,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreateRecipeScreen(navController: NavHostController) {
+fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewModel) {
     var recipeName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var cuisine by remember { mutableStateOf("") }
@@ -51,18 +61,24 @@ fun CreateRecipeScreen(navController: NavHostController) {
     var ingredients by remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageFile by remember { mutableStateOf<File?>(null) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri = uri
+        uri?.let {
+            copyUriToFile(it, navController.context.contentResolver) { file ->
+                selectedImageFile = file
+            }
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "Choose Recipe's Picture")
@@ -248,21 +264,65 @@ fun CreateRecipeScreen(navController: NavHostController) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Absolute.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Button(onClick = { /* Publish to Backend */ }) {
+            Button(onClick = {
+                viewModel.createRecipe(
+                    name = recipeName,
+                    description = description,
+                    cuisine = cuisine,
+                    course = course,
+                    diet = diet,
+                    prepTime = prepTime,
+                    ingredients = ingredients,
+                    instructions = instructions,
+                    imageUri = selectedImageFile?.toUri(),
+                    ownerId = Constant.userProfile.id, // Change to the actual user ID
+                    type = true
+                )
+            }) {
                 Text("Publish")
             }
 
-            Button(onClick = { /* Save As Draft to Backend */ }) {
+            Button(onClick = {
+                viewModel.saveRecipeAsDraft(
+                    name = recipeName,
+                    description = description,
+                    cuisine = cuisine,
+                    course = course,
+                    diet = diet,
+                    prepTime = prepTime,
+                    ingredients = ingredients,
+                    instructions = instructions,
+                    imageUri = selectedImageFile?.toUri(),
+                    ownerId = Constant.userProfile.id, // Change to the actual user ID
+                    type = false,
+                    isImgChanged = imageUri != null
+                )
+            }) {
                 Text("Save As Draft")
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewCreateRecipeScreen() {
-    CreateRecipeScreen(navController = rememberNavController())
+fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCreated: (File) -> Unit) {
+    val coroutineScope = CoroutineScope(Dispatchers.IO)
+    coroutineScope.launch {
+        try {
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val tempFile = File.createTempFile("temp_image", ".jpg")
+            val outputStream = FileOutputStream(tempFile)
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            onFileCreated(tempFile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
+
+fun File.toUri(): Uri = Uri.fromFile(this)
