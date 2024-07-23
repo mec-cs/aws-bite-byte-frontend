@@ -1,5 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.profilepage
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -39,10 +42,14 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 
 @Composable
-fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel) {
+fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel, navController: NavController) {
     val recipeList by recipeViewModel.recipeList.observeAsState(emptyList())
     RetrofitHelper.apiService
     var userProfile: UserProfile
+
+    var isFirstTime by remember { mutableStateOf(true) }
+
+
     if(Constant.targetUserProfile != null){
         userProfile = Constant.targetUserProfile!!
     }
@@ -50,32 +57,19 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
         userProfile = Constant.userProfile
     }
 
-    LaunchedEffect(userProfile.id) {
-        viewModel.fetchFollowersCount(userProfile.id)
-        recipeViewModel.fetchRecipes(userProfile.id)
+    if(isFirstTime){
+        LaunchedEffect(userProfile.id) {
+            viewModel.fetchFollowersCount(userProfile.id)
+            recipeViewModel.fetchRecipes(userProfile.id)
+        }
+        isFirstTime = false
     }
+
 
     val followCounts by viewModel.followCounts.observeAsState()
     var displayProfileImage by remember { mutableStateOf(false) }
 
-    if (userProfile.bm == null) {
-        LaunchedEffect(userProfile.profilePicture) {
-            profileImageViewModel.fetchProfileImage(userProfile.profilePicture)
-        }
 
-        val profileImage by profileImageViewModel.profileImage.observeAsState()
-        profileImage?.let {
-            displayProfileImage = true
-        } ?: run {
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-        }
-    } else {
-        displayProfileImage = true
-    }
 
     Column {
         Text(
@@ -88,7 +82,24 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             painterResource(id = R.drawable.ic_launcher_background)
+            if (userProfile.bm == null) {
+                LaunchedEffect(userProfile.profilePicture) {
+                    profileImageViewModel.fetchProfileImage(userProfile.profilePicture)
+                }
 
+                val profileImage by profileImageViewModel.profileImage.observeAsState()
+                profileImage?.let {
+                    displayProfileImage = true
+                } ?: run {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp),
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                }
+            } else {
+                displayProfileImage = true
+            }
             if (displayProfileImage) {
                 userProfile.bm?.let {
                     Image(
@@ -141,15 +152,26 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                     .wrapContentHeight()
                     .padding(16.dp, 0.dp, 16.dp, 32.dp)
             ) {
+                if(recipeList.size != recipeViewModel.recipeListDetail.size){
+
+                }
                 items(recipeList) { recipe ->
-                    DisplayRecipe(recipe, recipeViewModel)
+                    Log.d("SIZE:  ", recipeList.size.toString())
+                    recipeViewModel.listSize = recipeList.size
+                    Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
+
+                    recipeViewModel.recipeListDetail = recipeList
+                    Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
+
+                    DisplayRecipe(recipe, recipeViewModel, navController)
                 }
             }
 
             LaunchedEffect(listState) {
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
                     .collect { lastVisibleItem ->
-                        if (lastVisibleItem != null && lastVisibleItem.index >= recipeList.size - 1) {
+                        if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1) {
+                            Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
                             recipeViewModel.loadMoreRecipes(userProfile.id)
                         }
                     }

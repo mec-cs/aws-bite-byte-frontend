@@ -36,15 +36,18 @@ fun LikeRecipe(recipeId: Long){
     val loadingState by likeViewModel.loadingState.collectAsState()
     val isLoading = loadingState[recipeId] ?: false
 
-    LaunchedEffect(recipeId) {
+    /*LaunchedEffect(recipeId) {
         likeViewModel.fetchLikeCounts(recipeId)
     }
 
     LaunchedEffect(Constant.userProfile.id, recipeId) {
         likeViewModel.checkLike(Constant.userProfile.id, recipeId)
+    }*/
+
+    LaunchedEffect(recipeId) {
+        likeViewModel.fetchLikeCounts(recipeId)
+        likeViewModel.checkLike(Constant.userProfile.id, recipeId)
     }
-
-
     // Like Button
     if(isLoading){
         CircularProgressIndicator()
