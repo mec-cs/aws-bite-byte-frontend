@@ -3,16 +3,19 @@ package com.chattingapp.foodrecipeuidemo.composables.recipe
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -34,9 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Like
@@ -49,42 +54,32 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
+fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navController: NavController) {
+    var expanded by remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    LaunchedEffect(recipe.id) {
+        viewModel.fetchImage(recipe) {
+            bitmap = it
+            isLoading = false
+        }
+    }
+
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
-        var expanded by remember { mutableStateOf(false) } // State to toggle description
-        var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-        var isLoading by remember { mutableStateOf(true) } // State to track loading
-        /*val likeViewModel = LikeViewModel()
-
-        val likeCount by likeViewModel.likeCount.observeAsState()
-        likeViewModel.fetchLikeCounts(recipe.id!!)
-
-        val isLikeMap by likeViewModel.isLikedMap.collectAsState()
-        val isLiked = isLikeMap[recipe.id] ?: false*/
-
-        LaunchedEffect(recipe.image) {
-            viewModel.fetchImage(recipe) {
-                bitmap = it
-                isLoading = false // Set loading to false once image is loaded
-            }
+        // Conditional profile display
+        val profileBitmap = when {
+            Constant.isProfilePage && Constant.targetUserProfile == null -> Constant.userProfile.bm
+            Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
+            !Constant.isProfilePage && recipe.ownerId == Constant.userProfile.id -> Constant.userProfile.bm
+            else -> null
         }
 
-        if (Constant.isProfilePage && Constant.targetUserProfile == null) {
-            Constant.userProfile.bm?.let {
-                RecipeUserProfile(it.asImageBitmap(), Constant.userProfile.username, recipe.id!!)
-            }
-        } else if (Constant.isProfilePage && Constant.targetUserProfile != null) {
-            Constant.targetUserProfile!!.bm?.let {
-                RecipeUserProfile(it.asImageBitmap(), Constant.targetUserProfile!!.username, recipe.id!!)
-            }
-        } else if (!Constant.isProfilePage && recipe.ownerId == Constant.userProfile.id) {
-            Constant.userProfile.bm?.let {
-                RecipeUserProfile(it.asImageBitmap(), Constant.userProfile.username, recipe.id!!)
-            }
+        profileBitmap?.let {
+            RecipeUserProfile(it.asImageBitmap(), Constant.userProfile.username, recipe.id!!)
         }
 
         Text(
-            text = recipe.name!!,
+            text = recipe.name ?: "",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -95,17 +90,20 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp) // Add vertical padding if needed
+                    .padding(vertical = 16.dp)
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(64.dp),
                     color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
         } else {
             bitmap?.let {
-                Column(modifier = Modifier.clickable { Log.d("CLICKED RECIPE:", "HI") }) {
+                Column(modifier = Modifier.clickable {
+                    navController.navigate("recipeDetail/${recipe.id}")
+                }) {
+
                     Image(
                         bitmap = it.asImageBitmap(),
                         contentDescription = null,
@@ -117,27 +115,22 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
                             .clip(RoundedCornerShape(8.dp))
                     )
 
-
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(), // Ensure the Row takes up full width
-                        horizontalArrangement = Arrangement.spacedBy(8.dp) // Space between items
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         LikeRecipe(recipeId = recipe.id!!)
-
                     }
 
-
-
-                    val description = recipe.description
-                    val truncatedDescription = if (description!!.length > Constant.MAX_TEXT_SIZE) {
+                    val description = recipe.description ?: ""
+                    val truncatedDescription = if (description.length > Constant.MAX_TEXT_SIZE) {
                         description.take(Constant.MAX_TEXT_SIZE) + "..."
                     } else {
                         description
                     }
 
                     Text(
-                        text = if (expanded) recipe.description else truncatedDescription,
+                        text = if (expanded) description else truncatedDescription,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -152,14 +145,15 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel) {
                     }
 
                     val relativeDate = recipe.dateCreated?.let { formatDateForUser(it) }
-                    if (relativeDate != null) {
-                        Text(text = relativeDate, fontSize = 12.sp)
+                    relativeDate?.let {
+                        Text(text = it, fontSize = 12.sp)
                     }
                 }
             }
         }
     }
 }
+
 
 fun formatDateForUser(dateString: String): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -182,3 +176,4 @@ fun formatDateForUser(dateString: String): String {
         else -> "Just now"
     }
 }
+

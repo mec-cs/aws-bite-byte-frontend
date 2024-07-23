@@ -55,7 +55,7 @@ class LikeViewModel() : ViewModel() {
             }
         }
     }*/
-    fun checkLike(userId: Long, recipeId: Long) {
+    /*fun checkLike(userId: Long, recipeId: Long) {
         viewModelScope.launch {
             _loadingState.value = _loadingState.value.toMutableMap().apply {
                 put(recipeId, true)
@@ -65,6 +65,34 @@ class LikeViewModel() : ViewModel() {
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                     put(recipeId, response)
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(recipeId, false)
+                }
+            } finally {
+                _loadingState.value = _loadingState.value.toMutableMap().apply {
+                    put(recipeId, false)
+                }
+            }
+        }
+    }*/
+    private val _checkedLikeStatus = MutableStateFlow<Set<Long>>(emptySet()) // New state to track checked recipes
+
+    fun checkLike(userId: Long, recipeId: Long) {
+        // Prevent redundant checks
+        if (_checkedLikeStatus.value.contains(recipeId)) return
+
+        viewModelScope.launch {
+            _loadingState.value = _loadingState.value.toMutableMap().apply {
+                put(recipeId, true)
+            }
+            try {
+                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
+                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                    put(recipeId, response)
+                }
+                _checkedLikeStatus.value = _checkedLikeStatus.value + recipeId // Mark as checked
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
