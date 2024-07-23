@@ -33,7 +33,7 @@ fun AppNavigationBar(navController: NavController) {
             onClick = { navController.navigate("search") }
         )
         BottomNavigationItem(
-            icon = { Icon(Icons.Filled.Add, contentDescription = "Create Recipe") },
+            icon = { Icon(Icons.Filled.Add, contentDescription = "Create com.chattingapp.foodrecipeuidemo.composables.search.Recipe") },
             selected = currentRoute(navController) == "create recipe",
             onClick = { navController.navigate("create recipe") }
         )

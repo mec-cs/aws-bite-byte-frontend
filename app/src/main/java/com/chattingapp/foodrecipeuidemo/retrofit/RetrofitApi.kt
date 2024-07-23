@@ -7,6 +7,7 @@ import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
+import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
@@ -56,6 +57,9 @@ interface RetrofitAPICredentials {
     @POST("search-profile/search")
     fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
 
+    @POST("search-recipe/search")
+    fun getRecipesByNames(@Body searchRecipeDTO: SearchRecipeDTO) : Call<List<Recipe>>
+
 
     // PROFILE-PHOTO DOWNLOADER API
     @POST("/profile-picture-downloader/download/images")
@@ -64,8 +68,13 @@ interface RetrofitAPICredentials {
     @GET("/profile-picture-downloader/download/{fileName}")
     fun getImage(@Path("fileName") imageName:String): Call<String>
 
+
+    // RECIPE PICTURE DOWNLOADER API
     @GET("/recipe-picture-downloader/download/{fileName}")
     fun getImageRecipe(@Path("fileName") imageName:String): Call<String>
+
+    @POST("/recipe-picture-downloader/download/images")
+    fun getRecipeImagesList(@Body recipeList: List<String>) : Call<List<String>>
 
 
     // RECIPE API
