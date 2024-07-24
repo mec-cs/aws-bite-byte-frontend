@@ -331,7 +331,7 @@ class RecipeViewModel : ViewModel() {
                     Log.d("OnResponseContent", "${call}\n" + "$response")
 
                     if (response.isSuccessful) {
-                        Log.d("Recipe Created, HTTP: " + response.code(), response.body().toString())
+                        Log.d("com.chattingapp.foodrecipeuidemo.composables.search.Recipe Created, HTTP: " + response.code(), response.body().toString())
                     } else {
                         Log.d("onResponse Fail", "Response Unsuccessful!")
                     }
@@ -404,7 +404,7 @@ class RecipeViewModel : ViewModel() {
                     Log.d("OnResponseContent", "${call}\n" + "$response")
 
                     if (response.isSuccessful) {
-                        Log.d("Draft Recipe, HTTP: ", response.code().toString())
+                        Log.d("Draft com.chattingapp.foodrecipeuidemo.composables.search.Recipe, HTTP: ", response.code().toString())
                     } else {
                         Log.d("onResponse Fail", "Response Unsuccessful!")
                     }

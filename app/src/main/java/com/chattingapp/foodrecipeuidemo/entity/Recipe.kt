@@ -1,5 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.entity
 
+import android.graphics.Bitmap
+
 data class Recipe(
     var id: Long? = null,
     var name: String? = null,
@@ -12,7 +14,8 @@ data class Recipe(
     var instructions: String? = null,
     var image: String? = null,
     var ownerId: Long? = null,
-    var type: Boolean? = null
+    var type: Boolean? = null,
+    var bm: Bitmap? = null
 ) {
     // Additional methods if necessary
 }
