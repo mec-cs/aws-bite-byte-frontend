@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.retrofit
 
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
+import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
@@ -145,4 +146,13 @@ interface RetrofitAPICredentials {
 
     @POST("click/add-click")
     suspend fun addClick(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long)
+
+    @GET("comment/count/{recipeId}")
+    suspend fun countCommentsByRecipeId(@Path("recipeId") recipeId: Long): Long
+
+    @GET("comment/get-comments/{recipeId}/{page}")
+    fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): Call<List<CommentProjection>>
+
+    @GET("profile-api/get-user-profile/{id}")
+    suspend fun getUserProfileById(@Path("id") id: Long): UserProfile
 }

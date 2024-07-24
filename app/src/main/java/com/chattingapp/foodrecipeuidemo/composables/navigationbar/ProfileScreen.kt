@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileBanner
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel

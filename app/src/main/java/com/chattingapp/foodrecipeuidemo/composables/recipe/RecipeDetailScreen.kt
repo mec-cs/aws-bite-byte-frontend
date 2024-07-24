@@ -21,6 +21,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,6 +42,7 @@ import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.viewmodel.ClickHistoryViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 
@@ -48,13 +50,21 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 @Composable
 fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
     val recipeViewModel = remember { RecipeViewModel() }
+    val commentViewModel = remember { CommentViewModel() }
+
     val selectedTab = remember { mutableStateOf(toggleStatus) }
 
     val clickHistoryViewModel = ClickHistoryViewModel()
 
+
+
     LaunchedEffect(Constant.userProfile.id, Constant.recipeDetailProjection!!.id!!) {
         clickHistoryViewModel.addClick(Constant.userProfile.id, Constant.recipeDetailProjection!!.id!!)
     }
+
+
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -75,21 +85,21 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                 }
             )
 
+                    Row(modifier = Modifier.padding(16.dp)) {
+                        // Toggle Buttons
+                        ToggleButtons(
+                            selectedTab = selectedTab,
+                            onSelectTab = { selectedTab.value = it })
+
+                        // Content based on selected tab
+
+                    }
 
 
-            Row(modifier = Modifier.padding(16.dp)) {
-                // Toggle Buttons
-                ToggleButtons(
-                    selectedTab = selectedTab,
-                    onSelectTab = { selectedTab.value = it }
-                )
 
-                // Content based on selected tab
-
-            }
             when (selectedTab.value) {
                 "Details" -> RecipeDetailsToggle(recipeViewModel)
-                "Comments" -> RecipeCommentsContent()
+                "Comments" -> RecipeCommentsContent(commentViewModel)
             }
 
 

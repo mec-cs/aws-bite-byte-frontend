@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
@@ -66,7 +67,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipe.id] ?: false
 
-    val relativeDate = recipe.dateCreated?.let { formatDateForUser(it) }
+    val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
     LaunchedEffect(recipe.id) {
         viewModel.fetchImage(recipe) {
             bitmap = it
@@ -197,7 +198,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
 }
 
 
-fun formatDateForUser(dateString: String): String {
+/*fun formatDateForUser(dateString: String): String {
     val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
     val dateTime: Date
     try {
@@ -219,3 +220,4 @@ fun formatDateForUser(dateString: String): String {
     }
 }
 
+*/

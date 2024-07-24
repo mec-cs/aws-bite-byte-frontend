@@ -18,8 +18,30 @@ class FavoriteViewModel : ViewModel() {
 
     private var isLoading = false
 
-    fun checkFavorite(userId: Long, recipeId: Long) {
+    /*fun checkFavorite(userId: Long, recipeId: Long) {
         if (isLoading) return
+        isLoading = true
+
+        viewModelScope.launch {
+            try {
+                val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId).await()
+                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply {
+                    put(recipeId, response)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply {
+                    put(recipeId, false)
+                }
+            } finally {
+                isLoading = false
+            }
+        }
+    }*/
+
+    fun checkFavorite(userId: Long, recipeId: Long) {
+        // Avoid re-fetching if the status is already known
+        if (_isFavoriteMap.value.containsKey(recipeId) || isLoading) return
         isLoading = true
 
         viewModelScope.launch {
