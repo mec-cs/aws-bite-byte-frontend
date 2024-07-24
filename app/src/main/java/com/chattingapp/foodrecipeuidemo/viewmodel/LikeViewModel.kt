@@ -16,6 +16,10 @@ import kotlinx.coroutines.launch
 import retrofit2.await
 import retrofit2.awaitResponse
 import androidx.compose.runtime.State
+import kotlinx.coroutines.Dispatchers
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LikeViewModel() : ViewModel() {
 
@@ -32,51 +36,9 @@ class LikeViewModel() : ViewModel() {
     private val _isLikedMap = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
     val isLikedMap: StateFlow<Map<Long, Boolean>> = _isLikedMap
 
-    /*fun checkLike(userId: Long, recipeId: Long) {
-        if (isLoading) return
-        isLoading = true
 
-        viewModelScope.launch {
-            try {
-                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(recipeId, response)
-                }
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(recipeId, false)
-                }
-                _isLiked.value = false
 
-            } finally {
-                isLoading = false
-            }
-        }
-    }*/
-    /*fun checkLike(userId: Long, recipeId: Long) {
-        viewModelScope.launch {
-            _loadingState.value = _loadingState.value.toMutableMap().apply {
-                put(recipeId, true)
-            }
-            try {
-                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(recipeId, response)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(recipeId, false)
-                }
-            } finally {
-                _loadingState.value = _loadingState.value.toMutableMap().apply {
-                    put(recipeId, false)
-                }
-            }
-        }
-    }*/
     private val _checkedLikeStatus = MutableStateFlow<Set<Long>>(emptySet()) // New state to track checked recipes
 
     fun checkLike(userId: Long, recipeId: Long) {
@@ -186,4 +148,37 @@ class LikeViewModel() : ViewModel() {
             }
         }
     }
+
+
+
+
+
+    fun addLike(like: Like) {
+        viewModelScope.launch(Dispatchers.IO) {
+            RetrofitHelper.apiService.addLike(like).enqueue(object : Callback<Like> {
+                override fun onResponse(call: Call<Like>, response: Response<Like>) {
+
+                }
+
+                override fun onFailure(call: Call<Like>, t: Throwable) {
+                    // Handle failure
+                }
+            })
+        }
+    }
+
+    fun deleteLike(recipeId: Long, userId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            RetrofitHelper.apiService.deleteLike(recipeId, userId).enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    // Handle failure
+                }
+            })
+        }
+    }
+
 }

@@ -23,9 +23,9 @@ import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 
 @Composable
-fun LikeRecipe(recipeId: Long){
+fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
 
-    val likeViewModel: LikeViewModel = viewModel()
+
 
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipeId] ?: false
@@ -77,21 +77,7 @@ fun LikeRecipe(recipeId: Long){
         }
 // placeholder, font, limitations 50-200, recommends
 
-        IconButton( modifier = Modifier
-            .size(30.dp) // Adjust the size of the button
-            .clip(RoundedCornerShape(8.dp)),
-            onClick = {
 
-
-
-            }) {
-            Icon(
-                painter = painterResource(id = R.drawable.comment),
-                contentDescription = "Comment",
-                modifier = Modifier.size(24.dp), // Adjust the size of the icon
-                tint = Color.Unspecified
-            )
-        }
     }
 
     // Like Count

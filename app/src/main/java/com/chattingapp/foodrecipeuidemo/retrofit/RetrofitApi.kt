@@ -6,6 +6,7 @@ import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
+import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -129,4 +130,10 @@ interface RetrofitAPICredentials {
         @Part("ownerId") ownerId: RequestBody,
         @Part("type") type: RequestBody
     ): Call<Recipe>
+
+    @GET("recipe-getter/specific-fields/{id}")
+    suspend fun getRecipeById(@Path("id") id: Long): RecipeSpecificDTO
+
+    @POST("click/add-click")
+    suspend fun addClick(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long)
 }

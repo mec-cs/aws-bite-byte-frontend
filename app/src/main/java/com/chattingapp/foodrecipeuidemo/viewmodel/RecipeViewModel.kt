@@ -5,12 +5,15 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
+import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -414,6 +417,29 @@ class RecipeViewModel : ViewModel() {
                 }
 
             })
+        }
+    }
+
+    private val _recipe = mutableStateOf<RecipeSpecificDTO?>(null)
+    val recipe: State<RecipeSpecificDTO?> = _recipe
+
+    private val _isLoadingRecipe = mutableStateOf(true)
+    val isLoadingRecipe: State<Boolean> = _isLoadingRecipe
+
+
+    fun fetchRecipeById(id: Long) {
+        viewModelScope.launch {
+            _isLoadingRecipe.value = true
+            try {
+                val response = apiService.getRecipeById(id)
+                _recipe.value = response
+                Log.d("RecipeViewModel", "Recipe fetched: ${response.diet}")
+            } catch (e: Exception) {
+                Log.e("RecipeViewModel", "Error fetching recipe", e)
+                _recipe.value = null
+            } finally {
+                _isLoadingRecipe.value = false
+            }
         }
     }
 

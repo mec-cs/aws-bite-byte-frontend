@@ -10,6 +10,7 @@ import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileBanner
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 
@@ -26,11 +27,16 @@ fun ProfileScreen(navController: NavController) {
                 //ProfileBanner(viewModel = FollowCountsViewModel(), profileImageViewModel = ProfileImageViewModel(), recipeViewModel = RecipeViewModel(), navControllerRecipe)
                 ProfileBanner(vmFollow, vmProfilePic, vmRecipePic, navControllerRecipe)
             }
-            composable("recipeDetail/{recipeId}") { backStackEntry ->
-                val recipeId = backStackEntry.arguments?.getString("recipeId")
-                val current = backStackEntry.arguments?.getInt("current")
-
-                RecipeDetailScreen(navControllerRecipe, recipeId, vmRecipePic)
+            composable("recipeDetail/{toggleStatus}") { backStackEntry ->
+                /*val recipeId = backStackEntry.arguments?.getLong("recipeId")
+                val recipeName = backStackEntry.arguments?.getString("recipeName")
+                val recipeDescription = backStackEntry.arguments?.getString("recipeDescription")
+                val dateCreated = backStackEntry.arguments?.getString("dateCreated")
+                val bmRecipe = backStackEntry.arguments?.get("bmRecipe")
+                val isFavorite = backStackEntry.arguments?.getBoolean("isFavorite")
+                val current = backStackEntry.arguments?.getInt("current")*/
+                val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
+                RecipeDetailScreen(navControllerRecipe, toggleStatus!!)
             }
         }
         //ProfileBanner(vmFollow, vmProfilePic, vmRecipePic)

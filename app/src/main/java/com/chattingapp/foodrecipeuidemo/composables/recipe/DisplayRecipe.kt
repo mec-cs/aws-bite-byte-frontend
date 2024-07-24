@@ -41,6 +41,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -58,6 +59,14 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
     var expanded by remember { mutableStateOf(false) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var username = ""
+
+    val likeViewModel: LikeViewModel = viewModel()
+
+    val isLikeMap by likeViewModel.isLikedMap.collectAsState()
+    val isLike = isLikeMap[recipe.id] ?: false
+
+    val relativeDate = recipe.dateCreated?.let { formatDateForUser(it) }
     LaunchedEffect(recipe.id) {
         viewModel.fetchImage(recipe) {
             bitmap = it
@@ -65,17 +74,28 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
         }
     }
 
+    if(recipe.ownerId == Constant.userProfile.id){
+        username = Constant.userProfile.username
+    }
+    else{
+        // make a api call to get username by recipe owner id
+        username = ""
+    }
+
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
         // Conditional profile display
-        val profileBitmap = when {
-            Constant.isProfilePage && Constant.targetUserProfile == null -> Constant.userProfile.bm
+        var profileBitmap = when {
             Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
-            !Constant.isProfilePage && recipe.ownerId == Constant.userProfile.id -> Constant.userProfile.bm
+            Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
             else -> null
+        }
+        if(profileBitmap == null){
+            // get profile picture by recipe owner
         }
 
         profileBitmap?.let {
-            RecipeUserProfile(it.asImageBitmap(), Constant.userProfile.username, recipe.id!!)
+
+            RecipeUserProfile(it.asImageBitmap(), username, recipe.id!!)
         }
 
         Text(
@@ -101,7 +121,10 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
         } else {
             bitmap?.let {
                 Column(modifier = Modifier.clickable {
-                    navController.navigate("recipeDetail/${recipe.id}")
+                    Constant.recipeDetailProjection = recipe
+                    Constant.recipeDetailProjection!!.bmRecipe = bitmap
+                    Constant.recipeDetailProjection!!.relativeDate = relativeDate
+                    navController.navigate("recipeDetail/${"Details"}")
                 }) {
 
                     Image(
@@ -119,7 +142,25 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        LikeRecipe(recipeId = recipe.id!!)
+                        LikeRecipe(recipeId = recipe.id!!, likeViewModel)
+                        IconButton( modifier = Modifier
+                            .size(30.dp) // Adjust the size of the button
+                            .clip(RoundedCornerShape(8.dp)),
+                            onClick = {
+                                Constant.recipeDetailProjection = recipe
+                                Constant.recipeDetailProjection!!.bmRecipe = bitmap
+                                Constant.recipeDetailProjection!!.relativeDate = relativeDate
+                                navController.navigate("recipeDetail/${"Comments"}")
+
+
+                            }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.comment),
+                                contentDescription = "Comment",
+                                modifier = Modifier.size(24.dp), // Adjust the size of the icon
+                                tint = Color.Unspecified
+                            )
+                        }
                     }
 
                     val description = recipe.description ?: ""
@@ -144,8 +185,9 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                         )
                     }
 
-                    val relativeDate = recipe.dateCreated?.let { formatDateForUser(it) }
+
                     relativeDate?.let {
+
                         Text(text = it, fontSize = 12.sp)
                     }
                 }
