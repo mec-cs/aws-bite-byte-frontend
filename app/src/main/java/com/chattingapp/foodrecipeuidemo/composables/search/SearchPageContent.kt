@@ -1,13 +1,11 @@
 package com.chattingapp.foodrecipeuidemo.composables.search
 
 import android.graphics.BitmapFactory
-import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,8 +36,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
+import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -48,17 +50,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            SearchPageCall()
-        }
-    }
-}
-
 @Composable
-fun SearchPageCall() {
+fun SearchPageCall(navController: NavController) {
     var searchText by remember { mutableStateOf(TextFieldValue("")) }
     var isRecipeSelected by remember { mutableStateOf(true) }
     var isImageRendered by remember { mutableStateOf(false) }
@@ -182,7 +175,7 @@ fun SearchPageCall() {
         Spacer(modifier = Modifier.height(16.dp))
 
         if (isRecipeSelected) {
-            RecipeList(recipes, isRecipeImageRendered)
+            RecipeList(recipes, isRecipeImageRendered, navController)
         } else {
             UserProfileList(userProfiles, isImageRendered)
         }
@@ -226,10 +219,26 @@ fun ToggleView(isRecipeSelected: Boolean, onSelectionChange: (Boolean) -> Unit) 
 }
 
 @Composable
-fun RecipeList(recipes: List<Recipe>, isRecipeImageRendered: Boolean) {
+fun RecipeList(recipes: List<Recipe>, isRecipeImageRendered: Boolean, navController: NavController) {
     Column {
         recipes.forEach { recipe ->
-            RecipeItem(recipe, isRecipeImageRendered)
+            RecipeItem(
+                recipe,
+                isRecipeImageRendered,
+                onClick = { id ->
+                    Log.d("Recipe ID", "Clicked recipe id: $id")
+
+                    // navigate to the Recipe Details Page
+                    val recipeProObj = RecipeProjection(id = recipe.id, name = recipe.name, description = recipe.description, dateCreated = recipe.dateCreated, image = recipe.image, ownerId = recipe.ownerId, bmRecipe = recipe.bm)
+                    val relDate = CalculateDate.formatDateForUser(recipe.dateCreated!!)
+
+                    recipeProObj.relativeDate = relDate
+
+                    Constant.recipeDetailProjection = recipeProObj
+                    Constant.isSearchScreen = true
+                    navController.navigate("recipeDetail/${"Details"}")
+                }
+            )
             Divider()
         }
     }
@@ -239,18 +248,28 @@ fun RecipeList(recipes: List<Recipe>, isRecipeImageRendered: Boolean) {
 fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean) {
     Column {
         userProfiles.forEach { userProfile ->
-            UserProfileItem(userProfile, isImgRendered)
+            UserProfileItem(
+                userProfile = userProfile,
+                isImgRendered = isImgRendered,
+                onClick = { id ->
+                    Log.d("UserProfile", "Clicked user id: $id")
+
+                    // navigate to the profile page
+
+                }
+            )
             Divider()
         }
     }
 }
 
 @Composable
-fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean) {
+fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean, onClick: (Long) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+        .clickable { onClick(recipe.id!!) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(recipe.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
@@ -269,11 +288,12 @@ fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean) {
 }
 
 @Composable
-fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean) {
+fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean, onClick: (Long) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp)
+            .clickable { onClick(userProfile.id) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(userProfile.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))

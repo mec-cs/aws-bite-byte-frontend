@@ -1,10 +1,36 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
-import com.chattingapp.foodrecipeuidemo.composables.search.SearchPageCall
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
+import com.chattingapp.foodrecipeuidemo.composables.search.SearchPageCall
 
 @Composable
 fun SearchScreen(navController: NavHostController) {
-    SearchPageCall()
+    Column {
+        val navControllerSearch = rememberNavController()
+
+        NavHost(navController = navControllerSearch, startDestination = "search") {
+            composable("search") {
+                //ProfileBanner(viewModel = FollowCountsViewModel(), profileImageViewModel = ProfileImageViewModel(), recipeViewModel = RecipeViewModel(), navControllerRecipe)
+                SearchPageCall(navControllerSearch)
+            }
+            composable("recipeDetail/{toggleStatus}") { backStackEntry ->
+                /*val recipeId = backStackEntry.arguments?.getLong("recipeId")
+                val recipeName = backStackEntry.arguments?.getString("recipeName")
+                val recipeDescription = backStackEntry.arguments?.getString("recipeDescription")
+                val dateCreated = backStackEntry.arguments?.getString("dateCreated")
+                val bmRecipe = backStackEntry.arguments?.get("bmRecipe")
+                val isFavorite = backStackEntry.arguments?.getBoolean("isFavorite")
+                val current = backStackEntry.arguments?.getInt("current")*/
+                val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
+                RecipeDetailScreen(navControllerSearch, toggleStatus!!)
+            }
+        }
+
+    }
 }

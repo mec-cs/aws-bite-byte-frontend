@@ -55,7 +55,7 @@ class HomePageActivity : ComponentActivity() {
                                     //Log.e("API_CALL_PROFILE", Constant.userProfile.profilePicture)
                                 }
                             } else {
-
+                                Log.d("API_CALL UnSuccessfull", "Non HTTP 200 error")
                             }
                         }
 
@@ -89,7 +89,7 @@ class HomePageActivity : ComponentActivity() {
                             composable("create recipe") {
                                 Constant.isProfilePage = false
                                 Constant.targetUserProfile = null
-                                var recipeViewModel = RecipeViewModel()
+                                val recipeViewModel = RecipeViewModel()
                                 CreateRecipeScreen(navController, recipeViewModel)
                             }
                             composable("feed") {

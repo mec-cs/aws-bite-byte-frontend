@@ -13,4 +13,5 @@ object Constant {
     var isProfilePage = false
     var MAX_TEXT_SIZE = 60
     var recipeDetailProjection: RecipeProjection? = null
+    var isSearchScreen = false
 }
