@@ -53,11 +53,19 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                 navigationIcon = {
                     IconButton(onClick = {
                         Constant.recipeSpecificDTO = null
+<<<<<<< Updated upstream
                         if (Constant.isSearchScreen) {
                             navController.popBackStack("search", false, true)
                         } else if (Constant.isProfilePage) {
                             navController.popBackStack("profile", false, true)
                         }
+=======
+                        navController.popBackStack("profile", false, true)
+
+
+
+                        commentViewModel.currentPage = 0
+>>>>>>> Stashed changes
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),

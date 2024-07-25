@@ -44,14 +44,15 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 @Composable
 fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel, navController: NavController) {
     val recipeList by recipeViewModel.recipeList.observeAsState(emptyList())
-    RetrofitHelper.apiService
+
     var userProfile: UserProfile
 
     var isFirstTime by remember { mutableStateOf(true) }
 
-
     if(Constant.targetUserProfile != null){
         userProfile = Constant.targetUserProfile!!
+        Log.d("PROFILE IMAGE: ", userProfile.profilePicture)
+
     }
     else{
         userProfile = Constant.userProfile

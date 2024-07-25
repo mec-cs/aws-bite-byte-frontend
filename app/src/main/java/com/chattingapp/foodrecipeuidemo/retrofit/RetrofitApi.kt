@@ -154,5 +154,5 @@ interface RetrofitAPICredentials {
     fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): Call<List<CommentProjection>>
 
     @GET("profile-api/get-user-profile/{id}")
-    suspend fun getUserProfileById(@Path("id") id: Long): UserProfile
+    fun getUserProfileById(@Path("id") id: Long): Call<UserProfile>
 }
