@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -27,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +49,9 @@ import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -59,108 +65,33 @@ fun SearchPageCall(navController: NavController) {
     var userProfiles by remember { mutableStateOf(listOf<UserProfile>()) }
     var recipes by remember { mutableStateOf(listOf<Recipe>()) }
 
+    // Coroutine scope for debounce
+    val scope = rememberCoroutineScope()
+    var searchJob by remember { mutableStateOf<Job?>(null) }
+
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
         SearchBar(searchText, isRecipeSelected) { newText ->
             searchText = newText
             val trimmedText = newText.text.trim()
-            if (trimmedText.isNotEmpty()) {
-                Log.d("com.chattingapp.foodrecipeuidemo.composables.search.SearchPageCall", "Search box value: $trimmedText")
 
-                if (isRecipeSelected) {
-                    val searchRecipeDTO = SearchRecipeDTO(trimmedText, 0)
-                    RetrofitHelper.apiService.getRecipesByNames(searchRecipeDTO)
-                        .enqueue(object : Callback<List<Recipe>> {
-                            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
-                                if (response.isSuccessful) {
-                                    recipes = response.body() ?: listOf()
-                                    Log.d("SearchPageCall SUCCESSFULL", "Recipes fetched: $recipes")
-
-                                    val recipeImages: List<String> = recipes.map { it.image!! }
-
-                                    RetrofitHelper.apiService.getRecipeImagesList(recipeImages)
-                                        .enqueue(object: Callback<List<String>> {
-                                            override fun onResponse(
-                                                call: Call<List<String>>,
-                                                response: Response<List<String>>
-                                            ) {
-                                                if (response.isSuccessful) {
-                                                    val encodedRecipeStrings: List<String> = response.body() ?: listOf()
-                                                    recipes.forEachIndexed { index, recipe ->
-                                                        val encodedRecipeString = encodedRecipeStrings.getOrNull(index)
-                                                        if (encodedRecipeString != null) {
-                                                            val decodedBytes = Base64.decode(encodedRecipeString, Base64.DEFAULT)
-                                                            val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                                                            recipe.bm = bitm
-                                                        }
-                                                    }
-                                                    isRecipeImageRendered = true
-                                                } else {
-                                                    Log.e("SearchPageCall Unsuccuessful", "Error: ${response.errorBody()?.string()}")
-                                                }
-                                            }
-
-                                            override fun onFailure(
-                                                call: Call<List<String>>,
-                                                t: Throwable
-                                            ) {
-                                                Log.d("SearchPageCall FAILURE", "Failed to fetch recipe images\n${t}")
-                                            }
-
-                                        })
-
-                                } else {
-                                    Log.e("SearchPageCall UNSUCCESSFULL", "Error: ${response.errorBody()?.string()}")
-                                }
-                            }
-
-                            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
-                                Log.e("SearchPageCall FAILURE", "Network request failed\n$t")
-                            }
-                        })
+            searchJob?.cancel() // Cancel the previous job if any
+            searchJob = scope.launch {
+                delay(500) // Debounce time in milliseconds
+                if (trimmedText.isNotEmpty()) {
+                    Log.d("SearchPageCall", "Search box value: $trimmedText")
+                    if (isRecipeSelected) {
+                        searchRecipes(trimmedText, { recipes = it }, { isRecipeImageRendered = it })
+                    } else {
+                        searchUsers(trimmedText, { userProfiles = it }, { isImageRendered = it })
+                    }
                 } else {
-                    val searchCriteria = SearchCriteria(trimmedText, 0)
+                    // Clear results if searchText is empty
+                    recipes = listOf()
+                    userProfiles = listOf()
+                    isRecipeImageRendered = false
                     isImageRendered = false
-                    RetrofitHelper.apiService.getUsersByUsername(searchCriteria)
-                        .enqueue(object : Callback<List<UserProfile>> {
-                            override fun onResponse(call: Call<List<UserProfile>>, response: Response<List<UserProfile>>) {
-                                if (response.isSuccessful) {
-                                    userProfiles = response.body() ?: listOf()
-                                    val profilePictures: List<String> = userProfiles.map { it.profilePicture }
-
-                                    RetrofitHelper.apiService.getProfilePicturesList(profilePictures)
-                                        .enqueue(object : Callback<List<String>> {
-                                            override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
-                                                if (response.isSuccessful) {
-                                                    val encodedStrings: List<String> = response.body() ?: listOf()
-                                                    userProfiles.forEachIndexed { index, userProfile ->
-                                                        val encodedString = encodedStrings.getOrNull(index)
-                                                        if (encodedString != null) {
-                                                            val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
-                                                            val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                                                            userProfile.bm = bitm
-                                                        }
-                                                    }
-                                                    isImageRendered = true
-                                                } else {
-                                                    Log.e("ProfilePictureFetch", "Error: ${response.errorBody()?.string()}")
-                                                }
-                                            }
-
-                                            override fun onFailure(call: Call<List<String>>, t: Throwable) {
-                                                Log.e("ProfilePictureFetch", "Cannot fetch profile pictures", t)
-                                            }
-                                        })
-                                } else {
-                                    Log.e("SearchPageCall FAILURE", "Error: ${response.errorBody()?.string()}")
-                                }
-                            }
-
-                            override fun onFailure(call: Call<List<UserProfile>>, t: Throwable) {
-                                Log.e("SearchPageCall", "Network request failed\n", t)
-                            }
-                        })
                 }
             }
         }
@@ -177,7 +108,7 @@ fun SearchPageCall(navController: NavController) {
         if (isRecipeSelected) {
             RecipeList(recipes, isRecipeImageRendered, navController)
         } else {
-            UserProfileList(userProfiles, isImageRendered)
+            UserProfileList(userProfiles, isImageRendered, navController)
         }
     }
 }
@@ -220,8 +151,8 @@ fun ToggleView(isRecipeSelected: Boolean, onSelectionChange: (Boolean) -> Unit) 
 
 @Composable
 fun RecipeList(recipes: List<Recipe>, isRecipeImageRendered: Boolean, navController: NavController) {
-    Column {
-        recipes.forEach { recipe ->
+    LazyColumn {
+        items(recipes) { recipe ->
             RecipeItem(
                 recipe,
                 isRecipeImageRendered,
@@ -245,17 +176,18 @@ fun RecipeList(recipes: List<Recipe>, isRecipeImageRendered: Boolean, navControl
 }
 
 @Composable
-fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean) {
-    Column {
-        userProfiles.forEach { userProfile ->
+fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean, navController: NavController) {
+    LazyColumn {
+        items(userProfiles) { userProfile ->
             UserProfileItem(
                 userProfile = userProfile,
                 isImgRendered = isImgRendered,
                 onClick = { id ->
                     Log.d("UserProfile", "Clicked user id: $id")
-
-                    // navigate to the profile page
-
+                    // Set the targetUserProfile and navigate to profile
+                    Constant.targetUserProfile = userProfile
+                    Constant.isProfilePage = true
+                    navController.navigate("profile")
                 }
             )
             Divider()
@@ -269,12 +201,12 @@ fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean, onClick: (Long) -> 
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-        .clickable { onClick(recipe.id!!) },
+            .clickable { onClick(recipe.id!!) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(recipe.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
         Text(recipe.name!!, fontSize = 20.sp, modifier = Modifier.weight(1f))
-        if(isRecipeImgRendered) {
+        if (isRecipeImgRendered) {
             recipe.bm?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
@@ -298,7 +230,7 @@ fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean, onClick: (
     ) {
         Text(userProfile.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
         Text(userProfile.username, fontSize = 20.sp, modifier = Modifier.weight(1f))
-        if(isImgRendered) {
+        if (isImgRendered) {
             userProfile.bm?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
@@ -309,4 +241,95 @@ fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean, onClick: (
             }
         }
     }
+}
+
+private fun searchRecipes(query: String, onResult: (List<Recipe>) -> Unit, onImageRendered: (Boolean) -> Unit) {
+    val searchRecipeDTO = SearchRecipeDTO(query, 0)
+    RetrofitHelper.apiService.getRecipesByNames(searchRecipeDTO)
+        .enqueue(object : Callback<List<Recipe>> {
+            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+                if (response.isSuccessful) {
+                    val recipes = response.body() ?: listOf()
+                    onResult(recipes)
+                    val recipeImages: List<String> = recipes.map { it.image!! }
+                    Log.e("SearchPageCall Successfull", "Recipe List Successfully Fetched")
+
+                    RetrofitHelper.apiService.getRecipeImagesList(recipeImages)
+                        .enqueue(object: Callback<List<String>> {
+                            override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
+                                if (response.isSuccessful) {
+                                    val encodedRecipeStrings: List<String> = response.body() ?: listOf()
+                                    recipes.forEachIndexed { index, recipe ->
+                                        val encodedRecipeString = encodedRecipeStrings.getOrNull(index)
+                                        if (encodedRecipeString != null) {
+                                            val decodedBytes = Base64.decode(encodedRecipeString, Base64.DEFAULT)
+                                            val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                                            recipe.bm = bitm
+                                        }
+                                    }
+                                    onImageRendered(true)
+                                    Log.e("SearchPageCall Successfull", "Recipe Image List Successfully Fetched")
+                                } else {
+                                    Log.e("SearchPageCall Unsuccuessful", "Error: ${response.errorBody()?.string()}")
+                                }
+                            }
+
+                            override fun onFailure(call: Call<List<String>>, t: Throwable) {
+                                Log.d("SearchPageCall FAILURE", "Failed to fetch recipe images\n$t")
+                            }
+                        })
+
+                } else {
+                    Log.e("SearchPageCall UNSUCCESSFULL", "Error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                Log.e("SearchPageCall FAILURE", "Network request failed\n$t")
+            }
+        })
+}
+
+private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, onImageRendered: (Boolean) -> Unit) {
+    val searchCriteria = SearchCriteria(query, 0)
+    RetrofitHelper.apiService.getUsersByUsername(searchCriteria)
+        .enqueue(object : Callback<List<UserProfile>> {
+            override fun onResponse(call: Call<List<UserProfile>>, response: Response<List<UserProfile>>) {
+                if (response.isSuccessful) {
+                    val userProfiles = response.body() ?: listOf()
+                    onResult(userProfiles)
+                    val profilePictures: List<String> = userProfiles.map { it.profilePicture }
+
+                    RetrofitHelper.apiService.getProfilePicturesList(profilePictures)
+                        .enqueue(object : Callback<List<String>> {
+                            override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
+                                if (response.isSuccessful) {
+                                    val encodedStrings: List<String> = response.body() ?: listOf()
+                                    userProfiles.forEachIndexed { index, userProfile ->
+                                        val encodedString = encodedStrings.getOrNull(index)
+                                        if (encodedString != null) {
+                                            val decodedBytes = Base64.decode(encodedString, Base64.DEFAULT)
+                                            val bitm = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                                            userProfile.bm = bitm
+                                        }
+                                    }
+                                    onImageRendered(true)
+                                } else {
+                                    Log.e("ProfilePictureFetch", "Error: ${response.errorBody()?.string()}")
+                                }
+                            }
+
+                            override fun onFailure(call: Call<List<String>>, t: Throwable) {
+                                Log.e("ProfilePictureFetch", "Cannot fetch profile pictures", t)
+                            }
+                        })
+                } else {
+                    Log.e("SearchPageCall FAILURE", "Error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<UserProfile>>, t: Throwable) {
+                Log.e("SearchPageCall", "Network request failed\n", t)
+            }
+        })
 }

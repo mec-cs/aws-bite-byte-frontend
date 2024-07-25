@@ -81,7 +81,7 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Choose com.chattingapp.foodrecipeuidemo.composables.search.Recipe's Picture")
+        Text(text = "Choose Search Recipe's Picture")
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -114,7 +114,7 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
             textStyle = TextStyle(fontSize = 18.sp, color = Color.Black),
             decorationBox = { innerTextField ->
                 if (recipeName.isEmpty()) {
-                    Text("com.chattingapp.foodrecipeuidemo.composables.search.Recipe Name", style = TextStyle(color = Color.Gray, fontSize = 18.sp))
+                    Text("Recipe Name", style = TextStyle(color = Color.Gray, fontSize = 18.sp))
                 }
                 innerTextField()
             },

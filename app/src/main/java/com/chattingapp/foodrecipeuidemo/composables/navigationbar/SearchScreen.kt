@@ -30,6 +30,9 @@ fun SearchScreen(navController: NavHostController) {
                 val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
                 RecipeDetailScreen(navControllerSearch, toggleStatus!!)
             }
+            composable("profile") {
+                ProfileScreen(navControllerSearch)
+            }
         }
 
     }
