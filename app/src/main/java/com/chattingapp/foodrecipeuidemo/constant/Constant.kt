@@ -11,7 +11,8 @@ object Constant {
     var targetUserProfile: UserProfile? = null
     var recipeSpecificDTO: RecipeSpecificDTO? = null
     var isProfilePage = false
-    var MAX_TEXT_SIZE = 60
+    var MAX_DESCRIPTION_SIZE = 60
+    var MAX_COMMENT_SIZE = 30
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
 }

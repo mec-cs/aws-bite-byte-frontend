@@ -157,8 +157,8 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                     }
 
                     val description = recipe.description ?: ""
-                    val truncatedDescription = if (description.length > Constant.MAX_TEXT_SIZE) {
-                        description.take(Constant.MAX_TEXT_SIZE) + "..."
+                    val truncatedDescription = if (description.length > Constant.MAX_DESCRIPTION_SIZE) {
+                        description.take(Constant.MAX_DESCRIPTION_SIZE) + "..."
                     } else {
                         description
                     }
@@ -169,7 +169,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    if (description.length > Constant.MAX_TEXT_SIZE) {
+                    if (description.length > Constant.MAX_DESCRIPTION_SIZE) {
                         Text(
                             text = if (expanded) "See less" else "See more",
                             fontSize = 14.sp,
