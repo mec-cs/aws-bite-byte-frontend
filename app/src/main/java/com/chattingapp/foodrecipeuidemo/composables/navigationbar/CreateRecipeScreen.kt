@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -62,6 +64,7 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
     var instructions by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageFile by remember { mutableStateOf<File?>(null) }
+    val showDialog = remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -78,10 +81,12 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .background(Color.Transparent)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Choose Search Recipe's Picture")
+        Text(text = "Choose Recipe's Picture")
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -207,6 +212,7 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
             value = prepTime,
             onValueChange = { prepTime = it },
             textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             decorationBox = { innerTextField ->
                 if (prepTime.isEmpty()) {
                     Text("Enter Preparation Time", style = TextStyle(color = Color.Gray, fontSize = 16.sp))
@@ -267,44 +273,63 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             Button(onClick = {
-                viewModel.createRecipe(
-                    name = recipeName,
-                    description = description,
-                    cuisine = cuisine,
-                    course = course,
-                    diet = diet,
-                    prepTime = prepTime,
-                    ingredients = ingredients,
-                    instructions = instructions,
-                    imageUri = selectedImageFile?.toUri(),
-                    ownerId = Constant.userProfile.id, // Change to the actual user ID
-                    type = true
-                )
+                if (recipeName.isEmpty() || description.isEmpty() || cuisine.isEmpty() || course.isEmpty() ||
+                    diet.isEmpty() || prepTime.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
+                    showDialog.value = true
+                } else {
+                    viewModel.createRecipe(
+                        name = recipeName.trim(),
+                        description = description.trim(),
+                        cuisine = cuisine.trim(),
+                        course = course.trim(),
+                        diet = diet.trim(),
+                        prepTime = prepTime.trim(),
+                        ingredients = ingredients.trim(),
+                        instructions = instructions.trim(),
+                        imageUri = selectedImageFile?.toUri(),
+                        ownerId = Constant.userProfile.id, // Change to the actual user ID
+                        type = true
+                    )
+                }
             }) {
                 Text("Publish")
             }
 
             Button(onClick = {
-                viewModel.saveRecipeAsDraft(
-                    name = recipeName,
-                    description = description,
-                    cuisine = cuisine,
-                    course = course,
-                    diet = diet,
-                    prepTime = prepTime,
-                    ingredients = ingredients,
-                    instructions = instructions,
-                    imageUri = selectedImageFile?.toUri(),
-                    ownerId = Constant.userProfile.id, // Change to the actual user ID
-                    type = false,
-                    isImgChanged = imageUri != null
-                )
+                if (recipeName.isEmpty() || description.isEmpty() || cuisine.isEmpty() || course.isEmpty() ||
+                    diet.isEmpty() || prepTime.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
+                    showDialog.value = true
+                } else {
+                    viewModel.saveRecipeAsDraft(
+                        name = recipeName.trim(),
+                        description = description.trim(),
+                        cuisine = cuisine.trim(),
+                        course = course.trim(),
+                        diet = diet.trim(),
+                        prepTime = prepTime.trim(),
+                        ingredients = ingredients.trim(),
+                        instructions = instructions.trim(),
+                        imageUri = selectedImageFile?.toUri(),
+                        ownerId = Constant.userProfile.id, // Change to the actual user ID
+                        type = false,
+                        isImgChanged = imageUri != null
+                    )
+                }
             }) {
                 Text("Save As Draft")
             }
         }
+
+        if (showDialog.value) {
+            ShowAlertDialog(
+                title = "Warning",
+                message = Constant.CREATE_ERROR_DIALOG,
+                onConfirm = { showDialog.value = false }
+            )
+        }
     }
 }
+
 
 fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCreated: (File) -> Unit) {
     val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -325,4 +350,25 @@ fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCreated: (Fi
     }
 }
 
+
 fun File.toUri(): Uri = Uri.fromFile(this)
+
+
+@Composable
+fun ShowAlertDialog(
+    title: String,
+    message: String,
+    confirmButtonText: String = "OK",
+    onConfirm: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = { onConfirm() },
+        title = { Text(text = title) },
+        text = { Text(text = message) },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = onConfirm) {
+                Text(confirmButtonText)
+            }
+        }
+    )
+}

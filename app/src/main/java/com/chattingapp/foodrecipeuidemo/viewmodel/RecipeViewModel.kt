@@ -275,6 +275,15 @@ class RecipeViewModel : ViewModel() {
         })
     }
 
+
+
+
+    //
+    // //
+    // // CREATE RECIPE VIEW MODEL PART
+    // //
+    //
+
     fun createRecipe(
         name: String,
         description: String,
@@ -288,6 +297,7 @@ class RecipeViewModel : ViewModel() {
         ownerId: Long,
         type: Boolean
     ) {
+
         viewModelScope.launch {
             // Convert parameters to RequestBody
             val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -331,6 +341,7 @@ class RecipeViewModel : ViewModel() {
                     Log.d("OnResponseContent", "${call}\n" + "$response")
 
                     if (response.isSuccessful) {
+
                         Log.d("com.chattingapp.foodrecipeuidemo.composables.search.Recipe Created, HTTP: " + response.code(), response.body().toString())
                     } else {
                         Log.d("onResponse Fail", "Response Unsuccessful!")
@@ -360,6 +371,7 @@ class RecipeViewModel : ViewModel() {
         type: Boolean,
         isImgChanged: Boolean
     ) {
+
         viewModelScope.launch {
             // Convert parameters to RequestBody
             val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -419,6 +431,14 @@ class RecipeViewModel : ViewModel() {
             })
         }
     }
+
+    //
+    // //
+    // //
+    //
+
+
+
 
     private val _recipe = mutableStateOf<RecipeSpecificDTO?>(null)
     val recipe: State<RecipeSpecificDTO?> = _recipe

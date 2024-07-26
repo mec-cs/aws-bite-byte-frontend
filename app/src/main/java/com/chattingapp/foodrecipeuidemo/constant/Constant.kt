@@ -15,4 +15,5 @@ object Constant {
     var MAX_COMMENT_SIZE = 30
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
+    const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"
 }
