@@ -299,6 +299,7 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
                     val userProfiles = response.body() ?: listOf()
                     onResult(userProfiles)
                     val profilePictures: List<String> = userProfiles.map { it.profilePicture }
+                    Log.e("SearchPageCall Successfull", "User List Successfully Fetched")
 
                     RetrofitHelper.apiService.getProfilePicturesList(profilePictures)
                         .enqueue(object : Callback<List<String>> {
@@ -314,6 +315,7 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
                                         }
                                     }
                                     onImageRendered(true)
+                                    Log.e("SearchPageCall Successfull", "User Image List Successfully Fetched")
                                 } else {
                                     Log.e("ProfilePictureFetch", "Error: ${response.errorBody()?.string()}")
                                 }
