@@ -60,8 +60,9 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                         }
 
 
+                        commentViewModel.resetState()
+                        //commentViewModel.currentPage = 0
 
-                        commentViewModel.currentPage = 0
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),

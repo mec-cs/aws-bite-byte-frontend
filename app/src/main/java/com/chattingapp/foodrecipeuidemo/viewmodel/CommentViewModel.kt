@@ -20,31 +20,29 @@ import retrofit2.Response
 
 class CommentViewModel : ViewModel() {
 
-    private val _commentCount = MutableLiveData<Long>()
+    private val _commentCount = MutableLiveData<Long>(-1)
     val commentCount: LiveData<Long> get() = _commentCount
 
     fun fetchCommentCount(recipeId: Long) {
         viewModelScope.launch {
             try {
                 val count = RetrofitHelper.apiService.countCommentsByRecipeId(recipeId)
+                Log.d("CommentViewModel", "Fetched comment count: $count")
                 _commentCount.postValue(count)
             } catch (e: Exception) {
-                // Optionally handle errors
                 _commentCount.postValue(0) // Optionally set a default value on error
-                // Log or show error message
                 Log.e("CommentViewModel", "Error fetching comment count", e)
             }
         }
     }
 
-
-    private val _userProfilesComment = MutableLiveData<List<UserProfile>>()
+    private val _userProfilesComment = MutableLiveData<List<UserProfile>>(emptyList())
     val userProfilesComment: LiveData<List<UserProfile>> get() = _userProfilesComment
 
-    private val _profileImageCacheComment = MutableLiveData<MutableMap<Long, Bitmap?>>()
+    private val _profileImageCacheComment = MutableLiveData<MutableMap<Long, Bitmap?>>(mutableMapOf())
     val profileImageCacheComment: LiveData<MutableMap<Long, Bitmap?>> get() = _profileImageCacheComment
 
-    private val _loadingStateComment = MutableLiveData<MutableMap<Long, Boolean>>()
+    private val _loadingStateComment = MutableLiveData<MutableMap<Long, Boolean>>(mutableMapOf())
     val loadingStateComment: LiveData<MutableMap<Long, Boolean>> get() = _loadingStateComment
 
     fun fetchUserProfiles(commentOwnerIds: List<Long>) {
@@ -74,7 +72,7 @@ class CommentViewModel : ViewModel() {
                 val currentProfiles = _userProfilesComment.value ?: emptyList()
                 _userProfilesComment.postValue(currentProfiles + profiles)
             } catch (e: Exception) {
-                // Handle network error
+                Log.e("CommentViewModel", "Error fetching user profiles", e)
             } finally {
                 idsToFetch.forEach { id ->
                     newLoadingState[id] = false
@@ -108,7 +106,7 @@ class CommentViewModel : ViewModel() {
                 } ?: mutableMapOf(userId to response)
 
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("CommentViewModel", "Error fetching profile image", e)
                 _profileImageCacheComment.value = _profileImageCacheComment.value?.toMutableMap()?.apply {
                     put(userId, null)
                 } ?: mutableMapOf(userId to null)
@@ -120,8 +118,7 @@ class CommentViewModel : ViewModel() {
         }
     }
 
-
-    private val _comments = MutableLiveData<List<CommentProjection>>()
+    private val _comments = MutableLiveData<List<CommentProjection>>(emptyList())
     val comments: LiveData<List<CommentProjection>> get() = _comments
 
     private val _hasMorePages = MutableLiveData<Boolean>(true)
@@ -129,31 +126,40 @@ class CommentViewModel : ViewModel() {
 
     var currentPage = 0
     private var isLoading = false
+    private var isLastPage = false
 
     fun fetchComments(recipeId: Long) {
-        if (isLoading || !hasMorePages.value!!) return
+        if (isLoading || !hasMorePages.value!!) {
+            Log.d("CommentViewModel", "Skipping fetchComments: isLoading=$isLoading, hasMorePages=${hasMorePages.value}")
+            return
+        }
 
         isLoading = true
+        Log.d("CommentViewModel", "Fetching comments for recipeId=$recipeId, currentPage=$currentPage")
+
         RetrofitHelper.apiService.getComments(recipeId, currentPage).enqueue(object :
             Callback<List<CommentProjection>> {
             override fun onResponse(call: Call<List<CommentProjection>>, response: Response<List<CommentProjection>>) {
                 isLoading = false
                 if (response.isSuccessful) {
                     val newComments = response.body() ?: emptyList()
+                    Log.d("CommentViewModel", "Fetched ${newComments.size} new comments")
                     if (newComments.isNotEmpty()) {
                         val currentList = _comments.value?.toMutableList() ?: mutableListOf()
                         val existingIds = currentList.map { it.id }.toSet()
                         val filteredComments = newComments.filter { it.id !in existingIds }
+                        Log.d("CommentViewModel", "Filtered ${filteredComments.size} new comments")
                         if (filteredComments.isNotEmpty()) {
                             currentList.addAll(filteredComments)
                             _comments.value = currentList
                             currentPage += 1
+                            Log.d("CommentViewModel", "Current page updated to $currentPage")
                         }
                     } else {
                         _hasMorePages.value = false
+                        Log.d("CommentViewModel", "No more pages available")
                     }
                 } else {
-                    // Handle non-successful response
                     Log.e("CommentViewModel", "Response error: ${response.message()}")
                 }
             }
@@ -164,10 +170,14 @@ class CommentViewModel : ViewModel() {
             }
         })
     }
-    private var isLastPage = false
 
     fun fetchMoreComments(recipeId: Long) {
-        if (isLastPage) return
+        if (isLastPage || isLoading) {
+            Log.d("CommentViewModel", "Skipping fetchMoreComments: isLastPage=$isLastPage")
+            return
+        }
+
+        Log.d("CommentViewModel", "Fetching more comments for recipeId=$recipeId, currentPage=$currentPage")
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -176,6 +186,7 @@ class CommentViewModel : ViewModel() {
                     response.body()?.let { newComments ->
                         val currentComments = _comments.value ?: emptyList()
                         _comments.postValue(currentComments + newComments)
+                        Log.d("CommentViewModel", "Fetched and added ${newComments.size} new comments")
 
                         // Fetch user profiles for the new comments
                         val newOwnerIds = newComments.map { it.ownerId!! }.distinct()
@@ -184,15 +195,28 @@ class CommentViewModel : ViewModel() {
                         // Check if this is the last page
                         if (newComments.isEmpty()) {
                             isLastPage = true
+                            Log.d("CommentViewModel", "This is the last page")
                         } else {
                             currentPage++
+                            Log.d("CommentViewModel", "Current page updated to $currentPage")
                         }
                     }
                 }
             } catch (e: Exception) {
-                // Handle network error
+                Log.e("CommentViewModel", "Network error while fetching more comments", e)
             }
         }
     }
 
+    fun resetState() {
+        _comments.value = emptyList()
+        _commentCount.value = -1
+        _userProfilesComment.value = emptyList()
+        _profileImageCacheComment.value = mutableMapOf()
+        _hasMorePages.value = true
+        currentPage = 0
+        isLastPage = false
+        isLoading = false
+        Log.d("CommentViewModel", "State reset successfully")
+    }
 }

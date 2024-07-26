@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 import com.chattingapp.foodrecipeuidemo.composables.search.SearchPageCall
+import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 
 @Composable
 fun SearchScreen(navController: NavHostController) {
@@ -28,6 +29,7 @@ fun SearchScreen(navController: NavHostController) {
                 val isFavorite = backStackEntry.arguments?.getBoolean("isFavorite")
                 val current = backStackEntry.arguments?.getInt("current")*/
                 val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
+                val commentViewModel = CommentViewModel()
                 RecipeDetailScreen(navControllerSearch, toggleStatus!!)
             }
             composable("profile") {

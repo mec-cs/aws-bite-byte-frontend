@@ -37,6 +37,7 @@ fun ProfileScreen(navController: NavController) {
                 val isFavorite = backStackEntry.arguments?.getBoolean("isFavorite")
                 val current = backStackEntry.arguments?.getInt("current")*/
                 val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
+                val commentViewModel = CommentViewModel()
                 RecipeDetailScreen(navControllerRecipe, toggleStatus!!)
             }
         }
