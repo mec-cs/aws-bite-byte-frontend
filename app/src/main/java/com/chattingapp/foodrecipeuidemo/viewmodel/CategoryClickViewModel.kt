@@ -10,14 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
 
-class CategoryLikeViewModel : ViewModel() {
-
+class CategoryClickViewModel: ViewModel() {
     private val _recipes = MutableStateFlow<List<RecipeProjection>>(emptyList())
     val recipes: StateFlow<List<RecipeProjection>> = _recipes
 
@@ -36,7 +32,7 @@ class CategoryLikeViewModel : ViewModel() {
             _isLoading.value = true
             try {
                 val response = withContext(Dispatchers.IO) {
-                    RetrofitHelper.apiService.getMostLikedRecipes().execute()
+                    RetrofitHelper.apiService.getMostClickedRecipes().execute()
                 }
                 if (response.isSuccessful) {
                     allIds = response.body() ?: emptyList()
@@ -53,6 +49,7 @@ class CategoryLikeViewModel : ViewModel() {
             }
         }
     }
+
 
     fun loadMoreRecipes() {
         if (currentPage * pageSize >= allIds.size) return // No more pages
@@ -74,7 +71,5 @@ class CategoryLikeViewModel : ViewModel() {
             }
         }
     }
-
-
 
 }

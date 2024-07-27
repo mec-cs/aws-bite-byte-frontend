@@ -13,6 +13,7 @@ object Constant {
     var isProfilePage = false
     var MAX_DESCRIPTION_SIZE = 60
     var MAX_COMMENT_SIZE = 30
+    var PAGE_SIZE_CLICK_LIKE = 10
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
     const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"

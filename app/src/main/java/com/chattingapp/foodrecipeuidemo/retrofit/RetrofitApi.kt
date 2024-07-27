@@ -161,4 +161,7 @@ interface RetrofitAPICredentials {
 
     @GET("like-dislike/most-liked-recipes")
     fun getMostLikedRecipes(): Call<List<Long>>
+
+    @GET("click/most-clicked-recipes")
+    fun getMostClickedRecipes(): Call<List<Long>>
 }

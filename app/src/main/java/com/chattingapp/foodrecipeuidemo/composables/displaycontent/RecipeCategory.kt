@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
+import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryClickViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryLikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 import kotlinx.coroutines.delay
@@ -30,19 +31,25 @@ import kotlinx.coroutines.delay
 @Composable
 fun RecipeCategory(navController: NavController, cardId: String?) {
     val selectedTab = remember { mutableStateOf(cardId) }
-    val recipeViewModel = RecipeViewModel()
+    val recipeViewModelLike = RecipeViewModel()
+    val recipeViewModelClick = RecipeViewModel()
     val categoryLikeViewModel: CategoryLikeViewModel = viewModel()
-    val recipes by categoryLikeViewModel.recipes.collectAsState()
-    val isLoading by categoryLikeViewModel.isLoading.collectAsState()
-    val errorMessage by categoryLikeViewModel.errorMessage.collectAsState()
+    val recipesLike by categoryLikeViewModel.recipes.collectAsState()
+    val isLoadingLike by categoryLikeViewModel.isLoading.collectAsState()
+    val errorMessageLike by categoryLikeViewModel.errorMessage.collectAsState()
 
-    val listState = rememberLazyListState()
+    val categoryClickViewModel: CategoryClickViewModel = viewModel()
+    val recipesClick by categoryClickViewModel.recipes.collectAsState()
+    val isLoadingClick by categoryClickViewModel.isLoading.collectAsState()
+    val errorMessageClick by categoryClickViewModel.errorMessage.collectAsState()
 
-    LaunchedEffect(cardId) {
-        cardId?.let {
-            categoryLikeViewModel.fetchMostLikedIds()
-        }
-    }
+    val listStateLike = rememberLazyListState()
+    val listStateClick = rememberLazyListState()
+
+    var isLikeFetched = false
+    var isClickFetched = false
+
+
 
     Scaffold(
         topBar = {
@@ -94,38 +101,85 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
 
             when (selectedTab.value) {
                 "Most Liked" -> {
-                    if (isLoading && recipes.isEmpty()) {
+                    LaunchedEffect(cardId) {
+                        cardId?.let {
+                            if(!isLikeFetched){
+                                categoryLikeViewModel.fetchMostLikedIds()
+                                isLikeFetched = true
+                            }
+                        }
+                    }
+                    if (isLoadingLike && recipesLike.isEmpty()) {
                         CircularProgressIndicator()
                     } else {
-                        errorMessage?.let {
+                        errorMessageLike?.let {
                             Text(text = it)
                         }
                         LazyColumn(
-                            state = listState,
+                            state = listStateLike,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(recipes) { recipe ->
+                            items(recipesLike) { recipe ->
 
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModel, navController = navController)
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelLike, navController = navController)
                             }
 
                         }
-                        LaunchedEffect(listState) {
-                            snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
+                        LaunchedEffect(listStateLike) {
+                            snapshotFlow { listStateLike.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipes.size - 1) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1) {
                                         categoryLikeViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
-                                        Log.d("recipes.size", recipes.size.toString())
-                                        Log.d("recipes.size", recipes.toString())
+                                        Log.d("recipes.size", recipesLike.size.toString())
+                                        Log.d("recipes.size", recipesLike.toString())
                                     }
                                 }
                         }
                     }
                 }
                 // Handle other tabs as needed
-                "Popular" -> {/*PopularRecipes()*/}
+                "Popular" -> {
+                    LaunchedEffect(cardId) {
+                        cardId?.let {
+                            if(!isClickFetched){
+                                categoryClickViewModel.fetchMostLikedIds()
+                                isClickFetched = true
+                            }
+                        }
+                    }
+                    if (isLoadingClick && recipesClick.isEmpty()) {
+                        CircularProgressIndicator()
+                    } else {
+                        errorMessageClick?.let {
+                            Text(text = it)
+                        }
+                        LazyColumn(
+                            state = listStateClick,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(recipesClick) { recipe ->
+
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelClick, navController = navController)
+                            }
+
+                        }
+                        LaunchedEffect(listStateClick) {
+                            snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                .collect { lastVisibleItem ->
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1) {
+                                        categoryClickViewModel.loadMoreRecipes()
+                                        Log.d("CALLING API", "FETCHED MORE")
+                                        delay(1000)
+                                        Log.d("recipes.size", recipesClick.size.toString())
+                                        Log.d("recipes.size", recipesClick.toString())
+                                    }
+                                }
+                        }
+                    }
+
+                }
                 "Favorites" -> {/*FavoriteRecipes()*/}
                 "Liked" -> {/*LikedRecipes()*/}
             }
