@@ -3,6 +3,7 @@ package com.chattingapp.foodrecipeuidemo.composables.cards
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,15 +24,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 
 @Composable
-fun CardViewFavoriteRecipes() {
+fun CardViewFavoriteRecipes(navController: NavController, cardId: String) {
     val text = "Your Favorite Recipes"
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .height(150.dp)
+            .clickable {
+                navController.navigate("recipeCategory/$cardId")
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(

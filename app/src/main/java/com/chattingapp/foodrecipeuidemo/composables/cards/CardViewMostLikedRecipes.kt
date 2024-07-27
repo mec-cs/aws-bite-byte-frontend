@@ -1,8 +1,11 @@
+@file:JvmName("CardViewPopularRecipesKt")
+
 package com.chattingapp.foodrecipeuidemo.composables.cards
 
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,26 +26,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 
 @Composable
-fun CardViewRecommendedRecipes() {
-    val text = "Recommended Recipes For You"
+fun CardViewMostLikedRecipes(navController: NavController, cardId: String) {
+    val text = "Most liked Recipes"
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .height(150.dp)
+            .clickable {
+                navController.navigate("recipeCategory/$cardId")
+
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-            //.padding(8.dp)
+                //.padding(8.dp)
 
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.recommendedrecipes),
+                painter = painterResource(id = R.drawable.allrecipes),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()

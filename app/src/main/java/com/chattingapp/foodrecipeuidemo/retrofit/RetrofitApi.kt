@@ -155,4 +155,10 @@ interface RetrofitAPICredentials {
 
     @GET("profile-api/get-user-profile/{id}")
     fun getUserProfileById(@Path("id") id: Long): Call<UserProfile>
+
+    @POST("recipe-getter/get-recipes")
+    suspend fun getRecipes(@Query("ids") ids: List<Long>): List<RecipeProjection>
+
+    @GET("like-dislike/most-liked-recipes")
+    fun getMostLikedRecipes(): Call<List<Long>>
 }

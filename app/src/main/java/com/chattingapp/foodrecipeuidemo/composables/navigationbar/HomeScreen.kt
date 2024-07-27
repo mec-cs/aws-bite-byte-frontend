@@ -7,7 +7,7 @@ import com.chattingapp.foodrecipeuidemo.composables.cards.CardsList
 @Composable
 fun HomeScreen(navController: NavController) {
     // Your home screen UI
-    CardsList()
+    CardsList(navController)
 }
 
 

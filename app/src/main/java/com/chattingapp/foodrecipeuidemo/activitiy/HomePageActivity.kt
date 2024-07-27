@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategory
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.AppNavigationBar
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.CreateRecipeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
@@ -68,7 +69,7 @@ class HomePageActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
 
-                    Scaffold(
+                    /*Scaffold(
                         bottomBar = { AppNavigationBar(navController = navController) }
                     ) { innerPadding ->
                         NavHost(
@@ -106,8 +107,47 @@ class HomePageActivity : ComponentActivity() {
                             // Add more destinations as needed
 
                         }
+                    }*/
+                    Scaffold(
+                        bottomBar = { AppNavigationBar(navController = navController) }
+                    ) { innerPadding ->
+                        NavHost(
+                            navController = navController,
+                            startDestination = "home",
+                            modifier = Modifier.padding(innerPadding)
+                        ) {
+                            composable("home") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                HomeScreen(navController)
+                            }
+                            composable("search") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                SearchScreen(navController)
+                            }
+                            composable("create recipe") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                val recipeViewModel = RecipeViewModel()
+                                CreateRecipeScreen(navController, recipeViewModel)
+                            }
+                            composable("feed") {
+                                Constant.isProfilePage = false
+                                Constant.targetUserProfile = null
+                                Feed(navController)
+                            }
+                            composable("profile") {
+                                Constant.targetUserProfile = null
+                                Constant.isProfilePage = true
+                                ProfileScreen(navController)
+                            }
+                            composable("recipeCategory/{cardId}") { backStackEntry ->
+                                val cardId = backStackEntry.arguments?.getString("cardId")
+                                RecipeCategory(navController, cardId)
+                            }
+                        }
                     }
-
 
                 }
             }

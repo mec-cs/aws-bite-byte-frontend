@@ -38,6 +38,7 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel, navController: NavController) {
@@ -169,9 +170,11 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
             LaunchedEffect(listState) {
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
                     .collect { lastVisibleItem ->
+
                         if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1 && recipeViewModel.recipeListDetail.size.toLong() != followCounts?.recipeCount) {
                             Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
                             recipeViewModel.loadMoreRecipes(userProfile.id)
+                            delay(1000)
                         }
                     }
             }
