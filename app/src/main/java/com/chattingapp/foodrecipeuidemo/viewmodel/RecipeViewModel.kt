@@ -33,31 +33,7 @@ class RecipeViewModel : ViewModel() {
     private val imageCache = ConcurrentHashMap<String, Bitmap>()
     var listSize = 0
     var recipeListDetail: List<RecipeProjection> = emptyList()
-    /*fun fetchImage(recipe: RecipeProjection, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[recipe.image]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
 
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    val response = apiService.getImageRecipe(recipe.image!!).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
-                } catch (e: Exception) {
-                    null
-                }
-            }
-            response?.let { imageCache[recipe.image!!] = it }
-            onImageLoaded(response)
-        }
-    }*/
 
 
     fun fetchImage(recipe: RecipeProjection, onImageLoaded: (Bitmap?) -> Unit) {
@@ -99,105 +75,14 @@ class RecipeViewModel : ViewModel() {
     var page = 0
     private var isLoading = false
 
-    /*fun fetchRecipes(userId: Long) {
-        if (isLoading) return
-        isLoading = true
 
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    _recipeList.value = newRecipes
-                    _displayRecipes.value = true
-                    page += 1
-                }
-            }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load recipes", t)
-            }
-        })
-    }
-
-    fun loadMoreRecipes(userId: Long) {
-        if (isLoading) return
-        isLoading = true
-
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    if (newRecipes.isNotEmpty()) {
-                        // Append new recipes to existing list
-                        _recipeList.value = _recipeList.value?.let { it + newRecipes }
-                        page += 1
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load more recipes", t)
-                page -= 1
-            }
-        })
-    }*/
 
     fun updateRecipeList(newRecipes: List<RecipeProjection>) {
         _recipeList.value = newRecipes
         recipeListDetail = newRecipes
     }
 
-    /*fun fetchRecipes(userId: Long) {
-        if (isLoading) return
-        isLoading = true
 
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    updateRecipeList(newRecipes)
-                    _displayRecipes.value = true
-                    page += 1
-                }
-            }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load recipes", t)
-            }
-        })
-    }
-
-    fun loadMoreRecipes(userId: Long) {
-        if (isLoading) return
-        isLoading = true
-
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    if (newRecipes.isNotEmpty()) {
-                        val updatedList = _recipeList.value?.toMutableList() ?: mutableListOf()
-                        updatedList.addAll(newRecipes)
-                        updateRecipeList(updatedList)
-                        page += 1
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load more recipes", t)
-                page -= 1
-            }
-        })
-    }*/
 
     private fun getCurrentRecipeIds(): Set<Long?> {
         return _recipeList.value?.map { it.id }.orEmpty().toSet()

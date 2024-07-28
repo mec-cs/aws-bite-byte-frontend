@@ -164,4 +164,16 @@ interface RetrofitAPICredentials {
 
     @GET("click/most-clicked-recipes")
     fun getMostClickedRecipes(): Call<List<Long>>
+
+    @GET("favorite/get-recipe/{ownerId}/{page}")
+    fun getRecipesFavorite(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
+
+    @GET("favorite/favorites/count/{userId}")
+    fun getFavoriteCount(@Path("userId") userId: Long): Call<Long>
+
+    @GET("like-dislike/likes/count/{userId}")
+    fun getLikeCountByUserId(@Path("userId") userId: Long): Call<Long>
+
+    @GET("like-dislike/get-recipe/{ownerId}/{page}")
+    fun getRecipesLike(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
 }

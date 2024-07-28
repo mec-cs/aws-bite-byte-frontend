@@ -162,7 +162,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
 
                     recipeViewModel.recipeListDetail = recipeList
                     Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
-
+                    Constant.isProfilePage = true
                     DisplayRecipe(recipe, recipeViewModel, navController)
                 }
             }

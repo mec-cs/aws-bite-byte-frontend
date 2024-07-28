@@ -54,9 +54,15 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                     IconButton(onClick = {
                         Constant.recipeSpecificDTO = null
                         if (Constant.isSearchScreen) {
+                            Constant.isSearchScreen = false
                             navController.popBackStack("search", false, true)
                         } else if (Constant.isProfilePage) {
+                            Constant.isProfilePage = false
                             navController.popBackStack("profile", false, true)
+                        }
+                        else if(Constant.isCardScreen){
+                            Constant.isCardScreen = false
+                            navController.popBackStack("recipeCategory/{cardId}", false, true)
                         }
 
 

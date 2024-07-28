@@ -28,7 +28,7 @@ fun CardsList(navController: NavController) {
             CardViewFavoriteRecipes(navController, "Favorites")
         }
         item {
-            CardViewLikedRecipes(navController, "Likes")
+            CardViewLikedRecipes(navController, "Liked")
         }
     }
 }

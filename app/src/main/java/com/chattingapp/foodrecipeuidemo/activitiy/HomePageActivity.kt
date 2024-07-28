@@ -22,6 +22,7 @@ import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ProfileScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
+import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -117,36 +118,50 @@ class HomePageActivity : ComponentActivity() {
                             modifier = Modifier.padding(innerPadding)
                         ) {
                             composable("home") {
-                                Constant.isProfilePage = false
                                 Constant.targetUserProfile = null
+                                Constant.isCardScreen = false
+                                Constant.isProfilePage = false
+                                Constant.isSearchScreen = false
                                 HomeScreen(navController)
                             }
                             composable("search") {
+                                Constant.isCardScreen = false
                                 Constant.isProfilePage = false
+                                Constant.isSearchScreen = false
                                 Constant.targetUserProfile = null
                                 SearchScreen(navController)
                             }
                             composable("create recipe") {
+                                Constant.isCardScreen = false
                                 Constant.isProfilePage = false
+                                Constant.isSearchScreen = false
                                 Constant.targetUserProfile = null
                                 val recipeViewModel = RecipeViewModel()
                                 CreateRecipeScreen(navController, recipeViewModel)
                             }
                             composable("feed") {
+                                Constant.isCardScreen = false
                                 Constant.isProfilePage = false
+                                Constant.isSearchScreen = false
                                 Constant.targetUserProfile = null
                                 Feed(navController)
                             }
                             composable("profile") {
                                 Constant.targetUserProfile = null
                                 Constant.isProfilePage = true
+                                Constant.isCardScreen = false
+                                Constant.isProfilePage = false
+                                Constant.isSearchScreen = false
                                 ProfileScreen(navController)
                             }
                             composable("recipeCategory/{cardId}") { backStackEntry ->
                                 val cardId = backStackEntry.arguments?.getString("cardId")
                                 RecipeCategory(navController, cardId)
                             }
+
                         }
+
+
                     }
 
                 }

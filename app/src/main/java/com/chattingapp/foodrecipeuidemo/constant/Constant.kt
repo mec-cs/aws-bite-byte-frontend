@@ -16,5 +16,6 @@ object Constant {
     var PAGE_SIZE_CLICK_LIKE = 10
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
+    var isCardScreen = false
     const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"
 }

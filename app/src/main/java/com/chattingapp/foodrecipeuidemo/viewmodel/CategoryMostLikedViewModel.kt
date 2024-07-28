@@ -10,13 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
 
-class CategoryLikeViewModel : ViewModel() {
+class CategoryMostLikedViewModel : ViewModel() {
 
     private val _recipes = MutableStateFlow<List<RecipeProjection>>(emptyList())
     val recipes: StateFlow<List<RecipeProjection>> = _recipes
