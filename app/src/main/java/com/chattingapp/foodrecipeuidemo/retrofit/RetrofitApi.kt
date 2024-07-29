@@ -13,6 +13,7 @@ import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
+import com.chattingapp.foodrecipeuidemo.entity.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -179,4 +180,7 @@ interface RetrofitAPICredentials {
 
     @GET("click/most-clicked/last-two-days")
     fun getMostClickedRecipesLastTwo(): Call<List<Long>>
+
+    @GET("profile-getter/{id}")
+    fun getUserProfile(@Path("id") id: Long): Call<UserProfileResponse>
 }
