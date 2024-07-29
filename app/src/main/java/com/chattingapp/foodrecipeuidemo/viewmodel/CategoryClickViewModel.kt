@@ -1,5 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -27,6 +28,9 @@ class CategoryClickViewModel: ViewModel() {
     private val pageSize = Constant.PAGE_SIZE_CLICK_LIKE
     private var allIds: List<Long> = emptyList()
 
+    private val _allIdsSize = MutableStateFlow(0) // New StateFlow for size
+    val allIdsSize: StateFlow<Int> = _allIdsSize
+
     fun fetchMostLikedIds() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -36,6 +40,7 @@ class CategoryClickViewModel: ViewModel() {
                 }
                 if (response.isSuccessful) {
                     allIds = response.body() ?: emptyList()
+                    _allIdsSize.value = allIds.size
                     loadMoreRecipes()
                 } else {
                     _errorMessage.value = "Error: ${response.code()}"
@@ -60,9 +65,21 @@ class CategoryClickViewModel: ViewModel() {
             _isLoading.value = true
             try {
                 val fetchedRecipes = withContext(Dispatchers.IO) {
+                    Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${idsToFetch.joinToString(", ")}")
                     RetrofitHelper.apiService.getRecipes(idsToFetch)
                 }
                 _recipes.value = _recipes.value + fetchedRecipes // Append new recipes to the existing list
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(0).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(1).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(2).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(3).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(4).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(5).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(6).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(7).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(8).id}")
+                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(9).id}")
+
                 currentPage++
             } catch (e: Exception) {
                 _errorMessage.value = "Error: ${e.message}"

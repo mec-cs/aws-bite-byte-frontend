@@ -1,8 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -13,13 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
 
-class CategoryUserLikedViewModel: ViewModel() {
+class CategoryTrendsViewModel: ViewModel() {
 
     private val _recipes = MutableStateFlow<List<RecipeProjection>>(emptyList())
     val recipes: StateFlow<List<RecipeProjection>> = _recipes
@@ -34,6 +28,9 @@ class CategoryUserLikedViewModel: ViewModel() {
     private val pageSize = Constant.PAGE_SIZE_CLICK_LIKE
     private var allIds: List<Long> = emptyList()
 
+    private val _allIdsSize = MutableStateFlow(0) // New StateFlow for size
+    val allIdsSize: StateFlow<Int> = _allIdsSize
+
     fun fetchMostClickedLastTwoIds() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -43,6 +40,7 @@ class CategoryUserLikedViewModel: ViewModel() {
                 }
                 if (response.isSuccessful) {
                     allIds = response.body() ?: emptyList()
+                    _allIdsSize.value = allIds.size
                     loadMoreRecipes()
                 } else {
                     _errorMessage.value = "Error: ${response.code()}"

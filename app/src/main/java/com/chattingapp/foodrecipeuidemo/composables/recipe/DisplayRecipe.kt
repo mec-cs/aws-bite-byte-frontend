@@ -40,6 +40,7 @@ import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
+import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 
@@ -54,6 +55,11 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
 
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipe.id] ?: false
+
+    val favoriteViewModel: FavoriteViewModel = viewModel()
+
+    val isFavoriteMap by favoriteViewModel.isFavoriteMap.collectAsState()
+    val isFavorite = isFavoriteMap[recipe.id] ?: false
 
     val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
     LaunchedEffect(recipe.id) {
@@ -89,7 +95,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
 
         profileBitmap?.let {
 
-            RecipeUserProfile(it.asImageBitmap(), username, recipe.id!!)
+            RecipeUserProfile(it.asImageBitmap(), username, recipe.id!!, favoriteViewModel)
         }
 
         Text(

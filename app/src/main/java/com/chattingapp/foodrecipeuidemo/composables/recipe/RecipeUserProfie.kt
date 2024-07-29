@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -23,13 +24,22 @@ import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 
 @Composable
-fun RecipeUserProfile(bm: ImageBitmap, username: String, recipeId: Long) {
-    val favoriteViewModel: FavoriteViewModel = viewModel()
-
+fun RecipeUserProfile(
+    bm: ImageBitmap,
+    username: String,
+    recipeId: Long,
+    favoriteViewModel: FavoriteViewModel = viewModel() // Use default viewModel if not provided
+) {
+    // Observe the favorite state from the view model
     val isFavoriteMap by favoriteViewModel.isFavoriteMap.collectAsState()
     val isFavorite = isFavoriteMap[recipeId] ?: false
 
-    LaunchedEffect(Constant.userProfile.id, recipeId) {
+    // Observe the loading state from the view model
+    val loadingState by favoriteViewModel.loadingState.collectAsState()
+    val isLoading = loadingState[recipeId] ?: false
+
+    LaunchedEffect(recipeId) {
+        // Fetch the favorite state when the recipeId changes
         favoriteViewModel.checkFavorite(Constant.userProfile.id, recipeId)
     }
 
@@ -53,22 +63,32 @@ fun RecipeUserProfile(bm: ImageBitmap, username: String, recipeId: Long) {
             modifier = Modifier.weight(1f)
         )
 
-        Icon(
-            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-            tint = if (isFavorite) Color.Red else Color.Gray,
-            modifier = Modifier
-                .padding(16.dp)
-                .clickable {
-                    if (isFavorite) {
-                        // Call method to delete favorite
-                        favoriteViewModel.deleteFavorite(Constant.userProfile.id, recipeId)
-                    } else {
-                        // Call method to add favorite
-                        favoriteViewModel.addFavorite(Constant.userProfile.id, recipeId)
+        if (isLoading) {
+            // Show a progress indicator if loading
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(16.dp)
+            )
+        } else {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                tint = if (isFavorite) Color.Red else Color.Gray,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable {
+                        if (isFavorite) {
+                            // Call method to delete favorite
+                            //favoriteViewModel.deleteFavorite(Constant.userProfile.id, recipeId)
+                            favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
+                        } else {
+                            // Call method to add favorite
+                            //favoriteViewModel.addFavorite(Constant.userProfile.id, recipeId)
+                            favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
+                        }
                     }
-
-                }
-        )
+            )
+        }
     }
 }

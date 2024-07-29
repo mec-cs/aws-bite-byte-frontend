@@ -28,6 +28,9 @@ class CategoryMostLikedViewModel : ViewModel() {
     private val pageSize = Constant.PAGE_SIZE_CLICK_LIKE
     private var allIds: List<Long> = emptyList()
 
+    private val _allIdsSize = MutableStateFlow(0) // New StateFlow for size
+    val allIdsSize: StateFlow<Int> = _allIdsSize
+
     fun fetchMostLikedIds() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -37,6 +40,7 @@ class CategoryMostLikedViewModel : ViewModel() {
                 }
                 if (response.isSuccessful) {
                     allIds = response.body() ?: emptyList()
+                    _allIdsSize.value = allIds.size // Update the size
                     loadMoreRecipes()
                 } else {
                     _errorMessage.value = "Error: ${response.code()}"

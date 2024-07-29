@@ -28,7 +28,7 @@ import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryClickViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryFavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryMostLikedViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryUserLikedViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryTrendsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 import kotlinx.coroutines.delay
 
@@ -46,11 +46,13 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val recipesLike by categoryMostLikedViewModel.recipes.collectAsState()
     val isLoadingLike by categoryMostLikedViewModel.isLoading.collectAsState()
     val errorMessageLike by categoryMostLikedViewModel.errorMessage.collectAsState()
+    val allIdSizeLike by categoryMostLikedViewModel.allIdsSize.collectAsState()
 
     val categoryClickViewModel: CategoryClickViewModel = viewModel()
     val recipesClick by categoryClickViewModel.recipes.collectAsState()
     val isLoadingClick by categoryClickViewModel.isLoading.collectAsState()
     val errorMessageClick by categoryClickViewModel.errorMessage.collectAsState()
+    val allIdSizeClick by categoryClickViewModel.allIdsSize.collectAsState()
 
     val categoryFavoriteViewModel: CategoryFavoriteViewModel = viewModel()
     val recipeListFavorite by categoryFavoriteViewModel.recipeList.observeAsState(emptyList())
@@ -58,10 +60,11 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val isLoadingCountFavorite by categoryFavoriteViewModel.isLoadingCount.observeAsState(false)
     val favoriteCount = categoryFavoriteViewModel.favoriteCount.observeAsState()
 
-    val categoryUserLikeViewModel: CategoryUserLikedViewModel = viewModel()
-    val recipeListUserLike by categoryUserLikeViewModel.recipes.collectAsState(emptyList())
-    val isLoadingUserLike by categoryUserLikeViewModel.isLoading.collectAsState(false)
-    val isLoadingCountUserLike by categoryUserLikeViewModel.isLoading.collectAsState(false)
+    val categoryTrendsViewModel: CategoryTrendsViewModel = viewModel()
+    val recipeListTrends by categoryTrendsViewModel.recipes.collectAsState(emptyList())
+    val isLoadingTrends by categoryTrendsViewModel.isLoading.collectAsState(false)
+    val isLoadingCountTrends by categoryTrendsViewModel.isLoading.collectAsState(false)
+    val allIdSizeTrends by categoryTrendsViewModel.allIdsSize.collectAsState()
 
 
     val listStateLike = rememberLazyListState()
@@ -149,7 +152,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateLike) {
                             snapshotFlow { listStateLike.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1 && allIdSizeLike > recipesLike.size) {
                                         categoryMostLikedViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
@@ -188,12 +191,12 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateClick) {
                             snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1 && allIdSizeClick > recipesClick.size) {
                                         categoryClickViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
                                         Log.d("recipes.size", recipesClick.size.toString())
-                                        Log.d("recipes.size", recipesClick.toString())
+                                        Log.d("recipes.size", allIdSizeClick.toString())
                                     }
                                 }
                         }
@@ -246,12 +249,12 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                     LaunchedEffect(cardId) {
                         cardId?.let {
                             if(!isUserLikeFetched){
-                                categoryUserLikeViewModel.fetchMostClickedLastTwoIds()
+                                categoryTrendsViewModel.fetchMostClickedLastTwoIds()
                                 isUserLikeFetched = true
                             }
                         }
                     }
-                    if (isLoadingUserLike && recipeListUserLike.isEmpty()) {
+                    if (isLoadingTrends && recipeListTrends.isEmpty()) {
                         CircularProgressIndicator()
                     } else {
                         errorMessageLike?.let {
@@ -261,7 +264,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             state = listStateUserLike,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(recipeListUserLike) { recipe ->
+                            items(recipeListTrends) { recipe ->
                                 Constant.isCardScreen = true
                                 DisplayRecipe(recipe = recipe, viewModel = recipeViewModelUserLike, navController = navController)
                             }
@@ -270,12 +273,12 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateUserLike) {
                             snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListUserLike.size - 1) {
-                                        categoryUserLikeViewModel.loadMoreRecipes()
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListTrends.size - 1 && allIdSizeTrends > recipeListTrends.size) {
+                                        categoryTrendsViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
-                                        Log.d("recipes.size", recipeListUserLike.size.toString())
-                                        Log.d("recipes.size", recipeListUserLike.toString())
+                                        Log.d("recipes.size", recipeListTrends.size.toString())
+                                        Log.d("recipes.size", recipeListTrends.toString())
                                     }
                                 }
                         }
