@@ -25,10 +25,11 @@ fun CardsList(navController: NavController) {
             CardViewMostLikedRecipes(navController, "Most Liked")
         }
         item {
-            CardViewFavoriteRecipes(navController, "Favorites")
+            CardViewTrendsRecipes(navController, "Trends")
         }
         item {
-            CardViewLikedRecipes(navController, "Liked")
+            CardViewFavoriteRecipes(navController, "Favorites")
         }
+
     }
 }

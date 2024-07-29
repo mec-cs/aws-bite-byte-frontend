@@ -59,10 +59,9 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val favoriteCount = categoryFavoriteViewModel.favoriteCount.observeAsState()
 
     val categoryUserLikeViewModel: CategoryUserLikedViewModel = viewModel()
-    val recipeListUserLike by categoryUserLikeViewModel.recipeList.observeAsState(emptyList())
-    val isLoadingUserLike by categoryUserLikeViewModel.isLoading.observeAsState(false)
-    val isLoadingCountUserLike by categoryUserLikeViewModel.isLoadingCount.observeAsState(false)
-    val userLikeCount = categoryUserLikeViewModel.likeCount.observeAsState()
+    val recipeListUserLike by categoryUserLikeViewModel.recipes.collectAsState(emptyList())
+    val isLoadingUserLike by categoryUserLikeViewModel.isLoading.collectAsState(false)
+    val isLoadingCountUserLike by categoryUserLikeViewModel.isLoading.collectAsState(false)
 
 
     val listStateLike = rememberLazyListState()
@@ -97,32 +96,29 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            LazyRow {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { selectedTab.value = "Popular" }) {
-                        Text("Popular")
+            if(selectedTab.value != "Favorites"){
+                LazyRow {
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { selectedTab.value = "Popular" }) {
+                            Text("Popular")
+                        }
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { selectedTab.value = "Most Liked" }) {
-                        Text("Most Liked")
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { selectedTab.value = "Most Liked" }) {
+                            Text("Most Liked")
+                        }
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { selectedTab.value = "Favorites" }) {
-                        Text("Favorites")
-                    }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { selectedTab.value = "Liked" }) {
-                        Text("Liked")
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { selectedTab.value = "Trends" }) {
+                            Text("Trends")
+                        }
                     }
                 }
             }
+
 
             when (selectedTab.value) {
                 "Most Liked" -> {
@@ -246,21 +242,21 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                     }
 
                 }
-                "Liked" -> {
-
+                "Trends" -> {
                     LaunchedEffect(cardId) {
                         cardId?.let {
                             if(!isUserLikeFetched){
-                                categoryUserLikeViewModel.fetchLikeCount(Constant.userProfile.id)
-                                categoryUserLikeViewModel.fetchRecipes(Constant.userProfile.id)
+                                categoryUserLikeViewModel.fetchMostClickedLastTwoIds()
                                 isUserLikeFetched = true
                             }
                         }
                     }
-                    if(isLoadingUserLike){
+                    if (isLoadingUserLike && recipeListUserLike.isEmpty()) {
                         CircularProgressIndicator()
-                    }
-                    else{
+                    } else {
+                        errorMessageLike?.let {
+                            Text(text = it)
+                        }
                         LazyColumn(
                             state = listStateUserLike,
                             modifier = Modifier.fillMaxSize()
@@ -271,22 +267,20 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             }
 
                         }
-                    }
-
-
-                    LaunchedEffect(listStateUserLike) {
-                        snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
-                            .collect { lastVisibleItem ->
-                                if(!isLoadingCountUserLike && userLikeCount.value != -1L){
-                                    if (lastVisibleItem != null && lastVisibleItem.index >= categoryUserLikeViewModel.recipeListDetail.size - 1 && userLikeCount.value!! > recipeListUserLike.size) {
-                                        Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
-                                        categoryUserLikeViewModel.loadMoreRecipes(Constant.userProfile.id)
+                        LaunchedEffect(listStateUserLike) {
+                            snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                .collect { lastVisibleItem ->
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListUserLike.size - 1) {
+                                        categoryUserLikeViewModel.loadMoreRecipes()
+                                        Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
+                                        Log.d("recipes.size", recipeListUserLike.size.toString())
+                                        Log.d("recipes.size", recipeListUserLike.toString())
                                     }
                                 }
-
-                            }
+                        }
                     }
+
                 }
             }
         }

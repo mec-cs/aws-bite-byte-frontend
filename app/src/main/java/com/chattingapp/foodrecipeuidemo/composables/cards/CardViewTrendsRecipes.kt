@@ -28,8 +28,8 @@ import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 
 @Composable
-fun CardViewLikedRecipes(navController: NavController, cardId: String) {
-    val text = "Your Liked Recipes"
+fun CardViewTrendsRecipes(navController: NavController, cardId: String) {
+    val text = "Trending Recipes"
     Card(
         modifier = Modifier
             .fillMaxWidth()

@@ -4,129 +4,79 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 class CategoryUserLikedViewModel: ViewModel() {
 
-    private val _recipeList = MutableLiveData<List<RecipeProjection>>(emptyList())
-    val recipeList: LiveData<List<RecipeProjection>> get() = _recipeList
+    private val _recipes = MutableStateFlow<List<RecipeProjection>>(emptyList())
+    val recipes: StateFlow<List<RecipeProjection>> = _recipes
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> get() = _isLoading
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    var page = 0
-    private var isLoadingMore = false
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
 
-    var recipeListDetail: List<RecipeProjection> = emptyList()
-    private var noMoreRecipes = false
+    private var currentPage = 0
+    private val pageSize = Constant.PAGE_SIZE_CLICK_LIKE
+    private var allIds: List<Long> = emptyList()
 
-
-    fun fetchRecipes(userId: Long) {
-        if (page == 0 && !isLoadingMore) {
+    fun fetchMostClickedLastTwoIds() {
+        viewModelScope.launch {
             _isLoading.value = true
-            Log.d("CategoryLikeViewModel", "Fetching recipes for user: $userId, page: $page")
-
-            RetrofitHelper.apiService.getRecipesLike(userId, page).enqueue(object :
-                Callback<List<RecipeProjection>> {
-                override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                    _isLoading.value = false
-                    if (response.isSuccessful) {
-                        val newRecipes = response.body() ?: emptyList()
-                        Log.d("CategoryLikeViewModel", "Fetched ${newRecipes.size} recipes")
-                        if (newRecipes.isNotEmpty()) {
-                            val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
-                            val existingIds = currentList.map { it.id }.toSet()
-                            val filteredRecipes = newRecipes.filter { it.id !in existingIds }
-                            if (filteredRecipes.isNotEmpty()) {
-                                currentList.addAll(filteredRecipes)
-                                _recipeList.value = currentList
-                                recipeListDetail = currentList
-                                page += 1
-                                Log.d("CategoryLikeViewModel", "Updated recipe list with ${filteredRecipes.size} new recipes")
-                            }
-                        }
-                    } else {
-                        Log.e("CategoryLikeViewModel", "Failed to fetch recipes: ${response.errorBody()}")
-                    }
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitHelper.apiService.getMostClickedRecipesLastTwo().execute()
                 }
-
-                override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                    _isLoading.value = false
-                    Log.e("CategoryLikeViewModel", "Failed to load recipes", t)
+                if (response.isSuccessful) {
+                    allIds = response.body() ?: emptyList()
+                    loadMoreRecipes()
+                } else {
+                    _errorMessage.value = "Error: ${response.code()}"
                 }
-            })
+            } catch (e: IOException) {
+                _errorMessage.value = "Network Error: ${e.message}"
+            } catch (e: HttpException) {
+                _errorMessage.value = "HTTP Error: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
 
-    fun loadMoreRecipes(userId: Long) {
-        if (isLoadingMore || noMoreRecipes) return
-        isLoadingMore = true
-        Log.d("CategoryLikeViewModel", "Loading more recipes for user: $userId, page: $page")
+    fun loadMoreRecipes() {
+        if (currentPage * pageSize >= allIds.size) return // No more pages
 
-        RetrofitHelper.apiService.getRecipesLike(userId, page).enqueue(object :
-            Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoadingMore = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    Log.d("CategoryFavoriteViewModel", "Loaded ${newRecipes.size} more recipes")
-                    if (newRecipes.isNotEmpty()) {
-                        val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
-                        val existingIds = currentList.map { it.id }.toSet()
-                        val filteredRecipes = newRecipes.filter { it.id !in existingIds }
-                        if (filteredRecipes.isNotEmpty()) {
-                            currentList.addAll(filteredRecipes)
-                            _recipeList.value = currentList
-                            recipeListDetail = currentList
-                            page += 1
-                            Log.d("CategoryLikeViewModel", "Updated recipe list with ${filteredRecipes.size} new recipes")
-                        }
-                    } else {
-                        noMoreRecipes = true
-                    }
-                } else {
-                    Log.e("CategoryLikeViewModel", "Failed to load more recipes: ${response.errorBody()}")
+        val idsToFetch = allIds.drop(currentPage * pageSize).take(pageSize)
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val fetchedRecipes = withContext(Dispatchers.IO) {
+                    RetrofitHelper.apiService.getRecipes(idsToFetch)
                 }
+                _recipes.value = _recipes.value + fetchedRecipes // Append new recipes to the existing list
+                currentPage++
+            } catch (e: Exception) {
+                _errorMessage.value = "Error: ${e.message}"
+            } finally {
+                _isLoading.value = false
             }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoadingMore = false
-                Log.e("CategoryLikeViewModel", "Failed to load more recipes", t)
-                page -= 1
-            }
-        })
-    }
-
-
-    private val _likeCount = MutableLiveData<Long>(-1L)
-    val likeCount: LiveData<Long> get() = _likeCount
-
-    private val _isLoadingCount = MutableLiveData(false)
-    val isLoadingCount: LiveData<Boolean> get() = _isLoadingCount
-
-    fun fetchLikeCount(userId: Long) {
-        _isLoadingCount.value = true
-        RetrofitHelper.apiService.getLikeCountByUserId(userId).enqueue(object : Callback<Long> {
-            override fun onResponse(call: Call<Long>, response: Response<Long>) {
-                _isLoadingCount.value = false
-                if (response.isSuccessful) {
-                    _likeCount.value = response.body()
-                    Log.d("LikeCountViewModel", "Like count: ${response.body()}")
-                } else {
-                    Log.e("LikeCountViewModel", "Failed to fetch like count: ${response.errorBody()}")
-                }
-            }
-
-            override fun onFailure(call: Call<Long>, t: Throwable) {
-                _isLoadingCount.value = false
-                Log.e("LikeCountViewModel", "Failed to fetch like count", t)
-            }
-        })
+        }
     }
 
 
