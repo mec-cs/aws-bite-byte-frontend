@@ -27,6 +27,7 @@ import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
+import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 import retrofit2.Call
 import retrofit2.Callback
@@ -53,8 +54,10 @@ class HomePageActivity : ComponentActivity() {
                             if (response.isSuccessful) {
                                 if (response.body() != null) {
                                     Constant.userProfile = response.body()!!
-                                    // Display or process the response body for successful cases
-                                    //Log.e("API_CALL_PROFILE", Constant.userProfile.profilePicture)
+
+                                    val profileImageViewModel = ProfileImageViewModel()
+                                    profileImageViewModel.fetchProfileImage(Constant.userProfile.profilePicture)
+
                                 }
                             } else {
                                 Log.d("API_CALL UnSuccessfull", "Non HTTP 200 error")

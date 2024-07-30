@@ -100,6 +100,7 @@ fun DisplayRecipe(
             val displayedProfileBitmap = when {
                 Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
                 Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
+
                 else -> profileBitmap
             }
 
