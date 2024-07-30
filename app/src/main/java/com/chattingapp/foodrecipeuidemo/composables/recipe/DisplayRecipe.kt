@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,69 +44,79 @@ import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
+
+import android.util.Log
 
 @Composable
-fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navController: NavController) {
+fun DisplayRecipe(
+    recipe: RecipeProjection,
+    viewModel: RecipeViewModel = viewModel(),
+    navController: NavController,
+    userProfileViewModel: UserProfileViewModel
+) {
     var expanded by remember { mutableStateOf(false) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var username = ""
+    var isProfileLoading by remember { mutableStateOf(true) }
+    var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val likeViewModel: LikeViewModel = viewModel()
-
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipe.id] ?: false
 
     val favoriteViewModel: FavoriteViewModel = viewModel()
-
     val isFavoriteMap by favoriteViewModel.isFavoriteMap.collectAsState()
     val isFavorite = isFavoriteMap[recipe.id] ?: false
 
     val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
+
+
+    Log.d("RECIPE USERNAME", recipe.username.toString())
+    // Fetch recipe image
     LaunchedEffect(recipe.id) {
+        Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
         viewModel.fetchImage(recipe) {
             bitmap = it
             isLoading = false
+            Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
+        }
+        userProfileViewModel.fetchImage(recipe){
+            profileBitmap = it
+            isProfileLoading = false
         }
     }
 
-    username = if (recipe.ownerId == Constant.userProfile.id) {
-        Constant.userProfile.username
-    }
-    else {
-        if(Constant.targetUserProfile != null){
-            Constant.targetUserProfile!!.username
-        } else{
-            // make a api call to get username by recipe owner id
+    // Determine username and profile picture only if not in profile page
 
-            ""
-        }
-    }
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
-        // Conditional profile display
-        var profileBitmap = when {
-            Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
-            Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
-            else -> null
-        }
-        if(profileBitmap == null){
-            // get profile picture by recipe owner
-        }
+        if (isProfileLoading) {
+            Log.d("DisplayRecipe", "Profile is loading for recipe: ${recipe.id}")
 
-        profileBitmap?.let {
+        } else {
+            Log.d("DisplayRecipe", "Profile loaded for recipe: ${recipe.id}")
+            // Conditional profile display
+            val displayedProfileBitmap = when {
+                Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
+                Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
+                else -> profileBitmap
+            }
 
-            RecipeUserProfile(it.asImageBitmap(), username, recipe.id!!, favoriteViewModel)
+            displayedProfileBitmap?.let {
+                RecipeUserProfile(it.asImageBitmap(), recipe.username!!, recipe.id!!, favoriteViewModel)
+            }
+
+            Text(
+                text = recipe.name ?: "",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
         }
-
-        Text(
-            text = recipe.name ?: "",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
 
         if (isLoading) {
+            Log.d("DisplayRecipe", "Recipe image is loading for recipe: ${recipe.id}")
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -119,6 +130,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                 )
             }
         } else {
+            Log.d("DisplayRecipe", "Recipe image loaded for recipe: ${recipe.id}")
             bitmap?.let {
                 Column(modifier = Modifier.clickable {
                     Constant.recipeDetailProjection = recipe
@@ -126,7 +138,6 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                     Constant.recipeDetailProjection!!.relativeDate = relativeDate
                     navController.navigate("recipeDetail/${"Details"}")
                 }) {
-
                     Image(
                         bitmap = it.asImageBitmap(),
                         contentDescription = null,
@@ -143,17 +154,17 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         LikeRecipe(recipeId = recipe.id!!, likeViewModel)
-                        IconButton( modifier = Modifier
-                            .size(30.dp) // Adjust the size of the button
-                            .clip(RoundedCornerShape(8.dp)),
+                        IconButton(
+                            modifier = Modifier
+                                .size(30.dp) // Adjust the size of the button
+                                .clip(RoundedCornerShape(8.dp)),
                             onClick = {
                                 Constant.recipeDetailProjection = recipe
                                 Constant.recipeDetailProjection!!.bmRecipe = bitmap
                                 Constant.recipeDetailProjection!!.relativeDate = relativeDate
                                 navController.navigate("recipeDetail/${"Comments"}")
-
-
-                            }) {
+                            }
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.comment),
                                 contentDescription = "Comment",
@@ -185,9 +196,7 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
                         )
                     }
 
-
                     relativeDate?.let {
-
                         Text(text = it, fontSize = 12.sp)
                     }
                 }
@@ -195,28 +204,3 @@ fun DisplayRecipe(recipe: RecipeProjection, viewModel: RecipeViewModel, navContr
         }
     }
 }
-
-
-/*fun formatDateForUser(dateString: String): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-    val dateTime: Date
-    try {
-        dateTime = formatter.parse(dateString) ?: return "Invalid date"
-    } catch (e: ParseException) {
-        return "Parse error"
-    }
-    val now = Date()
-    val durationMillis = now.time - dateTime.time
-    val durationSeconds = durationMillis / 1000
-    val durationMinutes = durationSeconds / 60
-    val durationHours = durationMinutes / 60
-    val durationDays = durationHours / 24
-    return when {
-        durationDays > 0 -> "${durationDays} day(s) ago"
-        durationHours > 0 -> "${durationHours} hour(s) ago"
-        durationMinutes > 0 -> "${durationMinutes} minute(s) ago"
-        else -> "Just now"
-    }
-}
-
-*/

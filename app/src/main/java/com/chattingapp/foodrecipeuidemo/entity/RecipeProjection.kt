@@ -14,7 +14,7 @@ data class RecipeProjection (
     val ownerId: Long? = null,
     var bmProfile: Bitmap? = null,
     var bmRecipe: Bitmap? = null,
-    var relativeDate: String? = null
-
-
+    var relativeDate: String? = null,
+    var username: String? = null,
+    var ownerImage:String? = null
 )

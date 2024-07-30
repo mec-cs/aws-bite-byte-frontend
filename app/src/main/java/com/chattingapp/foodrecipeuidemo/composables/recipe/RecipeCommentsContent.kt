@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
@@ -84,6 +85,8 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
                     .collect { lastVisibleItem ->
                         if (lastVisibleItem != null && lastVisibleItem.index >= comments.size - 1) {
                             commentViewModel.fetchMoreComments(Constant.recipeDetailProjection?.id!!)
+                            Log.d("FETCH COMMENT", "RECIPE COMMENT CONTENT")
+                            delay(1000)
                         }
                     }
             }

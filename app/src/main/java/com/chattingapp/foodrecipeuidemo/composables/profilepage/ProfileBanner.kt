@@ -38,6 +38,7 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -144,6 +145,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
 
         }
         if(displayProfileImage){
+            val userProfileViewModel = UserProfileViewModel()
             val listState = rememberLazyListState()
             LazyColumn(
                 state = listState,
@@ -163,7 +165,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                     recipeViewModel.recipeListDetail = recipeList
                     Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
                     Constant.isProfilePage = true
-                    DisplayRecipe(recipe, recipeViewModel, navController)
+                    DisplayRecipe(recipe, recipeViewModel, navController, userProfileViewModel)
                 }
             }
 

@@ -30,6 +30,7 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryFavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryMostLikedViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryTrendsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +42,12 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val recipeViewModelClick = RecipeViewModel()
     val recipeViewModelFavorite = RecipeViewModel()
     val recipeViewModelUserLike = RecipeViewModel()
+
+
+    val userProfileViewModelLike = UserProfileViewModel()
+    val userProfileViewModelClick = UserProfileViewModel()
+    val userProfileViewModelFavorite = UserProfileViewModel()
+    val userProfileViewModelUserLike = UserProfileViewModel()
 
     val categoryMostLikedViewModel: CategoryMostLikedViewModel = viewModel()
     val recipesLike by categoryMostLikedViewModel.recipes.collectAsState()
@@ -139,13 +146,15 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         errorMessageLike?.let {
                             Text(text = it)
                         }
+
+
                         LazyColumn(
                             state = listStateLike,
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(recipesLike) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelLike, navController = navController)
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelLike, navController = navController, userProfileViewModelLike)
                             }
 
                         }
@@ -184,7 +193,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipesClick) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelClick, navController = navController)
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelClick, navController = navController, userProfileViewModelClick)
                             }
 
                         }
@@ -223,7 +232,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipeListFavorite) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelFavorite, navController = navController)
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelFavorite, navController = navController, userProfileViewModelFavorite)
                             }
 
                         }
@@ -266,7 +275,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipeListTrends) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelUserLike, navController = navController)
+                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelUserLike, navController = navController, userProfileViewModelUserLike)
                             }
 
                         }
