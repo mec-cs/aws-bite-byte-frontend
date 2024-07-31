@@ -73,45 +73,7 @@ class HomePageActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
 
-                    /*Scaffold(
-                        bottomBar = { AppNavigationBar(navController = navController) }
-                    ) { innerPadding ->
-                        NavHost(
-                            navController = navController,
-                            startDestination = "home",
-                            modifier = Modifier.padding(innerPadding)
-                        ) {
-                            composable("home") {
-                                Constant.isProfilePage = false
-                                Constant.targetUserProfile = null
-                                HomeScreen(navController)
-                            }
-                            composable("search") {
-                                Constant.isProfilePage = false
-                                Constant.targetUserProfile = null
-                                SearchScreen(navController)
-                            }
-                            composable("create recipe") {
-                                Constant.isProfilePage = false
-                                Constant.targetUserProfile = null
-                                val recipeViewModel = RecipeViewModel()
-                                CreateRecipeScreen(navController, recipeViewModel)
-                            }
-                            composable("feed") {
-                                Constant.isProfilePage = false
-                                Constant.targetUserProfile = null
-                                Feed(navController)
-                            }
-                            composable("profile") {
-                                Constant.targetUserProfile = null
-                                Constant.isProfilePage = true
-                                ProfileScreen(navController)
-                            }
 
-                            // Add more destinations as needed
-
-                        }
-                    }*/
                     Scaffold(
                         bottomBar = { AppNavigationBar(navController = navController) }
                     ) { innerPadding ->

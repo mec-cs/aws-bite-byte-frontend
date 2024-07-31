@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.composables.displaycontent
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,9 +17,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -107,23 +112,51 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                 .padding(16.dp)
         ) {
             if(selectedTab.value != "Favorites"){
-                LazyRow {
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { selectedTab.value = "Popular" }) {
-                            Text("Popular")
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LazyRow {
+                        item {
+                            Text(
+                                text = "Popular",
+                                modifier = Modifier
+                                    .padding(end = 16.dp)
+                                    .clickable { selectedTab.value = "Popular" },
+                                style = if (selectedTab.value == "Popular") {
+                                    TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
+                                } else {
+                                    TextStyle(fontWeight = FontWeight.Normal, color = Color.Gray)
+                                }
+                            )
                         }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { selectedTab.value = "Most Liked" }) {
-                            Text("Most Liked")
+                        item {
+                            Text(
+                                text = "Most Liked",
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .clickable { selectedTab.value = "Most Liked" },
+                                style = if (selectedTab.value == "Most Liked") {
+                                    TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
+                                } else {
+                                    TextStyle(fontWeight = FontWeight.Normal, color = Color.Gray)
+                                }
+                            )
                         }
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { selectedTab.value = "Trends" }) {
-                            Text("Trends")
+                        item {
+                            Text(
+                                text = "Trends",
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                                    .clickable { selectedTab.value = "Trends" },
+                                style = if (selectedTab.value == "Trends") {
+                                    TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
+                                } else {
+                                    TextStyle(fontWeight = FontWeight.Normal, color = Color.Gray)
+                                }
+                            )
                         }
                     }
                 }
