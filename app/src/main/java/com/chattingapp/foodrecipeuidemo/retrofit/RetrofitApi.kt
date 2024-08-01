@@ -12,6 +12,7 @@ import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
+import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileResponse
@@ -197,4 +198,11 @@ interface RetrofitAPICredentials {
 
     @POST("profile-api/remove-user-follows")
     suspend fun removeUserFollows(@Body followRequest: FollowRequest): Response<String>
+
+    @GET("profile-api/users/{userId}/{page}/followers")
+    fun getFollowersByUserId(@Path("userId") userId: Long, @Path("page") page: Int): Call<List<UserFollowsResponse>>
+
+    @GET("profile-api/users/{userId}/{page}/followings")
+    fun getFollowingsByUserId(@Path("userId") userId: Long, @Path("page") page: Int): Call<List<UserFollowsResponse>>
+
 }

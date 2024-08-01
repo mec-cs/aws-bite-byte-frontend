@@ -1,7 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -73,7 +71,7 @@ class FollowCountsViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         _isFollowing.value = true
                         isActionInProgress = false
-                        adjustFollowerCount(followerId, followedId, increment = true)
+                        adjustFollowerCount(increment = true)
                     }
                     delay(1000)
                 } catch (e: Exception) {
@@ -95,7 +93,7 @@ class FollowCountsViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         _isFollowing.value = false
                         isActionInProgress = false
-                        adjustFollowerCount(followerId, followedId, increment = false)
+                        adjustFollowerCount(increment = false)
                     }
                     delay(1000)
                 } catch (e: Exception) {
@@ -105,7 +103,7 @@ class FollowCountsViewModel : ViewModel() {
         }
     }
 
-    private fun adjustFollowerCount(userId: Long, targetId: Long, increment: Boolean) {
+    private fun adjustFollowerCount(increment: Boolean) {
         if(!isActionInProgress) {
             viewModelScope.launch {
                 // Fetch the current follower count

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.popup.CountPopup
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -128,6 +129,9 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                 }
             }
                 followCounts?.let { counts ->
+                    var showFollowersPopup by remember { mutableStateOf(false) }
+                    var showFollowingsPopup by remember { mutableStateOf(false) }
+
                     Column {
                         Row {
                             Column(
@@ -139,21 +143,45 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                                 Text(text = "recipes")
                             }
                             Column(
-                                modifier = Modifier.padding(start = 16.dp),
+                                modifier = Modifier.padding(start = 16.dp)
+                                    .clickable {
+                                        showFollowersPopup = true
+                                    },
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.Center,
+
                             ) {
                                 Text(text = "${counts.followersCount}", fontWeight = FontWeight.Bold)
                                 Text(text = "Followers")
                             }
                             Column(
-                                modifier = Modifier.padding(start = 16.dp),
+                                modifier = Modifier.padding(start = 16.dp)
+                                    .clickable {
+                                        showFollowingsPopup = true
+                                    },
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(text = "${counts.followingsCount}", fontWeight = FontWeight.Bold)
                                 Text(text = "Followings")
                             }
+
+                            if (showFollowersPopup) {
+                                CountPopup(
+                                    title = "Followers",
+                                    count = followCounts?.followersCount ?: 0,
+                                    onDismiss = { showFollowersPopup = false }
+                                )
+                            }
+
+                            if (showFollowingsPopup) {
+                                CountPopup(
+                                    title = "Followings",
+                                    count = followCounts?.followingsCount ?: 0,
+                                    onDismiss = { showFollowingsPopup = false }
+                                )
+                            }
+
                         }
                         if(Constant.targetUserProfile != null){
                             val isFollowing by viewModel.isFollowing.collectAsState()
