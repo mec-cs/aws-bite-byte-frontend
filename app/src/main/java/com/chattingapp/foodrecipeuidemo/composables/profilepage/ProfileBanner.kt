@@ -3,18 +3,14 @@ package com.chattingapp.foodrecipeuidemo.composables.profilepage
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
@@ -45,9 +40,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
-import com.chattingapp.foodrecipeuidemo.composables.popup.CountPopup
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -58,32 +53,37 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: ProfileImageViewModel, recipeViewModel: RecipeViewModel, navController: NavController) {
-    val recipeList by recipeViewModel.recipeList.observeAsState(emptyList())
+fun ProfileBanner(  navController: NavController) {
+    val recipeViewModel: RecipeViewModel = viewModel()
+    val viewModel: FollowCountsViewModel = viewModel()
+    val profileImageViewModel: ProfileImageViewModel = viewModel()
+    val recipeList by recipeViewModel.recipeList.collectAsState(emptyList())
+    val followCounts by viewModel.followCounts.collectAsState(null)
 
-    var userProfile: UserProfile
+    val userProfile = remember {
+        Constant.targetUserProfile ?: Constant.userProfile
+    }
 
     var isFirstTime by remember { mutableStateOf(true) }
 
-    if(Constant.targetUserProfile != null){
+    /*if(Constant.targetUserProfile != null){
         userProfile = Constant.targetUserProfile!!
         Log.d("PROFILE IMAGE: ", userProfile.profilePicture)
 
     }
     else{
         userProfile = Constant.userProfile
-    }
+    }*/
 
     if(isFirstTime){
         LaunchedEffect(userProfile.id) {
             viewModel.fetchFollowersCount(userProfile.id)
             recipeViewModel.fetchRecipes(userProfile.id)
+            isFirstTime = false
         }
-        isFirstTime = false
     }
 
 
-    val followCounts by viewModel.followCounts.observeAsState()
     var displayProfileImage by remember { mutableStateOf(false) }
 
 
@@ -129,8 +129,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                 }
             }
                 followCounts?.let { counts ->
-                    var showFollowersPopup by remember { mutableStateOf(false) }
-                    var showFollowingsPopup by remember { mutableStateOf(false) }
+
 
                     Column {
                         Row {
@@ -145,7 +144,10 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                             Column(
                                 modifier = Modifier.padding(start = 16.dp)
                                     .clickable {
-                                        showFollowersPopup = true
+                                        val followType = "Followers"
+                                        val followerCount = followCounts!!.followersCount.toString()
+                                        val followingCount = followCounts!!.followingsCount.toString()
+                                        navController.navigate("profileFollows/$followType/$followerCount/$followingCount")
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center,
@@ -157,29 +159,16 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                             Column(
                                 modifier = Modifier.padding(start = 16.dp)
                                     .clickable {
-                                        showFollowingsPopup = true
+                                        val followType = "Followings"
+                                        val followerCount = followCounts!!.followersCount.toString()
+                                        val followingCount = followCounts!!.followingsCount.toString()
+                                        navController.navigate("profileFollows/$followType/$followerCount/$followingCount")
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Text(text = "${counts.followingsCount}", fontWeight = FontWeight.Bold)
                                 Text(text = "Followings")
-                            }
-
-                            if (showFollowersPopup) {
-                                CountPopup(
-                                    title = "Followers",
-                                    count = followCounts?.followersCount ?: 0,
-                                    onDismiss = { showFollowersPopup = false }
-                                )
-                            }
-
-                            if (showFollowingsPopup) {
-                                CountPopup(
-                                    title = "Followings",
-                                    count = followCounts?.followingsCount ?: 0,
-                                    onDismiss = { showFollowingsPopup = false }
-                                )
                             }
 
                         }
@@ -258,7 +247,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                     recipeViewModel.recipeListDetail = recipeList
                     Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
                     Constant.isProfilePage = true
-                    DisplayRecipe(recipe, recipeViewModel, navController, userProfileViewModel)
+                    DisplayRecipe(recipe, /*recipeViewModel,*/ navController/*, userProfileViewModel*/)
                 }
             }
 

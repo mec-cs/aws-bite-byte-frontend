@@ -43,7 +43,7 @@ import kotlinx.coroutines.delay
 fun RecipeCategory(navController: NavController, cardId: String?) {
 
     val selectedTab = rememberSaveable  { mutableStateOf(cardId) }
-    val recipeViewModelLike = RecipeViewModel()
+    /*val recipeViewModelLike = RecipeViewModel()
     val recipeViewModelClick = RecipeViewModel()
     val recipeViewModelFavorite = RecipeViewModel()
     val recipeViewModelUserLike = RecipeViewModel()
@@ -52,7 +52,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val userProfileViewModelLike = UserProfileViewModel()
     val userProfileViewModelClick = UserProfileViewModel()
     val userProfileViewModelFavorite = UserProfileViewModel()
-    val userProfileViewModelUserLike = UserProfileViewModel()
+    val userProfileViewModelUserLike = UserProfileViewModel()*/
 
     val categoryMostLikedViewModel: CategoryMostLikedViewModel = viewModel()
     val recipesLike by categoryMostLikedViewModel.recipes.collectAsState()
@@ -187,7 +187,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipesLike) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelLike, navController = navController, userProfileViewModelLike)
+                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelLike,*/ navController = navController/*, userProfileViewModelLike*/)
                             }
 
                         }
@@ -226,7 +226,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipesClick) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelClick, navController = navController, userProfileViewModelClick)
+                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelClick,*/ navController = navController/*, userProfileViewModelClick*/)
                             }
 
                         }
@@ -265,7 +265,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipeListFavorite) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelFavorite, navController = navController, userProfileViewModelFavorite)
+                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelFavorite,*/ navController = navController/*, userProfileViewModelFavorite*/)
                             }
 
                         }
@@ -308,7 +308,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         ) {
                             items(recipeListTrends) { recipe ->
                                 Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, viewModel = recipeViewModelUserLike, navController = navController, userProfileViewModelUserLike)
+                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelUserLike,*/ navController = navController/*, userProfileViewModelUserLike*/)
                             }
 
                         }

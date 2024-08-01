@@ -22,7 +22,7 @@ import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ProfileScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
-import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
+import com.chattingapp.foodrecipeuidemo.composables.popup.FollowsPage
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -117,12 +117,15 @@ class HomePageActivity : ComponentActivity() {
                                 Constant.isCardScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
+
                                 ProfileScreen(navController)
                             }
                             composable("recipeCategory/{cardId}") { backStackEntry ->
                                 val cardId = backStackEntry.arguments?.getString("cardId")
                                 RecipeCategory(navController, cardId)
                             }
+
+
 
                         }
 

@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class FollowCountsViewModel : ViewModel() {
-    private val _followCounts = MutableLiveData<FollowCountsDTO>()
-    val followCounts: LiveData<FollowCountsDTO> get() = _followCounts
+    private val _followCounts = MutableStateFlow<FollowCountsDTO?>(null)
+    val followCounts: StateFlow<FollowCountsDTO?> get() = _followCounts
 
     private val apiService = RetrofitHelper.apiService
 
@@ -83,10 +83,15 @@ class FollowCountsViewModel : ViewModel() {
 
     }
 
+
+    private val _isUnfollowing = MutableStateFlow(false)
+    val isUnfollowing: StateFlow<Boolean> = _isUnfollowing
+
     fun unfollowUser(followerId: Long, followedId: Long) {
         if(!isActionInProgress) {
             isActionInProgress = true
             viewModelScope.launch {
+                _isUnfollowing.value = true
                 try {
                     val response =
                         apiService.removeUserFollows(FollowRequest(followerId, followedId))

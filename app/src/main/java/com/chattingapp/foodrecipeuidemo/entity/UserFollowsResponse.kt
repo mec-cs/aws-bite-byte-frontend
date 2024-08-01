@@ -6,7 +6,7 @@ data class UserFollowsResponse(
     val id: UserFollowsId,
     val follower: UserProfile,
     val followed: UserProfile,
-    val dateCreated: LocalDateTime
+    val dateCreated: String
 )
 
 data class UserFollowsId(

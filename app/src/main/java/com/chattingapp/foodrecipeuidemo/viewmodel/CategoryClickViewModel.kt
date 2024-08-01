@@ -69,16 +69,7 @@ class CategoryClickViewModel: ViewModel() {
                     RetrofitHelper.apiService.getRecipes(idsToFetch)
                 }
                 _recipes.value = _recipes.value + fetchedRecipes // Append new recipes to the existing list
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(0).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(1).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(2).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(3).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(4).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(5).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(6).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(7).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(8).id}")
-                Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${fetchedRecipes.get(9).id}")
+
 
                 currentPage++
             } catch (e: Exception) {

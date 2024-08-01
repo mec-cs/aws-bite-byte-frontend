@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chattingapp.foodrecipeuidemo.composables.popup.FollowsPage
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileBanner
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -22,11 +23,12 @@ fun ProfileScreen(navController: NavController) {
     val vmRecipePic = RecipeViewModel()
     Column {
         val navControllerRecipe = rememberNavController()
+        val navControllerProfile = rememberNavController()
 
         NavHost(navController = navControllerRecipe, startDestination = "profile") {
             composable("profile") {
                 //ProfileBanner(viewModel = FollowCountsViewModel(), profileImageViewModel = ProfileImageViewModel(), recipeViewModel = RecipeViewModel(), navControllerRecipe)
-                ProfileBanner(vmFollow, vmProfilePic, vmRecipePic, navControllerRecipe)
+                ProfileBanner(/*vmFollow,*/ /*vmProfilePic,*/ /*vmRecipePic,*/ navControllerRecipe)
             }
             composable("recipeDetail/{toggleStatus}") { backStackEntry ->
                 /*val recipeId = backStackEntry.arguments?.getLong("recipeId")
@@ -39,6 +41,14 @@ fun ProfileScreen(navController: NavController) {
                 val toggleStatus = backStackEntry.arguments?.getString("toggleStatus")
                 val commentViewModel = CommentViewModel()
                 RecipeDetailScreen(navControllerRecipe, toggleStatus!!)
+            }
+            composable("profileFollows/{followType}/{followerCount}/{followingCount}") { backStackEntry ->
+                val followType = backStackEntry.arguments?.getString("followType")
+                val followerCount = backStackEntry.arguments?.getString("followerCount")
+                val followingCount = backStackEntry.arguments?.getString("followingCount")
+
+
+                FollowsPage(navControllerRecipe, followType, followerCount, followingCount)
             }
         }
         //ProfileBanner(vmFollow, vmProfilePic, vmRecipePic)

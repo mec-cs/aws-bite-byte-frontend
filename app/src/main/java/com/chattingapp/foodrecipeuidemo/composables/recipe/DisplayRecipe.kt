@@ -51,10 +51,12 @@ import android.util.Log
 @Composable
 fun DisplayRecipe(
     recipe: RecipeProjection,
-    viewModel: RecipeViewModel = viewModel(),
-    navController: NavController,
-    userProfileViewModel: UserProfileViewModel
+
+    navController: NavController
+
 ) {
+    val viewModel: RecipeViewModel = viewModel()
+
     var expanded by remember { mutableStateOf(false) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -71,6 +73,7 @@ fun DisplayRecipe(
 
     val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
 
+    val userProfileViewModel: UserProfileViewModel = viewModel()
 
     Log.d("RECIPE USERNAME", recipe.username.toString())
     // Fetch recipe image

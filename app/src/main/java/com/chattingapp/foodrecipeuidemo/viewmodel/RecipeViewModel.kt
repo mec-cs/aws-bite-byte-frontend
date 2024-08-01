@@ -16,6 +16,8 @@ import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -34,7 +36,16 @@ class RecipeViewModel : ViewModel() {
     var listSize = 0
     var recipeListDetail: List<RecipeProjection> = emptyList()
 
+    private val _recipeList = MutableStateFlow<List<RecipeProjection>>(emptyList())
+    val recipeList: StateFlow<List<RecipeProjection>> get() = _recipeList
 
+    private val _displayRecipes = MutableStateFlow(false)
+    val displayRecipes: StateFlow<Boolean> get() = _displayRecipes
+
+
+
+    var page = 0
+    private var isLoading = false
 
     fun fetchImage(recipe: RecipeProjection, onImageLoaded: (Bitmap?) -> Unit) {
         val cachedImage = imageCache[recipe.image]
@@ -66,26 +77,8 @@ class RecipeViewModel : ViewModel() {
         }
     }
 
-    private val _recipeList = MutableLiveData<List<RecipeProjection>>(emptyList())
-    val recipeList: LiveData<List<RecipeProjection>> get() = _recipeList
-
-    private val _displayRecipes = MutableLiveData(false)
-    val displayRecipes: LiveData<Boolean> get() = _displayRecipes
-
-    var page = 0
-    private var isLoading = false
-
-
-
-    fun updateRecipeList(newRecipes: List<RecipeProjection>) {
-        _recipeList.value = newRecipes
-        recipeListDetail = newRecipes
-    }
-
-
-
     private fun getCurrentRecipeIds(): Set<Long?> {
-        return _recipeList.value?.map { it.id }.orEmpty().toSet()
+        return _recipeList.value.map { it.id }.toSet()
     }
 
     // Function to filter out duplicates
@@ -95,37 +88,35 @@ class RecipeViewModel : ViewModel() {
     }
 
     fun fetchRecipes(userId: Long) {
-        if(page == 0){
+        if (page == 0) {
+            if (isLoading) return
+            isLoading = true
 
-
-        if (isLoading) return
-        isLoading = true
-
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    if (newRecipes.isNotEmpty()) {
-                        val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
-                        val existingIds = currentList.map { it.id }.toSet()
-                        val filteredRecipes = newRecipes.filter { it.id !in existingIds }
-                        if (filteredRecipes.isNotEmpty()) {
-                            currentList.addAll(filteredRecipes)
-                            _recipeList.value = currentList
-                            recipeListDetail = currentList
-                            _displayRecipes.value = true
-                            page += 1
+            apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
+                override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
+                    isLoading = false
+                    if (response.isSuccessful) {
+                        val newRecipes = response.body() ?: emptyList()
+                        if (newRecipes.isNotEmpty()) {
+                            val currentList = _recipeList.value.toMutableList()
+                            val existingIds = currentList.map { it.id }.toSet()
+                            val filteredRecipes = newRecipes.filter { it.id !in existingIds }
+                            if (filteredRecipes.isNotEmpty()) {
+                                currentList.addAll(filteredRecipes)
+                                _recipeList.value = currentList
+                                recipeListDetail = currentList
+                                _displayRecipes.value = true
+                                page += 1
+                            }
                         }
                     }
                 }
-            }
 
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load recipes", t)
-            }
-        })
+                override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
+                    isLoading = false
+                    Log.e("RecipeViewModel", "Failed to load recipes", t)
+                }
+            })
         }
     }
 
@@ -133,13 +124,13 @@ class RecipeViewModel : ViewModel() {
         if (isLoading) return
         isLoading = true
 
-        RetrofitHelper.apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
+        apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
             override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
                 isLoading = false
                 if (response.isSuccessful) {
                     val newRecipes = response.body() ?: emptyList()
                     if (newRecipes.isNotEmpty()) {
-                        val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
+                        val currentList = _recipeList.value.toMutableList()
                         val existingIds = currentList.map { it.id }.toSet()
                         val filteredRecipes = newRecipes.filter { it.id !in existingIds }
                         if (filteredRecipes.isNotEmpty()) {
