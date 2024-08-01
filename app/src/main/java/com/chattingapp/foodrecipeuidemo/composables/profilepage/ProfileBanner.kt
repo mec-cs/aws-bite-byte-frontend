@@ -1,22 +1,34 @@
 package com.chattingapp.foodrecipeuidemo.composables.profilepage
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -25,8 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -113,33 +128,85 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                 }
             }
                 followCounts?.let { counts ->
-                    Column(
-                        modifier = Modifier.padding(start = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "${counts.recipeCount}", fontWeight = FontWeight.Bold)
-                        Text(text = "recipes")
+                    Column {
+                        Row {
+                            Column(
+                                modifier = Modifier.padding(start = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = "${counts.recipeCount}", fontWeight = FontWeight.Bold)
+                                Text(text = "recipes")
+                            }
+                            Column(
+                                modifier = Modifier.padding(start = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = "${counts.followersCount}", fontWeight = FontWeight.Bold)
+                                Text(text = "Followers")
+                            }
+                            Column(
+                                modifier = Modifier.padding(start = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = "${counts.followingsCount}", fontWeight = FontWeight.Bold)
+                                Text(text = "Followings")
+                            }
+                        }
+                        if(Constant.targetUserProfile != null){
+                            val isFollowing by viewModel.isFollowing.collectAsState()
+                            val isChecking by viewModel.isChecking.collectAsState()
+                            val isActionInProgress by viewModel.isActionInProgressFlow.collectAsState()
+                            LaunchedEffect(Unit) {
+                                viewModel.checkIfUserFollows(Constant.userProfile.id, Constant.targetUserProfile!!.id)
+                            }
+                            if(!isChecking){
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp) // Add horizontal padding
+                                        .wrapContentWidth(Alignment.CenterHorizontally) // Center the box horizontally
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            // Toggle follow/unfollow action based on the current state
+                                            if (isFollowing == true) {
+                                                // Call API to unfollow
+                                                viewModel.unfollowUser(Constant.userProfile.id, Constant.targetUserProfile!!.id)
+                                            } else {
+                                                // Call API to follow
+                                                viewModel.followUser(Constant.userProfile.id, Constant.targetUserProfile!!.id)
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (isFollowing == true) Color.Black else Color.White, // Background color
+                                            contentColor = if (isFollowing == true) Color.White else Color.Black // Text color
+                                        ),
+                                        shape = RoundedCornerShape(8.dp),
+                                        border = if (isFollowing == true) null else BorderStroke(1.dp, Color.Black), // Add border if not followed
+                                        modifier = Modifier
+                                            .fillMaxWidth(), // Ensure the button fills the Box
+                                        enabled = !isActionInProgress
+                                    ) {
+                                        Text(
+                                            text = if (isFollowing == true) "Unfollow" else "Follow",
+                                            style = TextStyle(
+                                                fontSize = 14.sp, // Font size for the button text
+                                                fontWeight = FontWeight.Bold // Font weight
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                        }
+
                     }
-                    Column(
-                        modifier = Modifier.padding(start = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "${counts.followersCount}", fontWeight = FontWeight.Bold)
-                        Text(text = "Followers")
-                    }
-                    Column(
-                        modifier = Modifier.padding(start = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "${counts.followingsCount}", fontWeight = FontWeight.Bold)
-                        Text(text = "Followings")
-                    }
+
                 }
                 // Observe and fetch more recipes when the user scrolls to the bottom
-
 
 
 
@@ -154,9 +221,7 @@ fun ProfileBanner(viewModel: FollowCountsViewModel, profileImageViewModel: Profi
                     .wrapContentHeight()
                     .padding(16.dp, 0.dp, 16.dp, 32.dp)
             ) {
-                if(recipeList.size != recipeViewModel.recipeListDetail.size){
 
-                }
                 items(recipeList) { recipe ->
                     Log.d("SIZE:  ", recipeList.size.toString())
                     recipeViewModel.listSize = recipeList.size

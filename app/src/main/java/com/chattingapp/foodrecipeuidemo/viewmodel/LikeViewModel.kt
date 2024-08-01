@@ -17,6 +17,7 @@ import retrofit2.await
 import retrofit2.awaitResponse
 import androidx.compose.runtime.State
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -105,6 +106,7 @@ class LikeViewModel() : ViewModel() {
                         }
                     }
                 }
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {

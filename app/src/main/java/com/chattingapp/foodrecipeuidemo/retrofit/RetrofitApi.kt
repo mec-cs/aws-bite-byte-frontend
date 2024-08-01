@@ -3,6 +3,7 @@ package com.chattingapp.foodrecipeuidemo.retrofit
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
+import com.chattingapp.foodrecipeuidemo.entity.FollowRequest
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
@@ -17,6 +18,7 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -183,4 +185,16 @@ interface RetrofitAPICredentials {
 
     @GET("profile-getter/{id}")
     fun getUserProfile(@Path("id") id: Long): Call<UserProfileResponse>
+
+    @GET("profile-api/check-follow")
+    suspend fun checkIfUserFollows(
+        @Query("followerId") followerId: Long,
+        @Query("followedId") followedId: Long
+    ): Boolean
+
+    @POST("profile-api/add-user-follows")
+    suspend fun addUserFollows(@Body followRequest: FollowRequest): Response<String>
+
+    @POST("profile-api/remove-user-follows")
+    suspend fun removeUserFollows(@Body followRequest: FollowRequest): Response<String>
 }
