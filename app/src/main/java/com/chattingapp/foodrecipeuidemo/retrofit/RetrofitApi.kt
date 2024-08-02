@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.retrofit
 
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
+import com.chattingapp.foodrecipeuidemo.entity.Comment
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
 import com.chattingapp.foodrecipeuidemo.entity.FollowRequest
@@ -207,4 +208,7 @@ interface RetrofitAPICredentials {
 
     @DELETE("credentials/delete-token")
     suspend fun deleteToken(@Query("userId") userId: Long, @Query("token") token: String): Response<Unit>
+
+    @POST("comment/save-comment")
+    fun addComment(@Body comment: Comment): Call<Comment>
 }

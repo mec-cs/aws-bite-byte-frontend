@@ -1,22 +1,32 @@
 package com.chattingapp.foodrecipeuidemo.date
 
+import android.util.Log
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 object CalculateDate {
 
     fun formatDateForUser(dateString: String): String {
-        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("Europe/Istanbul") // Set to Turkey timezone
+        }
         val dateTime: Date
         try {
             dateTime = formatter.parse(dateString) ?: return "Invalid date"
         } catch (e: ParseException) {
             return "Parse error"
         }
+
         val now = Date()
+        Log.d("TIME CALCULATOR", "Parsed Date: $dateTime")
+        Log.d("TIME CALCULATOR", "Current Date: $now")
+
         val durationMillis = now.time - dateTime.time
+        Log.d("TIME CALCULATOR", "Duration in millis: $durationMillis")
+
         val durationSeconds = durationMillis / 1000
         val durationMinutes = durationSeconds / 60
         val durationHours = durationMinutes / 60

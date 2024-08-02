@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.entity.Comment
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -167,6 +169,60 @@ class CommentViewModel : ViewModel() {
             }
         }
     }
+
+
+
+    fun addComment(recipeId: Long, commentText: String) {
+        val comment = Comment(-1, Constant.userProfile.id, commentText, null, recipeId)
+        Log.d("CommentViewModel", "Attempting to add comment: $comment")
+
+        viewModelScope.launch {
+            try {
+                RetrofitHelper.apiService.addComment(comment).enqueue(object : Callback<Comment> {
+                    override fun onResponse(call: Call<Comment>, response: Response<Comment>) {
+                        Log.d("CommentViewModel", "API call made to add comment: ${response.raw()}")
+                        if (response.isSuccessful) {
+                            Log.d("CommentViewModel", "Successfully added comment: ${response.body()}")
+                            val newComment = response.body()
+                            if (newComment != null) {
+                                val commentProjection = CommentProjection(
+                                    newComment.id,
+                                    newComment.ownerId,
+                                    newComment.comment,
+                                    newComment.dateCreated,
+                                    Constant.userProfile.username,
+                                    Constant.userProfile.profilePicture
+                                )
+                                val updatedComments = _comments.value?.toMutableList() ?: mutableListOf()
+                                updatedComments.add(0, commentProjection)  // Insert at the start of the list
+                                _comments.value = updatedComments
+
+                                Log.d("CommentViewModel", "Updated comments: $updatedComments")
+
+                                // Optionally update comment count
+                                val currentCount = _commentCount.value ?: 0
+                                _commentCount.value = currentCount + 1
+                                Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
+                            } else {
+                                Log.e("CommentViewModel", "Response body is null despite successful response")
+                            }
+                        } else {
+                            Log.e("CommentViewModel", "Failed to add comment: ${response.errorBody()?.string()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Comment>, t: Throwable) {
+                        Log.e("CommentViewModel", "Exception occurred while adding comment", t)
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("CommentViewModel", "Exception occurred while adding comment", e)
+            }
+        }
+    }
+
+
+
 
     fun resetState() {
         _comments.value = emptyList()
