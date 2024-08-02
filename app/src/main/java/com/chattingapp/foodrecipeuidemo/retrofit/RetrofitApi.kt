@@ -205,4 +205,6 @@ interface RetrofitAPICredentials {
     @GET("profile-api/users/{userId}/{page}/followings")
     fun getFollowingsByUserId(@Path("userId") userId: Long, @Path("page") page: Int): Call<List<UserFollowsResponse>>
 
+    @DELETE("credentials/delete-token")
+    suspend fun deleteToken(@Query("userId") userId: Long, @Query("token") token: String): Response<Unit>
 }

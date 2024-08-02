@@ -1,13 +1,18 @@
 package com.chattingapp.foodrecipeuidemo.composables.profilepage
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,8 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,13 +49,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 
@@ -60,20 +70,14 @@ fun ProfileBanner(  navController: NavController) {
     val recipeList by recipeViewModel.recipeList.collectAsState(emptyList())
     val followCounts by viewModel.followCounts.collectAsState(null)
 
+
     val userProfile = remember {
         Constant.targetUserProfile ?: Constant.userProfile
     }
 
     var isFirstTime by remember { mutableStateOf(true) }
 
-    /*if(Constant.targetUserProfile != null){
-        userProfile = Constant.targetUserProfile!!
-        Log.d("PROFILE IMAGE: ", userProfile.profilePicture)
 
-    }
-    else{
-        userProfile = Constant.userProfile
-    }*/
 
     if(isFirstTime){
         LaunchedEffect(userProfile.id) {
@@ -89,13 +93,52 @@ fun ProfileBanner(  navController: NavController) {
 
 
     Column {
-        Text(
-            userProfile.username,
-            fontWeight = FontWeight.Bold,
-            fontSize = 25.sp,
+        Row(
             modifier = Modifier
-                .padding(start = 16.dp, top = 16.dp)
-        )
+                .fillMaxWidth() // Fill the entire width of the screen
+                .padding(top = 16.dp)
+        ) {
+            Text(
+                userProfile.username,
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp,
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 16.dp)
+            )
+            if(userProfile.id == Constant.userProfile.id){
+                val context = LocalContext.current
+                val tokenViewModel: TokenViewModel = viewModel()
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    onClick = {
+                        val token = retrieveToken(context)
+                        if (token != null) {
+                            deleteToken(context)
+                            tokenViewModel.deleteToken(Constant.userProfile.id, token)
+                        }
+                        navigateToMainActivity(context)
+
+
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF00BCD4), // Cyan background color
+                        contentColor = Color.White // White text color
+                    ),
+                    shape = RoundedCornerShape(12.dp), // Rounded corners
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp) // Add padding around the button
+                ) {
+                    Text(
+                        text = "Logout",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        letterSpacing = 1.2.sp // Slightly increased spacing for modern feel
+                    )
+                }
+            }
+
+        }
+
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             painterResource(id = R.drawable.ic_launcher_background)
@@ -142,11 +185,13 @@ fun ProfileBanner(  navController: NavController) {
                                 Text(text = "recipes")
                             }
                             Column(
-                                modifier = Modifier.padding(start = 16.dp)
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
                                     .clickable {
                                         val followType = "Followers"
                                         val followerCount = followCounts!!.followersCount.toString()
-                                        val followingCount = followCounts!!.followingsCount.toString()
+                                        val followingCount =
+                                            followCounts!!.followingsCount.toString()
                                         navController.navigate("profileFollows/$followType/$followerCount/$followingCount")
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -157,11 +202,13 @@ fun ProfileBanner(  navController: NavController) {
                                 Text(text = "Followers")
                             }
                             Column(
-                                modifier = Modifier.padding(start = 16.dp)
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
                                     .clickable {
                                         val followType = "Followings"
                                         val followerCount = followCounts!!.followersCount.toString()
-                                        val followingCount = followCounts!!.followingsCount.toString()
+                                        val followingCount =
+                                            followCounts!!.followingsCount.toString()
                                         navController.navigate("profileFollows/$followType/$followerCount/$followingCount")
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -265,4 +312,19 @@ fun ProfileBanner(  navController: NavController) {
         }
 
     }
+}
+private fun navigateToMainActivity(context: Context) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    context.startActivity(intent)
+}
+fun retrieveToken(context: Context): String? {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("auth_token", null)
+}
+fun deleteToken(context: Context) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.remove("auth_token") // Remove the token
+    editor.apply() // Commit changes
 }

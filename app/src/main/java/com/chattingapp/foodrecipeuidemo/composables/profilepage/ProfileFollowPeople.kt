@@ -178,43 +178,26 @@ fun ProfileFollowPeople(
 
                         Button(
                             onClick = {
-                                if (buttonEnabled) {
-                                    buttonEnabled = false // Disable the button
-
-                                    scope.launch {
-                                        // Toggle follow/unfollow action based on the current state
-                                        if (isFollowing) {
-                                            // Call API to unfollow
-                                            viewModel?.unfollowUser(Constant.userProfile.id, user.id.followedId)
-                                        } else {
-                                            // Call API to follow
-                                            viewModel?.followUser(Constant.userProfile.id, user.id.followedId)
-                                        }
-
-                                        // Toggle the follow status
-                                        isFollowing = !isFollowing
-                                        // Re-enable the button after 1 seconds
-                                        delay(1000) // 1 seconds delay
-                                        buttonEnabled = true // Re-enable the button
-
-                                    }
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isFollowing == true) Color.Black else Color.White, // Background color
-                                contentColor = if (isFollowing == true) Color.White else Color.Black // Text color
-                            ),
-                            shape = RoundedCornerShape(8.dp),
-                            enabled = buttonEnabled,
-                            border = if (isFollowing == true) null else BorderStroke(1.dp, Color.Black) // Add border if not followed
-
-                        ) {
-                            androidx.compose.material3.Text(
-                                text = if (isFollowing == true) "Unfollow" else "Follow",
-                                style = TextStyle(
-                                    fontSize = 14.sp, // Font size for the button text
-                                    fontWeight = FontWeight.Bold // Font weight
+                                profileCountsViewModel.unfollowUser(
+                                    user.id.followerId,
+                                    user.id.followedId
                                 )
+                                isRemoved = true
+                            },
+                            enabled = !isRemoved,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isRemoved) Color(0xFFE0E0E0) else Color(
+                                    0xFF007BFF
+                                ), // Light gray for disabled, blue for active
+                                contentColor = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
+                            ),
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(4.dp) // Padding to give some spacing around the button
+                        ) {
+                            Text(
+                                text = if (isRemoved) "User Removed" else "Remove user",
+                                color = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
                             )
                         }
                     }
