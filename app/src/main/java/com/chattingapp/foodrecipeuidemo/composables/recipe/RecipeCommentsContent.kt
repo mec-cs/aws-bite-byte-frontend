@@ -35,10 +35,7 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
     val userProfiles by commentViewModel.userProfilesComment.observeAsState(emptyList())
     val profileImageCache by commentViewModel.profileImageCacheComment.observeAsState(emptyMap())
 
-    LaunchedEffect(comments) {
-        val ownerIds = comments.map { it.ownerId!! }.distinct()
-        commentViewModel.fetchUserProfiles(ownerIds)
-    }
+
 
     LaunchedEffect(Constant.recipeDetailProjection?.id) {
         Constant.recipeDetailProjection?.id?.let { id ->
@@ -70,12 +67,10 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
                     }
                 }
                 items(comments) { comment ->
-                    val userProfile = userProfiles.find { it.id == comment.ownerId }
-                    val profileImage = profileImageCache[comment.ownerId]
+
                     CommentItem(
                         comment = comment,
-                        userProfile = userProfile,
-                        profileImage = profileImage
+                        commentViewModel
                     )
                 }
             }

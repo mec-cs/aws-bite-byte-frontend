@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.ConcurrentHashMap
 
 class CommentViewModel : ViewModel() {
 
@@ -45,76 +46,37 @@ class CommentViewModel : ViewModel() {
     private val _loadingStateComment = MutableLiveData<MutableMap<Long, Boolean>>(mutableMapOf())
     val loadingStateComment: LiveData<MutableMap<Long, Boolean>> get() = _loadingStateComment
 
-    fun fetchUserProfiles(commentOwnerIds: List<Long>) {
-        val currentLoadingState = _loadingStateComment.value ?: emptyMap()
-        val idsToFetch = commentOwnerIds.filter { id -> currentLoadingState[id] != true }
 
-        if (idsToFetch.isEmpty()) return
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val profiles = mutableListOf<UserProfile>()
-            val newLoadingState = currentLoadingState.toMutableMap()
-            idsToFetch.forEach { id ->
-                newLoadingState[id] = true
-            }
-            _loadingStateComment.postValue(newLoadingState)
+    private val imageCache = ConcurrentHashMap<String, Bitmap>()
 
-            try {
-                idsToFetch.forEach { id ->
-                    val response = RetrofitHelper.apiService.getUserProfileById(id).execute()
-                    if (response.isSuccessful) {
-                        response.body()?.let { userProfile ->
-                            profiles.add(userProfile)
-                            userProfile.profilePicture?.let { fetchProfileImageComment(userProfile.id, it) }
-                        }
-                    }
-                }
-                val currentProfiles = _userProfilesComment.value ?: emptyList()
-                _userProfilesComment.postValue(currentProfiles + profiles)
-            } catch (e: Exception) {
-                Log.e("CommentViewModel", "Error fetching user profiles", e)
-            } finally {
-                idsToFetch.forEach { id ->
-                    newLoadingState[id] = false
-                }
-                _loadingStateComment.postValue(newLoadingState)
-            }
+    fun fetchImage(comment: CommentProjection, onImageLoaded: (Bitmap?) -> Unit) {
+        val cachedImage = imageCache[comment.profilePicture]
+        if (cachedImage != null) {
+            onImageLoaded(cachedImage)
+            return
         }
-    }
-
-    private fun fetchProfileImageComment(userId: Long, profilePictureUrl: String) {
-        if (_profileImageCacheComment.value?.contains(userId) == true) return
 
         viewModelScope.launch {
-            _loadingStateComment.value = _loadingStateComment.value?.toMutableMap()?.apply {
-                put(userId, true)
-            } ?: mutableMapOf(userId to true)
-
-            try {
-                val response = withContext(Dispatchers.IO) {
-                    val imageResponse = RetrofitHelper.apiService.getImage(profilePictureUrl).execute()
-                    if (imageResponse.isSuccessful) {
-                        val decodedBytes = Base64.decode(imageResponse.body(), Base64.DEFAULT)
+            val response = withContext(Dispatchers.IO) {
+                try {
+                    val response = RetrofitHelper.apiService.getImage(comment.profilePicture!!).execute()
+                    if (response.isSuccessful) {
+                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
                         BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                     } else {
                         null
                     }
+                } catch (e: Exception) {
+                    null
                 }
-
-                _profileImageCacheComment.value = _profileImageCacheComment.value?.toMutableMap()?.apply {
-                    put(userId, response)
-                } ?: mutableMapOf(userId to response)
-
-            } catch (e: Exception) {
-                Log.e("CommentViewModel", "Error fetching profile image", e)
-                _profileImageCacheComment.value = _profileImageCacheComment.value?.toMutableMap()?.apply {
-                    put(userId, null)
-                } ?: mutableMapOf(userId to null)
-            } finally {
-                _loadingStateComment.value = _loadingStateComment.value?.toMutableMap()?.apply {
-                    put(userId, false)
-                } ?: mutableMapOf(userId to false)
             }
+
+            if (response != null) {
+                imageCache[comment.profilePicture!!] = response
+            }
+
+            onImageLoaded(response)
         }
     }
 
@@ -189,8 +151,6 @@ class CommentViewModel : ViewModel() {
                         Log.d("CommentViewModel", "Fetched and added ${newComments.size} new comments")
 
                         // Fetch user profiles for the new comments
-                        val newOwnerIds = newComments.map { it.ownerId!! }.distinct()
-                        fetchUserProfiles(newOwnerIds)
 
                         // Check if this is the last page
                         if (newComments.isEmpty()) {

@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,14 +24,24 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
-import com.chattingapp.foodrecipeuidemo.entity.UserProfile
+import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 
 @Composable
-fun CommentItem(comment: CommentProjection, userProfile: UserProfile?, profileImage: Bitmap?) {
+fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
     var expanded by remember { mutableStateOf(false) }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(comment.id) {
+        viewModel.fetchImage(comment) {
+            bitmap = it
+            isLoading = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -39,8 +50,8 @@ fun CommentItem(comment: CommentProjection, userProfile: UserProfile?, profileIm
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (userProfile != null) {
-            profileImage?.let {
+        if (!isLoading) {
+            bitmap?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
                     contentDescription = "Profile Image",
@@ -49,7 +60,7 @@ fun CommentItem(comment: CommentProjection, userProfile: UserProfile?, profileIm
                         .clip(CircleShape)
                 )
             } ?: CircularProgressIndicator()
-            Text(text = userProfile.username, fontWeight = FontWeight.Bold)
+            Text(text = comment.username!!, fontWeight = FontWeight.Bold)
         } else {
             CircularProgressIndicator()
         }

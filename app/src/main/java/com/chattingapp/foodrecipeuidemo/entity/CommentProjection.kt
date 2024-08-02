@@ -11,7 +11,12 @@ class CommentProjection(
 
     val comment: String? = null,
 
-    val dateCreated: String? = null
-) {
+    val dateCreated: String? = null,
+
+    val username: String? = null,
+
+    val profilePicture: String? = null
+
+    ) {
 
 }
