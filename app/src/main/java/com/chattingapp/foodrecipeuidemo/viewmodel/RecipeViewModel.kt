@@ -2,7 +2,6 @@ package com.chattingapp.foodrecipeuidemo.viewmodel
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.compose.runtime.State
@@ -159,6 +158,8 @@ class RecipeViewModel : ViewModel() {
     // // CREATE RECIPE VIEW MODEL PART
     // //
     //
+    var nullExceptionSave = false
+    var nullExceptionDraft = false
 
     fun createRecipe(
         name: String,
@@ -169,7 +170,7 @@ class RecipeViewModel : ViewModel() {
         prepTime: String,
         ingredients: String,
         instructions: String,
-        imageUri: Uri?,
+        imageUri: String,
         ownerId: Long,
         type: Boolean
     ) {
@@ -184,13 +185,13 @@ class RecipeViewModel : ViewModel() {
             val prepTimePart = prepTime.toRequestBody("text/plain".toMediaTypeOrNull())
             val ingredientsPart = ingredients.toRequestBody("text/plain".toMediaTypeOrNull())
             val instructionsPart = instructions.toRequestBody("text/plain".toMediaTypeOrNull())
-            val imageUriPart = imageUri.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val imageUriPart = imageUri.toRequestBody("text/plain".toMediaTypeOrNull())
             val ownerIdPart = ownerId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val typePart = type.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
             // Convert the imageUri to a MultipartBody.Part
             val imageFile = imageUri?.let {
-                val file = File(it.path)
+                val file = File(it)
                 MultipartBody.Part.createFormData("file", file.name, file.asRequestBody("image/jpeg".toMediaTypeOrNull()))
             }
 
@@ -216,25 +217,29 @@ class RecipeViewModel : ViewModel() {
                 ) {
                     Log.d("OnResponseContent", "${call}\n" + "$response")
 
-                    if (response.isSuccessful) {
-
+                    if (response.body() == null) {
+                        Log.d("Save NULL Response", "Response is null, please check conditions")
+                        nullExceptionSave = true
+                    } else if (response.isSuccessful) {
                         Log.d("com.chattingapp.foodrecipeuidemo.composables.search.Recipe Created, HTTP: " + response.code(), response.body().toString())
+                        nullExceptionSave = false
                     } else {
                         Log.d("onResponse Fail", "Response Unsuccessful!")
+                        nullExceptionSave = false
                     }
                 }
 
                 override fun onFailure(call: Call<Recipe>, t: Throwable) {
                     Log.d("OnResponseContent", "${call}\n" + "$t")
-
                     Log.d("onFailure", "Fail to call the API function")
+                    nullExceptionSave = false
                 }
             })
         }
     }
 
     fun saveRecipeAsDraft(
-        name: String,
+        name: String?,
         description: String,
         cuisine: String,
         course: String,
@@ -242,7 +247,7 @@ class RecipeViewModel : ViewModel() {
         prepTime: String,
         ingredients: String,
         instructions: String,
-        imageUri: Uri?,
+        imageUri: String?,
         ownerId: Long,
         type: Boolean,
         isImgChanged: Boolean
@@ -250,7 +255,7 @@ class RecipeViewModel : ViewModel() {
 
         viewModelScope.launch {
             // Convert parameters to RequestBody
-            val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
+            val namePart = name?.toRequestBody("text/plain".toMediaTypeOrNull())
             val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
             val cuisinePart = cuisine.toRequestBody("text/plain".toMediaTypeOrNull())
             val coursePart = course.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -258,53 +263,60 @@ class RecipeViewModel : ViewModel() {
             val prepTimePart = prepTime.toRequestBody("text/plain".toMediaTypeOrNull())
             val ingredientsPart = ingredients.toRequestBody("text/plain".toMediaTypeOrNull())
             val instructionsPart = instructions.toRequestBody("text/plain".toMediaTypeOrNull())
-            val imageUriPart = imageUri.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val imageUriPart = imageUri?.toRequestBody("text/plain".toMediaTypeOrNull())
             val ownerIdPart = ownerId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val typePart = type.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val isImgChangedPart = isImgChanged.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
             // Convert the imageUri to a MultipartBody.Part
             val imageFile = imageUri?.let {
-                val file = File(it.path)
+                val file = File(it)
                 MultipartBody.Part.createFormData("file", file.name, file.asRequestBody("image/jpeg".toMediaTypeOrNull()))
             }
 
             // Call the API
-            apiService.saveRecipeAsDraft(
-                file = imageFile!!,
-                name = namePart,
-                description = descriptionPart,
-                cuisine = cuisinePart,
-                course = coursePart,
-                diet = dietPart,
-                prepTime = prepTimePart,
-                ingredients = ingredientsPart,
-                instructions = instructionsPart,
-                image = imageUriPart,
-                ownerId = ownerIdPart,
-                type = typePart,
-                isImgChanged = isImgChangedPart
-            ).enqueue(object : Callback<Recipe> {
-                override fun onResponse(
-                    call: Call<Recipe>,
-                    response: Response<Recipe>
-                ) {
-                    Log.d("OnResponseContent", "${call}\n" + "$response")
+            if (namePart != null && imageUriPart != null) {
+                apiService.saveRecipeAsDraft(
+                    file = imageFile,
+                    name = namePart,
+                    description = descriptionPart,
+                    cuisine = cuisinePart,
+                    course = coursePart,
+                    diet = dietPart,
+                    prepTime = prepTimePart,
+                    ingredients = ingredientsPart,
+                    instructions = instructionsPart,
+                    image = imageUriPart,
+                    ownerId = ownerIdPart,
+                    type = typePart,
+                    isImgChanged = isImgChangedPart
+                ).enqueue(object : Callback<Recipe> {
+                    override fun onResponse(
+                        call: Call<Recipe>,
+                        response: Response<Recipe>
+                    ) {
+                        Log.d("OnResponseContent", "${call}\n" + "$response")
 
-                    if (response.isSuccessful) {
-                        Log.d("Draft com.chattingapp.foodrecipeuidemo.composables.search.Recipe, HTTP: ", response.code().toString())
-                    } else {
-                        Log.d("onResponse Fail", "Response Unsuccessful!")
+                        if (response.body() == null) {
+                            Log.d("Draft NULL Response", "Response is null, please check conditions")
+                            nullExceptionDraft = true
+                        } else if (response.isSuccessful) {
+                            Log.d("Draft com.chattingapp.foodrecipeuidemo.composables.search.Recipe, HTTP: ", response.code().toString())
+                            nullExceptionDraft = false
+                        } else {
+                            Log.d("onResponse Fail", "Response Unsuccessful!")
+                            nullExceptionDraft = false
+                        }
                     }
-                }
 
-                override fun onFailure(call: Call<Recipe>, t: Throwable) {
-                    Log.d("OnResponseContent", "${call}\n" + "$t")
+                    override fun onFailure(call: Call<Recipe>, t: Throwable) {
+                        Log.d("OnResponseContent", "${call}\n" + "$t")
+                        Log.d("onFailure", "Fail to call the API function\n$t \n$call")
+                        nullExceptionDraft = false
+                    }
 
-                    Log.d("onFailure", "Fail to call the API function\n$t \n$call")
-                }
-
-            })
+                })
+            }
         }
     }
 

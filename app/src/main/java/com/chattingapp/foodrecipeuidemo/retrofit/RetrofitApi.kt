@@ -114,7 +114,7 @@ interface RetrofitAPICredentials {
     @Multipart
     @POST("create-recipe/create-draft")
     fun saveRecipeAsDraft(
-        @Part file: MultipartBody.Part,
+        @Part file: MultipartBody.Part?,
         @Part("name") name: RequestBody,
         @Part("description") description: RequestBody,
         @Part("cuisine") cuisine: RequestBody,

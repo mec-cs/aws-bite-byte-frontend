@@ -18,4 +18,5 @@ object Constant {
     var isSearchScreen = false
     var isCardScreen = false
     const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"
+    const val NULL_EXCEPTION_ERROR = "Invalid request, please fill crucial parts!"
 }
