@@ -22,7 +22,6 @@ import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ProfileScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
-import com.chattingapp.foodrecipeuidemo.composables.popup.FollowsPage
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -102,7 +101,7 @@ class HomePageActivity : ComponentActivity() {
                                 Constant.isSearchScreen = false
                                 Constant.targetUserProfile = null
                                 val recipeViewModel = RecipeViewModel()
-                                CreateRecipeScreen(navController, recipeViewModel)
+                                CreateRecipeScreen(navController)
                             }
                             composable("feed") {
                                 Constant.isCardScreen = false

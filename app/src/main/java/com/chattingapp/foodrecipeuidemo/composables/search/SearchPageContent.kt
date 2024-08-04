@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,13 +19,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,14 +42,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.activitiy.ui.theme.Purple40
+import com.chattingapp.foodrecipeuidemo.activitiy.ui.theme.PurpleGrey40
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
@@ -69,32 +86,41 @@ fun SearchPageCall(navController: NavController) {
     val scope = rememberCoroutineScope()
     var searchJob by remember { mutableStateOf<Job?>(null) }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
-        SearchBar(searchText, isRecipeSelected) { newText ->
-            searchText = newText
-            val trimmedText = newText.text.trim()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
 
-            searchJob?.cancel() // Cancel the previous job if any
-            searchJob = scope.launch {
-                delay(500) // Debounce time in milliseconds
-                if (trimmedText.isNotEmpty()) {
-                    Log.d("SearchPageCall", "Search box value: $trimmedText")
-                    if (isRecipeSelected) {
-                        searchRecipes(trimmedText, { recipes = it }, { isRecipeImageRendered = it })
+        SearchBar(
+            searchText = searchText,
+            isRecipeSelected = isRecipeSelected,
+            onTextChange = { newText ->
+                searchText = newText
+                val trimmedText = newText.text.trim()
+
+                searchJob?.cancel() // Cancel the previous job if any
+                searchJob = scope.launch {
+                    delay(500)
+                    if (trimmedText.isNotEmpty()) {
+                        // Log.d("SearchPageCall", "Search box value: $trimmedText")
+                        if (isRecipeSelected) {
+                            searchRecipes(trimmedText, { recipes = it }, { isRecipeImageRendered = it })
+                        } else {
+                            searchUsers(trimmedText, { userProfiles = it }, { isImageRendered = it })
+                        }
                     } else {
-                        searchUsers(trimmedText, { userProfiles = it }, { isImageRendered = it })
+
+                        recipes = listOf()
+                        userProfiles = listOf()
+                        isRecipeImageRendered = false
+                        isImageRendered = false
                     }
-                } else {
-                    // Clear results if searchText is empty
-                    recipes = listOf()
-                    userProfiles = listOf()
-                    isRecipeImageRendered = false
-                    isImageRendered = false
                 }
-            }
-        }
+            },
+            hint = if (isRecipeSelected) "Search for recipes..." else "Search for users..."
+        )
+
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -114,23 +140,78 @@ fun SearchPageCall(navController: NavController) {
 }
 
 @Composable
-fun SearchBar(searchText: TextFieldValue, isRecipeSelected: Boolean, onTextChange: (TextFieldValue) -> Unit) {
+fun SearchBar(
+    searchText: TextFieldValue,
+    isRecipeSelected: Boolean,
+    onTextChange: (TextFieldValue) -> Unit,
+    modifier: Modifier = Modifier,
+    hint: String = "Search..."
+) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicTextField(
-            value = searchText,
-            onValueChange = onTextChange,
+        Surface(
             modifier = Modifier
                 .weight(1f)
-                .height(56.dp)
-                .padding(8.dp)
-                .background(Color.Gray.copy(alpha = 0.1f))
-        )
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp
+        ) {
+            BasicTextField(
+                value = searchText,
+                onValueChange = onTextChange,
+                decorationBox = { innerTextField ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp)
+                        ) {
+                            if (searchText.text.isEmpty()) {
+                                Text(
+                                    text = hint,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                        if (searchText.text.isNotEmpty()) {
+                            IconButton(onClick = { onTextChange(TextFieldValue("")) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "Clear Icon",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+                },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
         if (isRecipeSelected) {
-            IconButton(onClick = { /* Handle filter click */ }) {
-                Icon(painter = painterResource(id = R.drawable.ic_filter), contentDescription = "Filter")
+            IconButton(
+                onClick = { /* Handle filter click */ },
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_filter),
+                    contentDescription = "Filter",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
@@ -138,13 +219,55 @@ fun SearchBar(searchText: TextFieldValue, isRecipeSelected: Boolean, onTextChang
 
 @Composable
 fun ToggleView(isRecipeSelected: Boolean, onSelectionChange: (Boolean) -> Unit) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        Button(onClick = { onSelectionChange(true) }, colors = ButtonDefaults.buttonColors(backgroundColor = if (isRecipeSelected) Color.Gray else Color.LightGray)) {
-            Text("Recipes")
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { onSelectionChange(false) }, colors = ButtonDefaults.buttonColors(backgroundColor = if (isRecipeSelected) Color.LightGray else Color.Gray)) {
-            Text("Users")
+    val activeColor = Purple40
+    val inactiveColor = PurpleGrey40
+
+    Box(
+        modifier = Modifier
+            .width(180.dp)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(65))
+            .background(inactiveColor)
+            .clickable {
+                onSelectionChange(!isRecipeSelected)
+            }
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(65))
+                .background(if (isRecipeSelected) activeColor else inactiveColor)
+                .fillMaxWidth()
+                .clickable {
+                    onSelectionChange(!isRecipeSelected)
+                }
+                .padding(vertical = 4.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Recipe",
+                color = if (isRecipeSelected) Color.White else Color.Black,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (!isRecipeSelected) onSelectionChange(true)
+                    }
+                    .padding(8.dp),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "User",
+                color = if (isRecipeSelected) Color.Black else Color.White,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        if (isRecipeSelected) onSelectionChange(false)
+                    }
+                    .padding(8.dp),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -197,47 +320,100 @@ fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean, nav
 
 @Composable
 fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean, onClick: (Long) -> Unit) {
-    Row(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(10.dp)
             .clickable { onClick(recipe.id!!) },
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Text(recipe.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
-        Text(recipe.name!!, fontSize = 20.sp, modifier = Modifier.weight(1f))
-        if (isRecipeImgRendered) {
-            recipe.bm?.let {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isRecipeImgRendered && recipe.bm != null) {
                 Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = null,
+                    bitmap = recipe.bm!!.asImageBitmap(),
+                    contentDescription = "Recipe Image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(50.dp)
+                        .clip(CircleShape)
                 )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = recipe.name!!,
+                    style = TextStyle(
+                        color = Color(0xFF2b2b2b),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                )
+                Text(
+                    text = "Recipe ID: ${recipe.id}",
+                    style = TextStyle(
+                        color = Color(0xFF666666),
+                        fontSize = 14.sp
+                    )
+                )
+            }
+            IconButton(onClick = { /* Handle drop-down icon click */ }) {
+                Icon(imageVector = Icons.Outlined.ArrowDropDown, contentDescription = "Drop Down")
             }
         }
     }
 }
 
+
 @Composable
 fun UserProfileItem(userProfile: UserProfile, isImgRendered: Boolean, onClick: (Long) -> Unit) {
-    Row(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(10.dp)
             .clickable { onClick(userProfile.id) },
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
-        Text(userProfile.id.toString(), fontSize = 20.sp, modifier = Modifier.width(32.dp))
-        Text(userProfile.username, fontSize = 20.sp, modifier = Modifier.weight(1f))
-        if (isImgRendered) {
-            userProfile.bm?.let {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isImgRendered && userProfile.bm != null) {
                 Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = null, // Provide a content description if needed
+                    bitmap = userProfile.bm!!.asImageBitmap(),
+                    contentDescription = "User Image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(50.dp)
+                        .clip(CircleShape)
                 )
+            }
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = userProfile.username,
+                    style = TextStyle(
+                        color = Color(0xFF2b2b2b),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                )
+//                Text(text = "Subtitle for ${userProfile.username}", style = MaterialTheme.typography.bodySmall) // Adjust subtitle as needed
+            }
+            IconButton(onClick = { /* Handle phone icon click */ }) {
+                Icon(imageVector = Icons.Outlined.ArrowDropDown, contentDescription = "Drop Down")
             }
         }
     }
@@ -335,3 +511,11 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
             }
         })
 }
+
+
+@Preview
+@Composable
+fun displaySearchPage() {
+    SearchPageCall(navController = rememberNavController())
+}
+

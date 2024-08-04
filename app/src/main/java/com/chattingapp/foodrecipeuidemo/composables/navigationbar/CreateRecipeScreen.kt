@@ -50,17 +50,25 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.entity.Recipe
+import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper.apiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewModel) {
+fun CreateRecipeScreen(navController: NavHostController) {
     var recipeName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var cuisine by remember { mutableStateOf("") }
@@ -72,8 +80,7 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageFile by remember { mutableStateOf<File?>(null) }
     var showDialog by remember { mutableStateOf(false) }
-    var nullDraft by remember { mutableStateOf(viewModel.nullExceptionDraft) }
-    var nullSave by remember { mutableStateOf(viewModel.nullExceptionSave) }
+    var nullSave by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -92,6 +99,63 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
             copyUriToFile(it, navController.context.contentResolver) { file ->
                 selectedImageFile = file
             }
+        }
+    }
+
+    // Function to create recipe
+    fun createRecipe() {
+        coroutineScope.launch {
+            val namePart = recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
+            val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
+            val cuisinePart = cuisine.toRequestBody("text/plain".toMediaTypeOrNull())
+            val coursePart = course.toRequestBody("text/plain".toMediaTypeOrNull())
+            val dietPart = diet.toRequestBody("text/plain".toMediaTypeOrNull())
+            val prepTimePart = prepTime.toRequestBody("text/plain".toMediaTypeOrNull())
+            val ingredientsPart = ingredients.toRequestBody("text/plain".toMediaTypeOrNull())
+            val instructionsPart = instructions.toRequestBody("text/plain".toMediaTypeOrNull())
+            val imageUriPart = selectedImageFile?.name?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val ownerIdPart = Constant.userProfile.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
+            val typePart = "true".toRequestBody("text/plain".toMediaTypeOrNull())
+
+            val imageFile = selectedImageFile?.let {
+                MultipartBody.Part.createFormData("file", it.name, it.asRequestBody("image/jpeg".toMediaTypeOrNull()))
+            }
+
+            val apiService = // Initialize your API service here
+
+                apiService.createTheRecipe(
+                    file = imageFile!!,
+                    name = namePart,
+                    description = descriptionPart,
+                    cuisine = cuisinePart,
+                    course = coursePart,
+                    diet = dietPart,
+                    prepTime = prepTimePart,
+                    ingredients = ingredientsPart,
+                    instructions = instructionsPart,
+                    image = imageUriPart!!,
+                    ownerId = ownerIdPart,
+                    type = typePart
+                ).enqueue(object : Callback<Recipe> {
+                    override fun onResponse(call: Call<Recipe>, response: Response<Recipe>) {
+                        if (response.body() == null) {
+                            Log.d("Save NULL Response", "Response is null, please check conditions")
+                            nullSave = true
+                        } else if (response.isSuccessful) {
+                            Log.d("Recipe Created, HTTP: " + response.code(), response.body().toString())
+                            nullSave = false
+                            showSuccessMessage("Your recipe successfully created!")
+                        } else {
+                            Log.d("onResponse Fail", "Response Unsuccessful!")
+                            nullSave = false
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Recipe>, t: Throwable) {
+                        Log.d("onFailure", "Fail to call the API function")
+                        nullSave = false
+                    }
+                })
         }
     }
 
@@ -301,55 +365,15 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
                     } else if (nullSave) {
                         nullSave = true
                     } else {
-                        viewModel.createRecipe(
-                            name = recipeName.trim(),
-                            description = description.trim(),
-                            cuisine = cuisine.trim(),
-                            course = course.trim(),
-                            diet = diet.trim(),
-                            prepTime = prepTime.trim(),
-                            ingredients = ingredients.trim(),
-                            instructions = instructions.trim(),
-                            imageUri = selectedImageFile?.name!!,
-                            ownerId = Constant.userProfile.id,
-                            type = true
-                        )
+                        createRecipe()
                         showSuccessMessage("Your recipe successfully created!")
                     }
                 }) {
                     Text("Publish")
                 }
-
-                Button(onClick = {
-                    if (recipeName.isEmpty() || description.isEmpty() || cuisine.isEmpty() || course.isEmpty() ||
-                        diet.isEmpty() || prepTime.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()
-                    ) {
-                        showDialog = true
-                    } else if (nullDraft) {
-                        nullDraft = true
-                    } else {
-                        viewModel.saveRecipeAsDraft(
-                            name = recipeName.trim(),
-                            description = description.trim(),
-                            cuisine = cuisine.trim(),
-                            course = course.trim(),
-                            diet = diet.trim(),
-                            prepTime = prepTime.trim(),
-                            ingredients = ingredients.trim(),
-                            instructions = instructions.trim(),
-                            imageUri = selectedImageFile?.name,
-                            ownerId = Constant.userProfile.id,
-                            type = false,
-                            isImgChanged = imageUri != null
-                        )
-                        showSuccessMessage("Recipe successfully saved as draft")
-                    }
-                }) {
-                    Text("Save As Draft")
-                }
             }
 
-            Log.d("NULL TF", "SaveDraft=$nullDraft\nSaveDraft=$nullSave")
+            Log.d("NULL TF", "SaveRecipe=$nullSave")
 
             if (showDialog) {
                 ShowAlertDialog(
@@ -359,15 +383,12 @@ fun CreateRecipeScreen(navController: NavHostController, viewModel: RecipeViewMo
                 )
             }
 
-            if (nullSave || nullDraft) {
+            if (nullSave) {
                 ShowAlertDialog(
                     title = "Null Error",
                     message = Constant.NULL_EXCEPTION_ERROR,
                     onConfirm = {
-                        if (nullSave)
-                            nullSave = false
-                        if (nullDraft)
-                            nullDraft = false
+                        nullSave = false
                     }
                 )
             }
