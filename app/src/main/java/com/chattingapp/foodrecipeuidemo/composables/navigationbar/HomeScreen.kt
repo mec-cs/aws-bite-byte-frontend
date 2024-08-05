@@ -25,6 +25,7 @@ fun HomeScreen(navController: NavController) {
         composable("cardlist") { backStackEntry ->
             CardsList(navControllerCategory)
         }
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.retrofit
 
+import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ResetPasswordRequest
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.Comment
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
@@ -59,7 +60,8 @@ interface RetrofitAPICredentials {
     @GET("/profile-api/user/{id}/followers-followings/count")
     fun getFollowersCount(@Path("id") id: Long): Call<FollowCountsDTO>
 
-
+    @POST("user/resetPassword")
+    fun resetPassword(@Body request: ResetPasswordRequest): Call<Boolean>
     // SEARCH API
     @POST("search-profile/search")
     fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
