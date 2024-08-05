@@ -34,11 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -48,7 +46,7 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
 
     val comments by commentViewModel.comments.observeAsState(emptyList())
 
-
+    Constant.deletedCommentCount = 0
     val userProfiles by commentViewModel.userProfilesComment.observeAsState(emptyList())
     val profileImageCache by commentViewModel.profileImageCacheComment.observeAsState(emptyMap())
 
@@ -136,7 +134,8 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
 
                                             commentViewModel.addComment(
                                                 recipeId = Constant.recipeDetailProjection!!.id!!,
-                                                commentText = textState.text.trim())
+                                                commentText = textState.text.trim()
+                                            )
 
                                             textState = TextFieldValue() // Clear text field
 
@@ -167,7 +166,13 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
             LaunchedEffect(listState) {
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
                     .collect { lastVisibleItem ->
+                        Log.d("commentCount", commentCount.toString())
+                        Log.d("comments", comments.size.toString())
                         if (lastVisibleItem != null && lastVisibleItem.index >= comments.size - 1 && commentCount > comments.size) {
+                            if(Constant.deletedCommentCount > 0){
+                                commentViewModel.currentPage -= (Constant.deletedCommentCount / Constant.PAGE_SIZE_CLICK_LIKE + 1)
+                                Constant.deletedCommentCount = 0
+                            }
                             commentViewModel.fetchMoreComments(Constant.recipeDetailProjection?.id!!)
                             Log.d("FETCH COMMENT", "RECIPE COMMENT CONTENT")
                             delay(1000)

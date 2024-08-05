@@ -5,11 +5,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +69,44 @@ fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
                         .clip(CircleShape)
                 )
             } ?: CircularProgressIndicator()
+            var expandedMenu by remember { mutableStateOf(false) }
+
+
             Text(text = comment.username!!, fontWeight = FontWeight.Bold)
+            if(comment.ownerId == Constant.userProfile.id){
+                Row {
+                    IconButton(onClick = { expandedMenu = !expandedMenu }) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp) // Space between dots
+                        ) {
+                            repeat(3) {
+                                Surface(
+                                    modifier = Modifier.size(4.dp),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ) {}
+                            }
+                        }
+                    }
+
+                    DropdownMenu(
+                        expanded = expandedMenu,
+                        onDismissRequest = { expandedMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete Comment") },
+                            onClick = {
+                                // Handle the delete action here
+                                Constant.deletedCommentCount +=1
+                                viewModel.deleteComment(comment.id!!)
+
+                                expandedMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
         } else {
             CircularProgressIndicator()
         }

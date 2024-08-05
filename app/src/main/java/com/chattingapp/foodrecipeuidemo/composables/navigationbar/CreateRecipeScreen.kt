@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -113,6 +116,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
             val ownerIdPart = Constant.userProfile.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val typePart = "true".toRequestBody("text/plain".toMediaTypeOrNull())
 
+
             val imageFile = selectedImageFile?.let {
                 MultipartBody.Part.createFormData("file", it.name, it.asRequestBody("image/jpeg".toMediaTypeOrNull()))
             }
@@ -161,6 +165,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(12.dp)
+                .imePadding()
         ) {
 
             item {
@@ -300,14 +305,25 @@ fun CreateRecipeScreen(navController: NavHostController) {
             }
 
             item {
+                val keyboardController = LocalSoftwareKeyboardController.current
+
                 OutlinedTextField(
                     value = instructions,
                     onValueChange = { instructions = it },
                     label = { Text("Recipe Instructions") },
-                    placeholder = { Text("Enter instructions in a detail") },
+                    placeholder = { Text("Enter instructions in detail") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp)
+                        .imePadding(), // Adjust padding for keyboard
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            keyboardController?.hide() // Hide the keyboard when done
+                        }
+                    )
                 )
             }
 
@@ -349,9 +365,3 @@ fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (Fil
     onFileCopied(file)
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview
-@Composable
-fun displayCreateRecipePage() {
-    CreateRecipeScreen(navController = rememberNavController())
-}

@@ -135,6 +135,7 @@ class CommentViewModel : ViewModel() {
         })
     }
 
+
     fun fetchMoreComments(recipeId: Long) {
         if (isLastPage || isLoading) {
             Log.d("CommentViewModel", "Skipping fetchMoreComments: isLastPage=$isLastPage")
@@ -149,19 +150,19 @@ class CommentViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     response.body()?.let { newComments ->
                         val currentComments = _comments.value ?: emptyList()
-                        _comments.postValue(currentComments + newComments)
-                        Log.d("CommentViewModel", "Fetched and added ${newComments.size} new comments")
+                        val existingIds = currentComments.map { it.id }.toSet()
+                        val filteredComments = newComments.filter { it.id !in existingIds }
 
-                        // Fetch user profiles for the new comments
+                        _comments.postValue(currentComments + filteredComments)
+                        Log.d("CommentViewModel", "Fetched and added ${filteredComments.size} new comments")
 
-                        // Check if this is the last page
-                        if (newComments.isEmpty()) {
-                            isLastPage = true
+                       /* if (filteredComments.isEmpty()) {
+                            //isLastPage = true
                             Log.d("CommentViewModel", "This is the last page")
-                        } else {
+                        } else {*/
                             currentPage++
                             Log.d("CommentViewModel", "Current page updated to $currentPage")
-                        }
+                        //}
                     }
                 }
             } catch (e: Exception) {
@@ -169,6 +170,7 @@ class CommentViewModel : ViewModel() {
             }
         }
     }
+
 
 
 
@@ -222,6 +224,41 @@ class CommentViewModel : ViewModel() {
     }
 
 
+    fun deleteComment(commentId: Long) {
+        Log.d("CommentViewModel", "Attempting to delete comment with id: $commentId")
+
+        viewModelScope.launch {
+            try {
+                RetrofitHelper.apiService.deleteComment(commentId).enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        Log.d("CommentViewModel", "API call made to delete comment: ${response.raw()}")
+                        if (response.isSuccessful) {
+                            Log.d("CommentViewModel", "Successfully deleted comment with id: $commentId")
+
+                            // Update the comment list after deletion
+                            val updatedComments = _comments.value?.filter { it.id != commentId } ?: mutableListOf()
+                            _comments.value = updatedComments
+
+                            Log.d("CommentViewModel", "Updated comments after deletion: $updatedComments")
+
+                            // Optionally update comment count
+                            val currentCount = _commentCount.value ?: 0
+                            _commentCount.value = (currentCount - 1).coerceAtLeast(0) // Ensure count doesn't go below 0
+                            Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
+                        } else {
+                            Log.e("CommentViewModel", "Failed to delete comment: ${response.errorBody()?.string()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e("CommentViewModel", "Exception occurred while deleting comment", t)
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("CommentViewModel", "Exception occurred while deleting comment", e)
+            }
+        }
+    }
 
 
     fun resetState() {

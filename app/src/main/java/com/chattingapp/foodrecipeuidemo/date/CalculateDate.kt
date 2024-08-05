@@ -21,11 +21,9 @@ object CalculateDate {
         }
 
         val now = Date()
-        Log.d("TIME CALCULATOR", "Parsed Date: $dateTime")
-        Log.d("TIME CALCULATOR", "Current Date: $now")
+
 
         val durationMillis = now.time - dateTime.time
-        Log.d("TIME CALCULATOR", "Duration in millis: $durationMillis")
 
         val durationSeconds = durationMillis / 1000
         val durationMinutes = durationSeconds / 60

@@ -211,4 +211,7 @@ interface RetrofitAPICredentials {
 
     @POST("comment/save-comment")
     fun addComment(@Body comment: Comment): Call<Comment>
+
+    @DELETE("comment/delete/{id}")
+    fun deleteComment(@Path("id") id: Long): Call<Void>
 }
