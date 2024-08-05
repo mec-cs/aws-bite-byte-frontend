@@ -92,7 +92,7 @@ fun RecipeDetailsToggle(recipeViewModel: RecipeViewModel){
                     RecipeDetail(fieldName = "Diet", detail = recipe!!.diet)
                 }
                 item {
-                    RecipeDetail(fieldName = "Prep Time", detail = recipe!!.prepTime)
+                    RecipeDetail(fieldName = "Prep Time in Minutes", detail = recipe!!.prepTime)
                 }
                 item {
                     RecipeDetail(fieldName = "Ingredients", detail = recipe!!.ingredients)

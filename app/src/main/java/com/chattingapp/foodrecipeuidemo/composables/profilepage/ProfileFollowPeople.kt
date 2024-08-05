@@ -53,9 +53,9 @@ fun ProfileFollowPeople(
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var username by remember { mutableStateOf<String?>("") }
     var isLoading by remember { mutableStateOf(true) }
-    var isFollowing by remember { mutableStateOf(true) }
     var isRemoved by remember { mutableStateOf(false) }
     val profileCountsViewModel = FollowCountsViewModel()
+
 
     if(selectedTab == "Followers"){
         LaunchedEffect(user.follower.profilePicture) {
