@@ -176,9 +176,9 @@ fun FollowsPage(
                     }
 
                     if (isLoadingFollowing) {
-                        CircularProgressIndicator(modifier = Modifier
+                        /*CircularProgressIndicator(modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 16.dp))
+                            .padding(top = 16.dp))*/
                     } else {
                         Column {
                             val profileCountsViewModel = FollowCountsViewModel()

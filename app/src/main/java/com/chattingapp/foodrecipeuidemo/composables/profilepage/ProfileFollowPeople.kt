@@ -53,8 +53,7 @@ fun ProfileFollowPeople(
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var username by remember { mutableStateOf<String?>("") }
     var isLoading by remember { mutableStateOf(true) }
-    var isRemoved by remember { mutableStateOf(false) }
-    val profileCountsViewModel = FollowCountsViewModel()
+
 
 
     if(selectedTab == "Followers"){
@@ -79,7 +78,6 @@ fun ProfileFollowPeople(
             }
         }
     }
-
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -107,7 +105,6 @@ fun ProfileFollowPeople(
                             .clip(RoundedCornerShape(8.dp))
                     )
                 }
-
                 Text(
                     text = username!!,
                     fontSize = 18.sp,
@@ -115,94 +112,6 @@ fun ProfileFollowPeople(
                         .weight(1f)
                         .padding(start = 8.dp, end = 8.dp)
                 )
-                if(selectedTab == "Followers") {
-                    if (Constant.userProfile.id == user.id.followedId) {
-                        Button(
-                            onClick = {
-                                profileCountsViewModel.unfollowUser(
-                                    user.id.followerId,
-                                    user.id.followedId
-                                )
-                                isRemoved = true
-                            },
-                            enabled = !isRemoved,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRemoved) Color(0xFFE0E0E0) else Color(
-                                    0xFF007BFF
-                                ), // Light gray for disabled, blue for active
-                                contentColor = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
-                            ),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(4.dp) // Padding to give some spacing around the button
-                        ) {
-                            Text(
-                                text = if (isRemoved) "User Removed" else "Remove user",
-                                color = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
-                            )
-                        }
-                    }
-                }
-                else{
-                    if(user.follower.id == Constant.userProfile.id) {
-                        /*Button(
-                            onClick = {
-                                if (isFollowing) {
-                                    viewModel?.unfollowUser(Constant.userProfile.id, user.id.followedId)
-                                } else {
-                                    viewModel?.followUser(Constant.userProfile.id, user.id.followedId)
-                                }
-                                isFollowing = !isFollowing
-
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isFollowing) Color.Black else Color.White,
-                                contentColor = if (isFollowing) Color.White else Color.Black
-                            ),
-                            shape = RoundedCornerShape(8.dp),
-                            border = if (isFollowing) null else BorderStroke(1.dp, Color.Black),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(4.dp)
-                        ) {
-                            Text(
-                                text = if (isFollowing) "Unfollow" else "Follow",
-                                style = TextStyle(
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                        }*/
-                        val scope = rememberCoroutineScope() // Create a coroutine scope
-                        var buttonEnabled by remember { mutableStateOf(true) } // Track button clickability
-
-                        Button(
-                            onClick = {
-                                profileCountsViewModel.unfollowUser(
-                                    user.id.followerId,
-                                    user.id.followedId
-                                )
-                                isRemoved = true
-                            },
-                            enabled = !isRemoved,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRemoved) Color(0xFFE0E0E0) else Color(
-                                    0xFF007BFF
-                                ), // Light gray for disabled, blue for active
-                                contentColor = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
-                            ),
-                            modifier = Modifier
-                                .wrapContentWidth()
-                                .padding(4.dp) // Padding to give some spacing around the button
-                        ) {
-                            Text(
-                                text = if (isRemoved) "User Removed" else "Remove user",
-                                color = if (isRemoved) Color(0xFF757575) else Color.White // Darker gray text for disabled, white text for active
-                            )
-                        }
-                    }
-                }
-
             }
         }
     }
