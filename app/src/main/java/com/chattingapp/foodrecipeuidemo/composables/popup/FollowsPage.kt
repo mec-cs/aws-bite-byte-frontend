@@ -42,7 +42,6 @@ import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileFollowPeo
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileButtonStatusViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileFollowerViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileFollowingViewModel
 import kotlinx.coroutines.delay

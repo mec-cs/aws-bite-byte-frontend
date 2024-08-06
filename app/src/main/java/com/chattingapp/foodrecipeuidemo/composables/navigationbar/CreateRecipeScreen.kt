@@ -143,6 +143,18 @@ fun CreateRecipeScreen(navController: NavHostController) {
                         Log.d("Recipe Created, HTTP: " + response.code(), response.body().toString())
                         nullSave = false
                         showSuccessMessage("Your recipe successfully created!")
+
+                        recipeName = ""
+                        description = ""
+                        cuisine = ""
+                        course = ""
+                        diet = ""
+                        prepTime = ""
+                        ingredients = ""
+                        instructions = ""
+                        imageUri = null
+                        selectedImageFile = null
+
                     } else {
                         Log.d("onResponse Fail", "Response Unsuccessful!")
                         nullSave = false
@@ -342,7 +354,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
                                 showSuccessMessage("Please fill out all fields.")
                             }
                         },
-                        modifier = Modifier.width(150.dp)
+                        modifier = Modifier.width(150.dp).padding(bottom = 400.dp)
                     ) {
                         Text("Create Recipe")
                     }
