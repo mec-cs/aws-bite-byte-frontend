@@ -110,23 +110,20 @@ class ProfileFollowingViewModel: ViewModel() {
                     val newUsers = response.body() ?: emptyList()
                     Log.d("ProfileFollowerViewModel", "Loaded more users: ${newUsers.size}")
                     if (newUsers.isNotEmpty()) {
-                        val currentList = _userList.value.toMutableList()
-                        val existingIds = currentList.map { it.id }.toSet()
-                        val filteredUsers = newUsers.filter { it.id !in existingIds }
-                        if (filteredUsers.isNotEmpty()) {
-                            currentList.addAll(filteredUsers)
-                            _userList.value = currentList
-                            userListDetail = currentList
-                            page += 1
-                        }
+                        // Append new users to the existing list
+                        _userList.value += newUsers
+                        userListDetail = _userList.value // Update detail list
+                        page += 1
                     }
+                } else {
+                    Log.e("ProfileFollowerViewModel", "Failed to load more users: ${response.errorBody()?.string()}")
                 }
             }
 
             override fun onFailure(call: Call<List<UserFollowsResponse>>, t: Throwable) {
                 _isLoading.value = false
                 Log.e("ProfileFollowerViewModel", "Error loading more users", t)
-                page -= 1
+                // Optionally, decrement page number to retry fetching later
             }
         })
     }

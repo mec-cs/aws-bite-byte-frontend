@@ -1,5 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.popup
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,7 @@ fun FollowsPage(
 
             val userProfile: UserProfile = Constant.targetUserProfile ?: Constant.userProfile
 
-            /*LazyRow(
+            LazyRow(
                 horizontalArrangement = Arrangement.Center, // Center items horizontally
                 contentPadding = PaddingValues(horizontal = 16.dp), // Padding around the row
                 modifier = Modifier.fillMaxWidth()
@@ -124,7 +125,7 @@ fun FollowsPage(
                         }
                     )
                 }
-            }*/
+            }
 
             when (selectedTab.value) {
                 "Followers" -> {
@@ -169,6 +170,7 @@ fun FollowsPage(
                 "Followings" -> {
                     // Handle "Followings" tab content here
                     if (isFirstTimeFollowing) {
+                        Log.d("inside", "isFirstTimeFollowing")
                         LaunchedEffect(userProfile.id) {
                             profileFollowingViewModel.fetchUsers(userProfile.id)
                         }
@@ -189,7 +191,7 @@ fun FollowsPage(
                                     .padding(16.dp, 0.dp, 16.dp, 32.dp)
                             ) {
                                 items(userListFollowing) { user ->
-                                    profileFollowingViewModel.userListDetail = userListFollowing
+
 
                                     ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, profileCountsViewModel)
                                 }
@@ -198,7 +200,7 @@ fun FollowsPage(
                             LaunchedEffect(listStateFollowing) {
                                 snapshotFlow { listStateFollowing.layoutInfo.visibleItemsInfo.lastOrNull() }
                                     .collect { lastVisibleItem ->
-                                        if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowingViewModel.userListDetail.size - 1 && userListFollowing.size != followingCount!!.toInt()) {
+                                        if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1 && followingCount!!.toInt() > userListFollowing.size) {
                                             profileFollowingViewModel.loadMoreUser(userProfile.id)
                                             delay(1000)
                                         }

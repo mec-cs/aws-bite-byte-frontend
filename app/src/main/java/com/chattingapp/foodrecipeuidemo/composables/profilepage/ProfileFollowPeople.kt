@@ -58,23 +58,19 @@ fun ProfileFollowPeople(
 
     if(selectedTab == "Followers"){
         LaunchedEffect(user.follower.profilePicture) {
-            Log.d("DisplayRecipe", "Fetching image for user: ${user.id}")
             profileFollowerViewModel.fetchImage(user) {
                 bitmap = it
                 username = user.follower.username
                 isLoading = false
-                Log.d("DisplayRecipe", "Image fetched for user: ${user.id}")
             }
         }
     }
     else{
         LaunchedEffect(user.followed.profilePicture) {
-            Log.d("DisplayRecipe", "Fetching image for user: ${user.id}")
             profileFollowingViewModel.fetchImage(user) {
                 bitmap = it
                 username = user.followed.username
                 isLoading = false
-                Log.d("DisplayRecipe", "Image fetched for user: ${user.id}")
             }
         }
     }
