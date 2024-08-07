@@ -15,14 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.chattingapp.foodrecipeuidemo.composables.ForgotPasswordScreen
 import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategory
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.AppNavigationBar
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.CreateRecipeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ProfileScreen
-import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ResetPasswordScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -125,13 +123,7 @@ class HomePageActivity : ComponentActivity() {
                                 val cardId = backStackEntry.arguments?.getString("cardId")
                                 RecipeCategory(navController, cardId)
                             }
-                            composable("forgotPassword") {
-                                ForgotPasswordScreen(navController)
-                            }
 
-                            composable("resetPassword") {
-                                ResetPasswordScreen(navController)
-                            }
                         }
 
 
