@@ -179,7 +179,7 @@ fun ForgotPassword(navController: NavController) {
                     onClick = {
                         if (userCode.text == serverCode.toString()) {
 
-                            displayToast("correct", context)
+                            //displayToast("correct", context)
                             displayMailSender.value = false
                             displayPasswordChangeScreen.value = true
 
@@ -213,7 +213,7 @@ fun ForgotPassword(navController: NavController) {
             OutlinedTextField(
                 value = password.value,
                 onValueChange = { password.value = it },
-                label = { Text("Password") },
+                label = { Text("New Password") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
@@ -223,7 +223,7 @@ fun ForgotPassword(navController: NavController) {
             OutlinedTextField(
                 value = confirmPassword.value,
                 onValueChange = { confirmPassword.value = it },
-                label = { Text("Confirm Password") },
+                label = { Text("Confirm New Password") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
@@ -289,7 +289,7 @@ fun ForgotPassword(navController: NavController) {
 private fun sendEmail(email:String){
     val apiService = RetrofitHelper.apiService
 
-    apiService.sendVerificationEmail(email).enqueue(object : Callback<Int> {
+    apiService.sendChangePasswordEmail(email).enqueue(object : Callback<Int> {
         override fun onResponse(call: Call<Int>, response: Response<Int>) {
             serverCode = response.body()!!
         }

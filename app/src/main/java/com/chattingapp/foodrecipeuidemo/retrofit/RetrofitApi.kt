@@ -53,6 +53,8 @@ interface RetrofitAPICredentials {
     @GET("email-sender/send-verification-code/")
     fun sendVerificationEmail(@Query("email") email:String) : Call<Int>
 
+    @GET("email-sender/send-change-password-code/")
+    fun sendChangePasswordEmail(@Query("email") email:String) : Call<Int>
 
     // PROFILE API
     @GET("/profile-api/get-user-profile-by-email/")
