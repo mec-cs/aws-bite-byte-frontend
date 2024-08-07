@@ -2,6 +2,7 @@ package com.chattingapp.foodrecipeuidemo.retrofit
 
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ResetPasswordRequest
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
+import com.chattingapp.foodrecipeuidemo.entity.ChangePasswordRequest
 import com.chattingapp.foodrecipeuidemo.entity.Comment
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
@@ -220,4 +221,10 @@ interface RetrofitAPICredentials {
     @Multipart
     @POST("profile-api/change-profile-picture")
     fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long): Call<Void>
+
+    @GET("credentials/exists-by-email/{email}")
+    fun userExistsByEmail(@Path("email") email: String): Call<Boolean>
+
+    @POST("credentials/change-password")
+    fun changePassword(@Body request: ChangePasswordRequest): Call<Boolean>
 }

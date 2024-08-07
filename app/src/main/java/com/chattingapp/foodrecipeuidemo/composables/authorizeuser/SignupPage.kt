@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.chattingapp.foodrecipeuidemo.MainActivity
+import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import org.mindrot.jbcrypt.BCrypt
@@ -97,7 +98,7 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
         if(!email.isBlank() && isEmailValid(email) && !username.isBlank() && !password.isBlank() &&
             !confirmPassword.isBlank() && password.equals(confirmPassword) && !password.contains("$")){
 
-            val userProfileDTO = UserProfileDTO(email, hashPassword(password), username)
+            val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
 
             val apiService = RetrofitHelper.apiService
 
@@ -159,11 +160,11 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
     }
 }
 
-fun hashPassword(password: String): String {
+/*fun hashPassword(password: String): String {
     val salt = BCrypt.gensalt()
     Log.d("HASH: ",BCrypt.hashpw(password, salt))
     return BCrypt.hashpw(password, salt)
-}
+}*/
 
 private fun navigateToMainActivity(context: Context) {
     val intent = Intent(context, MainActivity::class.java)
