@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,10 +16,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
+import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
+import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
+import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -63,7 +71,20 @@ class MainActivity : ComponentActivity() {
                         })
                     }
                     else{
-                        LoginManager()
+                        val navController = rememberNavController()
+
+                        NavHost(
+                            navController = navController,
+                            startDestination = "login"
+                        ) {
+                            composable("login") {
+                                LoginManager(navController)
+
+                            }
+                            composable("forgot my password") {
+                                ForgotPassword(navController)
+                            }
+                        }
                     }
                 }
             }
@@ -82,13 +103,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 @Composable
-fun LoginManager() {
+fun LoginManager(navController: NavController) {
+
+
 
     var showLogin by remember { mutableStateOf(true) }
 
 
     if (showLogin) {
-        LoginPage(onSwitchToSignup = { showLogin = false })
+        LoginPage(onSwitchToSignup = { showLogin = false }, navController)
     } else {
         SignupPage(onSwitchToLogin = { showLogin = true })
     }

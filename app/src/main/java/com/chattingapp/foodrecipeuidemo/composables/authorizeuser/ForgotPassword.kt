@@ -1,7 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.authorizeuser
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chattingapp.foodrecipeuidemo.MainActivity
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.entity.ChangePasswordRequest
@@ -50,7 +49,7 @@ private fun displayToast(msg:String, context: Context){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPassword() {
+fun ForgotPassword(navController: NavController) {
     val email = remember { mutableStateOf("") }
     val isInputEnabled = remember { mutableStateOf(true) }
     val displayPasswordChangeScreen = remember { mutableStateOf(false) }
@@ -63,7 +62,7 @@ fun ForgotPassword() {
             title = { Text(text = "Forgot my password") },
             navigationIcon = {
                 IconButton(onClick = {
-                    navigateToMainActivity(context)
+                    navController.popBackStack("login", false, true)
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
@@ -235,7 +234,7 @@ fun ForgotPassword() {
                 onClick = {
                     isPasswordMatch.value = password.value == confirmPassword.value
                     if(isPasswordMatch.value){
-                        displayToast("pw matches", context)
+                        //displayToast("pw matches", context)
 
 
                         val apiService = RetrofitHelper.apiService
@@ -248,7 +247,7 @@ fun ForgotPassword() {
                                     if (success) {
                                         // Password change successful
                                         displayToast("Password changed successfully.", context)
-                                        navigateToMainActivity(context)
+                                        navController.popBackStack("login", false, true)
                                     } else {
                                         // Password change failed
                                         displayToast("Failed to change password.", context)
@@ -301,10 +300,4 @@ private fun sendEmail(email:String){
 
 
     })
-}
-
-private fun navigateToMainActivity(context: Context) {
-    val intent = Intent(context, MainActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    context.startActivity(intent)
 }

@@ -38,8 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
-import com.chattingapp.foodrecipeuidemo.activitiy.ForgotPasswordActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
@@ -56,7 +56,7 @@ private fun displayToast(msg:String, context: Context){
 }
 
 @Composable
-fun LoginPage(onSwitchToSignup: () -> Unit) {
+fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var rememberMe by remember { mutableStateOf(false) }
@@ -91,7 +91,8 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
 
         TextButton(onClick = {
             // Handle the click event here
-            navigateToForgotPasswordActivity(context)
+            //navigateToForgotPasswordActivity(context)
+            navController.navigate("forgot my password")
         }) {
             Text(text = "Forgot my password")
         }
@@ -196,11 +197,6 @@ private fun navigateToHomePageActivity(context: Context) {
 }
 private fun navigateToEmailActivity(context: Context) {
     val intent = Intent(context, EmailActivity::class.java)
-    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    context.startActivity(intent)
-}
-private fun navigateToForgotPasswordActivity(context: Context) {
-    val intent = Intent(context, ForgotPasswordActivity::class.java)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
 }
