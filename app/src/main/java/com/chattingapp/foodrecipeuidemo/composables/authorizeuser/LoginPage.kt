@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -30,13 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
@@ -115,7 +108,17 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
             authenticationDTO.email = email
             authenticationDTO.password = password
 
+            var token = ""
 
+
+            if (rememberMe) {
+                token = generateToken()
+                Log.d("TOKEN", token)
+
+                authenticationDTO.token = token
+
+
+            }
             val apiService = RetrofitHelper.apiService
 
             apiService.checkLoginCredentials(authenticationDTO).enqueue(object : Callback<User> {
@@ -124,14 +127,8 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
                     if (response.isSuccessful) {
                         if (response.body() != null) {
                             Constant.user = response.body()!!
-                            if (rememberMe) {
-                                val token = generateToken()
-                                Log.d("TOKEN", token)
+                            if(rememberMe){
                                 storeToken(token, context)
-
-                                authenticationDTO.token = token
-
-
                             }
                             // Display or process the response body for successful cases
                             if(response.body()!!.verified)
@@ -140,9 +137,11 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
                                 navigateToEmailActivity(context)
 
                         } else {
+                            deleteToken(context)
                             displayToast("Please check your email or password!", context)
                         }
                     } else {
+                        deleteToken(context)
                         val errorBody = response.errorBody()?.string()
                         displayToast("${response.message()} $errorBody", context)
                     }
@@ -182,7 +181,12 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
 fun generateToken(): String {
     return UUID.randomUUID().toString()
 }
-
+fun deleteToken(context: Context) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.remove("auth_token") // Remove the token
+    editor.apply() // Commit changes
+}
 fun storeToken(token: String, context: Context) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
