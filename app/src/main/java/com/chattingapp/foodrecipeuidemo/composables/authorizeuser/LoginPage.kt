@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -28,10 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
+import com.chattingapp.foodrecipeuidemo.activitiy.ForgotPasswordActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
@@ -60,7 +68,7 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         Text(text = "Login", style = MaterialTheme.typography.h4)
         Spacer(modifier = Modifier.height(16.dp))
@@ -79,6 +87,15 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
         )
+
+
+        TextButton(onClick = {
+            // Handle the click event here
+            navigateToForgotPasswordActivity(context)
+        }) {
+            Text(text = "Forgot my password")
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -96,15 +113,7 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
 
             authenticationDTO.email = email
             authenticationDTO.password = password
-            if (rememberMe) {
-                val token = generateToken()
-                Log.d("TOKEN", token)
-                storeToken(token, context)
 
-                authenticationDTO.token = token
-
-
-            }
 
             val apiService = RetrofitHelper.apiService
 
@@ -114,6 +123,15 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
                     if (response.isSuccessful) {
                         if (response.body() != null) {
                             Constant.user = response.body()!!
+                            if (rememberMe) {
+                                val token = generateToken()
+                                Log.d("TOKEN", token)
+                                storeToken(token, context)
+
+                                authenticationDTO.token = token
+
+
+                            }
                             // Display or process the response body for successful cases
                             if(response.body()!!.verified)
                                 navigateToHomePageActivity(context)
@@ -131,7 +149,7 @@ fun LoginPage(onSwitchToSignup: () -> Unit) {
 
                 override fun onFailure(call: Call<User>, t: Throwable) {
                     Log.e("API_CALL_FAILURE", "Failed to create user", t)
-                    displayToast("Failed to create user: Something went wrong!", context)
+                    displayToast("Failed to login: Check your email and password", context)
                 }
             })
 
@@ -178,6 +196,11 @@ private fun navigateToHomePageActivity(context: Context) {
 }
 private fun navigateToEmailActivity(context: Context) {
     val intent = Intent(context, EmailActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    context.startActivity(intent)
+}
+private fun navigateToForgotPasswordActivity(context: Context) {
+    val intent = Intent(context, ForgotPasswordActivity::class.java)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
 }

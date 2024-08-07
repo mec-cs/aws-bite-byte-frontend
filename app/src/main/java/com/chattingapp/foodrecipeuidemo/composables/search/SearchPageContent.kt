@@ -96,6 +96,8 @@ fun SearchPageCall(navController: NavController) {
             searchText = searchText,
             isRecipeSelected = isRecipeSelected,
             onTextChange = { newText ->
+                isRecipeImageRendered = false
+                isImageRendered = false
                 searchText = newText
                 val trimmedText = newText.text.trim()
 
@@ -113,8 +115,8 @@ fun SearchPageCall(navController: NavController) {
 
                         recipes = listOf()
                         userProfiles = listOf()
-                        isRecipeImageRendered = false
-                        isImageRendered = false
+                        /*isRecipeImageRendered = false
+                        isImageRendered = false*/
                     }
                 }
             },
@@ -202,7 +204,7 @@ fun SearchBar(
             )
         }
 
-        if (isRecipeSelected) {
+        /*if (isRecipeSelected) {
             IconButton(
                 onClick = { /* Handle filter click */ },
                 modifier = Modifier.padding(start = 8.dp)
@@ -213,7 +215,7 @@ fun SearchBar(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-        }
+        }*/
     }
 }
 
@@ -320,52 +322,57 @@ fun UserProfileList(userProfiles: List<UserProfile>, isImgRendered: Boolean, nav
 
 @Composable
 fun RecipeItem(recipe: Recipe, isRecipeImgRendered: Boolean, onClick: (Long) -> Unit) {
-    Card(
-        modifier = Modifier
-            .padding(10.dp)
-            .clickable { onClick(recipe.id!!) },
-        shape = RoundedCornerShape(15.dp),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ) {
-        Row(
+    if(isRecipeImgRendered) {
+        Card(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(10.dp)
+                .clickable { onClick(recipe.id!!) },
+            shape = RoundedCornerShape(15.dp),
+            elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            if (isRecipeImgRendered && recipe.bm != null) {
-                Image(
-                    bitmap = recipe.bm!!.asImageBitmap(),
-                    contentDescription = "Recipe Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                )
-            }
-            Column(
+            Row(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .weight(1f)
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = recipe.name!!,
-                    style = TextStyle(
-                        color = Color(0xFF2b2b2b),
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        fontSize = 16.sp
+                if (/*isRecipeImgRendered && */recipe.bm != null) {
+                    Image(
+                        bitmap = recipe.bm!!.asImageBitmap(),
+                        contentDescription = "Recipe Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
                     )
-                )
-                Text(
-                    text = "Recipe ID: ${recipe.id}",
-                    style = TextStyle(
-                        color = Color(0xFF666666),
-                        fontSize = 14.sp
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = recipe.name!!,
+                        style = TextStyle(
+                            color = Color(0xFF2b2b2b),
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     )
-                )
-            }
-            IconButton(onClick = { /* Handle drop-down icon click */ }) {
-                Icon(imageVector = Icons.Outlined.ArrowDropDown, contentDescription = "Drop Down")
+                    Text(
+                        text = "Recipe ID: ${recipe.id}",
+                        style = TextStyle(
+                            color = Color(0xFF666666),
+                            fontSize = 14.sp
+                        )
+                    )
+                }
+                IconButton(onClick = { /* Handle drop-down icon click */ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowDropDown,
+                        contentDescription = "Drop Down"
+                    )
+                }
             }
         }
     }
@@ -429,7 +436,6 @@ private fun searchRecipes(query: String, onResult: (List<Recipe>) -> Unit, onIma
                     onResult(recipes)
                     val recipeImages: List<String> = recipes.map { it.image!! }
                     Log.e("SearchPageCall Successfull", "Recipe List Successfully Fetched")
-
                     RetrofitHelper.apiService.getRecipeImagesList(recipeImages)
                         .enqueue(object: Callback<List<String>> {
                             override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
@@ -449,17 +455,14 @@ private fun searchRecipes(query: String, onResult: (List<Recipe>) -> Unit, onIma
                                     Log.e("SearchPageCall Unsuccuessful", "Error: ${response.errorBody()?.string()}")
                                 }
                             }
-
                             override fun onFailure(call: Call<List<String>>, t: Throwable) {
                                 Log.d("SearchPageCall FAILURE", "Failed to fetch recipe images\n$t")
                             }
                         })
-
                 } else {
                     Log.e("SearchPageCall UNSUCCESSFULL", "Error: ${response.errorBody()?.string()}")
                 }
             }
-
             override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
                 Log.e("SearchPageCall FAILURE", "Network request failed\n$t")
             }
@@ -476,7 +479,6 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
                     onResult(userProfiles)
                     val profilePictures: List<String> = userProfiles.map { it.profilePicture }
                     Log.e("SearchPageCall Successfull", "User List Successfully Fetched")
-
                     RetrofitHelper.apiService.getProfilePicturesList(profilePictures)
                         .enqueue(object : Callback<List<String>> {
                             override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
@@ -496,7 +498,6 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
                                     Log.e("ProfilePictureFetch", "Error: ${response.errorBody()?.string()}")
                                 }
                             }
-
                             override fun onFailure(call: Call<List<String>>, t: Throwable) {
                                 Log.e("ProfilePictureFetch", "Cannot fetch profile pictures", t)
                             }
@@ -505,17 +506,8 @@ private fun searchUsers(query: String, onResult: (List<UserProfile>) -> Unit, on
                     Log.e("SearchPageCall FAILURE", "Error: ${response.errorBody()?.string()}")
                 }
             }
-
             override fun onFailure(call: Call<List<UserProfile>>, t: Throwable) {
                 Log.e("SearchPageCall", "Network request failed\n", t)
             }
         })
 }
-
-
-@Preview
-@Composable
-fun displaySearchPage() {
-    SearchPageCall(navController = rememberNavController())
-}
-

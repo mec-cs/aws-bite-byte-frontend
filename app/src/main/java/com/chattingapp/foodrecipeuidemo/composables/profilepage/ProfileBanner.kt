@@ -1,9 +1,15 @@
 package com.chattingapp.foodrecipeuidemo.composables.profilepage
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,12 +61,19 @@ import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
+import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 
 @Composable
 fun ProfileBanner(  navController: NavController) {
@@ -114,7 +127,7 @@ fun ProfileBanner(  navController: NavController) {
                         val token = retrieveToken(context)
                         if (token != null) {
                             deleteToken(context)
-                            tokenViewModel.deleteToken(Constant.userProfile.id, token)
+                            tokenViewModel.deleteToken(Constant.user.id, token)
                         }
                         navigateToMainActivity(context)
 
@@ -162,13 +175,48 @@ fun ProfileBanner(  navController: NavController) {
             }
             if (displayProfileImage) {
                 userProfile.bm?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .padding(10.dp, 0.dp, 0.dp, 0.dp)
-                    )
+                    if(userProfile.id == Constant.userProfile.id){
+
+                        var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+                        val context = LocalContext.current
+                        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+                            selectedImageUri = uri
+                            uri?.let {
+                                uploadProfilePicture(it, userProfile.id, context.contentResolver)
+                            }
+                        }
+
+                        val bitmap = selectedImageUri?.let { uri ->
+                            loadBitmapFromUri(uri, context.contentResolver)
+                        }
+
+                        val displayBitmap = bitmap ?: userProfile.bm
+
+                        if (displayBitmap != null) {
+                            Constant.userProfile.bm = displayBitmap
+                            Image(
+                                bitmap = displayBitmap.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .padding(10.dp, 0.dp, 0.dp, 0.dp)
+                                    .clickable {
+                                        launcher.launch("image/*")
+                                    }
+                            )
+                        }
+
+                    }
+                    else{
+                        Image(
+                            bitmap = it.asImageBitmap(),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .padding(10.dp, 0.dp, 0.dp, 0.dp)
+                        )
+                    }
+
                 }
             }
                 followCounts?.let { counts ->
@@ -327,4 +375,41 @@ fun deleteToken(context: Context) {
     val editor = sharedPreferences.edit()
     editor.remove("auth_token") // Remove the token
     editor.apply() // Commit changes
+}
+
+fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
+    val inputStream = contentResolver.openInputStream(uri)
+    val file = File.createTempFile("profile_picture", ".jpg")
+    file.outputStream().use { outputStream ->
+        inputStream?.copyTo(outputStream)
+    }
+
+    val requestFile = RequestBody.create(MultipartBody.FORM, file)
+    val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+    RetrofitHelper.apiService.changeProfilePicture(body, userProfileId).enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+            if (response.isSuccessful) {
+                // Handle success
+                println("Profile picture updated successfully!")
+            } else {
+                // Handle error
+                println("Failed to update profile picture: ${response.message()}")
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            println("Error: ${t.message}")
+        }
+    })
+}
+fun loadBitmapFromUri(uri: Uri, contentResolver: ContentResolver): Bitmap? {
+    return try {
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }

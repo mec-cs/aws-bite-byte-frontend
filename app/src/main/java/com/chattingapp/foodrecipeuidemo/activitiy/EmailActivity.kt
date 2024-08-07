@@ -2,6 +2,7 @@ package com.chattingapp.foodrecipeuidemo.activitiy
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -29,9 +30,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.activitiy.ui.theme.FoodRecipeUiDemoTheme
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
@@ -69,6 +73,7 @@ fun VerificationCodeUI() {
     val countdownTime = 60 // seconds
 
     var resendAttempts by remember { mutableStateOf(0) }
+    val tokenViewModel: TokenViewModel = viewModel()
 
 
     // Timer logic
@@ -144,6 +149,25 @@ fun VerificationCodeUI() {
             Text(timerText)
         }
 
+        Button(
+            onClick = {
+                val token =
+                    retrieveToken(context)
+                if (token != null) {
+                    deleteToken(context)
+
+                    tokenViewModel.deleteToken(Constant.user.id, token)
+                }
+                navigateToMainActivity(
+                    context
+                )
+            },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text("Logout")
+        }
+
+
     }
 
 }
@@ -174,4 +198,20 @@ private fun navigateToHomePageActivity(context: Context) {
     val intent = Intent(context, HomePageActivity::class.java)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
+}
+
+private fun navigateToMainActivity(context: Context) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    context.startActivity(intent)
+}
+fun retrieveToken(context: Context): String? {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getString("auth_token", null)
+}
+fun deleteToken(context: Context) {
+    val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.remove("auth_token") // Remove the token
+    editor.apply() // Commit changes
 }

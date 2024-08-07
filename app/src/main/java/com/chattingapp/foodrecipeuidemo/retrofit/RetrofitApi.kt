@@ -216,4 +216,8 @@ interface RetrofitAPICredentials {
 
     @DELETE("comment/delete/{id}")
     fun deleteComment(@Path("id") id: Long): Call<Void>
+
+    @Multipart
+    @POST("profile-api/change-profile-picture")
+    fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long): Call<Void>
 }
