@@ -1,6 +1,8 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
 import android.content.ContentResolver
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Log
@@ -364,7 +366,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
     }
 }
 
-fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (File) -> Unit) {
+/*fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (File) -> Unit) {
     val inputStream = contentResolver.openInputStream(uri)
     val file = File.createTempFile("image", ".jpg")
 
@@ -375,5 +377,26 @@ fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (Fil
     }
 
     onFileCopied(file)
-}
+}*/
 
+fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (File) -> Unit) {
+    // Open an input stream from the given Uri
+    val inputStream = contentResolver.openInputStream(uri)
+
+    // Decode the input stream into a Bitmap
+    val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+    // Resize the bitmap to 350x175 pixels
+    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 350, 175, true)
+
+    // Create a temporary file to store the resized image
+    val file = File.createTempFile("image", ".jpg")
+
+    // Compress the resized bitmap into the file
+    FileOutputStream(file).use { outputStream ->
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+    }
+
+    // Call the callback with the resized file
+    onFileCopied(file)
+}

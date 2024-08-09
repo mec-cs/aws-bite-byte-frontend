@@ -74,6 +74,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ProfileBanner(  navController: NavController) {
@@ -377,7 +378,7 @@ fun deleteToken(context: Context) {
     editor.apply() // Commit changes
 }
 
-fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
+/*fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
     val inputStream = contentResolver.openInputStream(uri)
     val file = File.createTempFile("profile_picture", ".jpg")
     file.outputStream().use { outputStream ->
@@ -387,6 +388,47 @@ fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: Content
     val requestFile = RequestBody.create(MultipartBody.FORM, file)
     val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
+    RetrofitHelper.apiService.changeProfilePicture(body, userProfileId).enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+            if (response.isSuccessful) {
+                // Handle success
+                println("Profile picture updated successfully!")
+            } else {
+                // Handle error
+                println("Failed to update profile picture: ${response.message()}")
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            println("Error: ${t.message}")
+        }
+    })
+}*/
+
+fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
+    // Open an input stream to the image file
+    val inputStream = contentResolver.openInputStream(uri)
+
+    // Decode the input stream to a Bitmap
+    val originalBitmap = BitmapFactory.decodeStream(inputStream)
+
+    // Resize the bitmap to 100x100
+    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true)
+
+    // Create a temporary file to store the resized image
+    val file = File.createTempFile("profile_picture", ".jpg")
+    val outputStream = FileOutputStream(file)
+
+    // Compress the bitmap and save it to the file
+    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+    outputStream.flush()
+    outputStream.close()
+
+    // Create a RequestBody and MultipartBody.Part from the file
+    val requestFile = RequestBody.create(MultipartBody.FORM, file)
+    val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+    // Make the API call to upload the image
     RetrofitHelper.apiService.changeProfilePicture(body, userProfileId).enqueue(object : Callback<Void> {
         override fun onResponse(call: Call<Void>, response: Response<Void>) {
             if (response.isSuccessful) {
