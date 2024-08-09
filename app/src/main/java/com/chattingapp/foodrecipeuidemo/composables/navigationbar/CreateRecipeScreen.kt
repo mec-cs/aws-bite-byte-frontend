@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -48,10 +49,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
@@ -83,6 +82,9 @@ fun CreateRecipeScreen(navController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
     var nullSave by remember { mutableStateOf(false) }
 
+    var isLoading by remember { mutableStateOf(false) }
+
+
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -105,6 +107,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
     }
 
     fun createRecipe() {
+        isLoading = true
         coroutineScope.launch {
             val namePart = recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
             val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -138,6 +141,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
                 type = typePart
             ).enqueue(object : Callback<Recipe> {
                 override fun onResponse(call: Call<Recipe>, response: Response<Recipe>) {
+                    isLoading = false
                     if (response.body() == null) {
                         Log.d("Save NULL Response", "Response is null, please check conditions")
                         nullSave = true
@@ -164,6 +168,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
                 }
 
                 override fun onFailure(call: Call<Recipe>, t: Throwable) {
+                    isLoading = false
                     Log.d("onFailure", "Fail to call the API function")
                     nullSave = false
                 }
@@ -356,11 +361,27 @@ fun CreateRecipeScreen(navController: NavHostController) {
                                 showSuccessMessage("Please fill out all fields.")
                             }
                         },
+                        enabled = !isLoading,
                         modifier = Modifier.width(150.dp).padding(bottom = 400.dp)
                     ) {
                         Text("Create Recipe")
                     }
                 }
+            }
+        }
+
+        if (isLoading) {
+            // Show a loading indicator or dialog
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(100.dp),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
