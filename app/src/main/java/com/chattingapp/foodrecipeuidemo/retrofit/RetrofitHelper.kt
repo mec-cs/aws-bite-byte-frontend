@@ -18,3 +18,17 @@ object RetrofitHelper {
         .build()
     val apiService: RetrofitAPICredentials = retrofit.create(RetrofitAPICredentials::class.java)
 }
+
+object RetrofitHelperRecommendation {
+    var gson = GsonBuilder()
+        .setLenient()
+        .create()
+    private const val BASE_URL = "http://192.168.1.100:80/"
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(ScalarsConverterFactory.create()) //important
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+    val apiService: RetrofitAPICredentials = retrofit.create(RetrofitAPICredentials::class.java)
+}
