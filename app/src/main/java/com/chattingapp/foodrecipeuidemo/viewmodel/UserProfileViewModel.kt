@@ -8,9 +8,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,6 +50,25 @@ class UserProfileViewModel : ViewModel() {
             }
 
             onImageLoaded(response)
+        }
+    }
+
+    fun fetchUserProfile() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userProfile = apiService.getUserProfileByEmail(Constant.user.email)
+
+                // Handle the successful response
+                withContext(Dispatchers.Main) {
+                    Constant.userProfile = userProfile
+
+                    val profileImageViewModel = ProfileImageViewModel()
+                    profileImageViewModel.fetchProfileImage(userProfile.profilePicture)
+                }
+            } catch (e: Exception) {
+                // Handle failure (e.g., network error, non-200 HTTP status)
+                Log.e("API_CALL_FAILURE", "Failed to fetch user profile", e)
+            }
         }
     }
 }

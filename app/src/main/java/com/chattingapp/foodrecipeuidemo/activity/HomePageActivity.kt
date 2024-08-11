@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,6 +31,7 @@ import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -44,31 +47,12 @@ class HomePageActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
+                    val userProfileViewModel:UserProfileViewModel = viewModel()
                     val apiService = RetrofitHelper.apiService
 
-                    apiService.getUserProfileByEmail(Constant.user.email).enqueue(object :
-                        Callback<UserProfile> {
-
-                        override fun onResponse(call: Call<UserProfile>, response: Response<UserProfile>) {
-                            if (response.isSuccessful) {
-                                if (response.body() != null) {
-                                    Constant.userProfile = response.body()!!
-
-                                    val profileImageViewModel = ProfileImageViewModel()
-                                    profileImageViewModel.fetchProfileImage(Constant.userProfile.profilePicture)
-
-                                }
-                            } else {
-                                Log.d("API_CALL UnSuccessfull", "Non HTTP 200 error")
-                            }
-                        }
-
-                        override fun onFailure(call: Call<UserProfile>, t: Throwable) {
-                            Log.e("API_CALL_FAILURE", "Failed to create user", t)
-
-                        }
-                    })
+                    LaunchedEffect(Unit) {
+                        userProfileViewModel.fetchUserProfile()
+                    }
 
 
                     val navController = rememberNavController()

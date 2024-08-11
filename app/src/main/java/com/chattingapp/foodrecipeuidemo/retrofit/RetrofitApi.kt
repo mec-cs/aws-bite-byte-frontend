@@ -57,7 +57,7 @@ interface RetrofitAPICredentials {
 
     // PROFILE API
     @GET("/profile-api/get-user-profile-by-email/")
-    fun getUserProfileByEmail(@Query("email") email:String): Call<UserProfile>
+    suspend fun getUserProfileByEmail(@Query("email") email:String): UserProfile
 
     @GET("/profile-api/user/{id}/followers-followings/count")
     fun getFollowersCount(@Path("id") id: Long): Call<FollowCountsDTO>
