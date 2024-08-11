@@ -68,49 +68,67 @@ class LikeViewModel() : ViewModel() {
             }
         }
     }
+    private var isActionInProgress = false
 
     fun toggleLike(like: Like) {
-        viewModelScope.launch {
-            try {
-                val currentLikeState = _isLikedMap.value[like.recipeId] ?: false
-                val newLikeState = !currentLikeState
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(like.recipeId, newLikeState)
-                }
-
-                if (newLikeState) {
-                    val response = RetrofitHelper.apiService.addLike(like).awaitResponse()
-                    if (response.isSuccessful) {
-                        updateLikeCount(like.recipeId, 1)
-
-                        // Handle successful addition of like
-                        Log.d("LikeToggle", "Like added successfully")
-                    } else {
-                        // Handle error response
-                        Log.e("LikeToggle", "Error adding like: ${response.errorBody()?.string()}")
-                        _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                            put(like.recipeId, false)
-                        }
+        if(!isActionInProgress) {
+            isActionInProgress = true
+            viewModelScope.launch {
+                try {
+                    val currentLikeState = _isLikedMap.value[like.recipeId] ?: false
+                    val newLikeState = !currentLikeState
+                    _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                        put(like.recipeId, newLikeState)
                     }
-                } else {
-                    val response = RetrofitHelper.apiService.deleteLike(like.recipeId, like.userId).awaitResponse()
-                    if (response.isSuccessful) {
-                        // Handle successful removal of like
-                        updateLikeCount(like.recipeId, -1)
 
-                        Log.d("LikeToggle", "Like removed successfully")
-                    } else {
-                        // Handle error response
-                        _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                            put(like.recipeId, true)
+                    if (newLikeState) {
+                        val response = RetrofitHelper.apiService.addLike(like).awaitResponse()
+                        if (response.isSuccessful) {
+                            updateLikeCount(like.recipeId, 1)
+                            isActionInProgress = false
+
+                            // Handle successful addition of like
+                            Log.d("LikeToggle", "Like added successfully")
+                        } else {
+                            // Handle error response
+                            Log.e(
+                                "LikeToggle",
+                                "Error adding like: ${response.errorBody()?.string()}"
+                            )
+                            _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                                put(like.recipeId, false)
+                            }
                         }
-                    }
-                }
+                        delay(1000)
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
-                    put(like.recipeId, _isLikedMap.value[like.recipeId] ?: false)
+                    } else {
+                        val response =
+                            RetrofitHelper.apiService.deleteLike(like.recipeId, like.userId)
+                                .awaitResponse()
+                        if (response.isSuccessful) {
+                            // Handle successful removal of like
+                            updateLikeCount(like.recipeId, -1)
+                            isActionInProgress = false
+
+                            Log.d("LikeToggle", "Like removed successfully")
+                        } else {
+                            // Handle error response
+                            _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                                put(like.recipeId, true)
+                            }
+                        }
+                        delay(1000)
+
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
+                        put(like.recipeId, _isLikedMap.value[like.recipeId] ?: false)
+                        isActionInProgress = false
+                        delay(1000)
+
+                    }
                 }
             }
         }
@@ -182,5 +200,6 @@ class LikeViewModel() : ViewModel() {
             })
         }
     }
+    val isActionInProgressFlow = MutableStateFlow(isActionInProgress)
 
 }

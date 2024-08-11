@@ -53,6 +53,8 @@ fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
         CircularProgressIndicator()
     }
     else{
+        val isActionInProgress by likeViewModel.isActionInProgressFlow.collectAsState()
+
         IconButton(modifier = Modifier
             .size(30.dp) // Adjust the size of the button
             .clip(RoundedCornerShape(8.dp)) // Clip the icon to have rounded corners
@@ -60,7 +62,7 @@ fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
             , onClick = {
                 val likeClicked = Like(-1, Constant.userProfile.id, recipeId)
                 likeViewModel.toggleLike(likeClicked)
-            }) {
+            }, enabled = !isActionInProgress) {
             val icon = if (isLike) R.drawable.like_filled else R.drawable.like
             Icon(
                 painter = painterResource(id = icon),
