@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,12 +74,11 @@ fun ForgotPassword(navController: NavController) {
             }
         )
 
-
-
         OutlinedTextField(
             value = email.value,
             onValueChange = { email.value = it },
             label = { Text("Email Address") },
+            placeholder = { Text("Email Address") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
@@ -86,7 +86,7 @@ fun ForgotPassword(navController: NavController) {
         )
 
         if(isSendButtonEnabled.value) {
-            Button(
+            ElevatedButton(
                 onClick = {
                     val apiService = RetrofitHelper.apiService
 
@@ -155,11 +155,10 @@ fun ForgotPassword(navController: NavController) {
 
 
 
-
                 Text(
                     text = "We have sent you an email. Please enter your verification code!",
                     fontSize = 20.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp, top = 20.dp)
                 )
 
                 OutlinedTextField(
@@ -175,7 +174,7 @@ fun ForgotPassword(navController: NavController) {
                         .padding(bottom = 16.dp)
                 )
 
-                Button(
+                ElevatedButton(
                     onClick = {
                         if (userCode.text == serverCode.toString()) {
 
@@ -268,7 +267,7 @@ fun ForgotPassword(navController: NavController) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
+                    .padding(top = 16.dp, bottom = 10.dp)
             ) {
                 Text(text = "Change Password")
             }
@@ -301,3 +300,9 @@ private fun sendEmail(email:String){
 
     })
 }
+
+//@Preview
+//@Composable
+//fun displayForgotPwdPage() {
+//    ForgotPassword(navController = rememberNavController())
+//}

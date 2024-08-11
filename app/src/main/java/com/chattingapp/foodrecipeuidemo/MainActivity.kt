@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -20,13 +19,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
-import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
+import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
+import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
-import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
-import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper

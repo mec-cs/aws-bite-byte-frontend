@@ -1,4 +1,4 @@
-package com.chattingapp.foodrecipeuidemo.activitiy
+package com.chattingapp.foodrecipeuidemo.activity
 
 import android.content.Context
 import android.content.Intent
@@ -8,10 +8,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
-import com.chattingapp.foodrecipeuidemo.activitiy.ui.theme.FoodRecipeUiDemoTheme
+import com.chattingapp.foodrecipeuidemo.activity.ui.theme.FoodRecipeUiDemoTheme
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
@@ -87,11 +91,12 @@ fun VerificationCodeUI() {
         isButtonEnabled = true
     }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "We have sent you an email. Please enter your verification code!",
             fontSize = 20.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier
+                .padding(bottom = 8.dp)
         )
 
         OutlinedTextField(
@@ -103,38 +108,47 @@ fun VerificationCodeUI() {
                 keyboardType = KeyboardType.Number
             ),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .width(300.dp)
+                .padding(bottom = 16.dp, top = 8.dp)
+                .size(50.dp)
+            ,
+            placeholder = {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Enter code here",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
         )
 
-        Button(
-            onClick = {
-                if (userCode.text == serverCode.toString()) {
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(
+                onClick = {
+                    if (userCode.text == serverCode.toString()) {
 
-                    val apiService = RetrofitHelper.apiService
+                        val apiService = RetrofitHelper.apiService
 
-                    apiService.verifyUser(Constant.user.email).enqueue(object : Callback<Boolean> {
-                        override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                            if(response.body() == true){
-                                navigateToHomePageActivity(context)
+                        apiService.verifyUser(Constant.user.email).enqueue(object : Callback<Boolean> {
+                            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                                if(response.body() == true){
+                                    navigateToHomePageActivity(context)
+                                }
                             }
-                        }
 
-                        override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                            t.message?.let { Log.d("EMAIL VERIFY ERROR:", it) }
-                        }
+                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                t.message?.let { Log.d("EMAIL VERIFY ERROR:", it) }
+                            }
 
+                        })
 
-                    })
-
-
-                } else {
-                    displayToast("Please check your code!", context)
+                    } else {
+                        displayToast("Please check your code!", context)
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Verify my account")
+            ) {
+                Text("Verify the account")
+            }
         }
 
         Button(
@@ -149,24 +163,26 @@ fun VerificationCodeUI() {
             Text(timerText)
         }
 
-        Button(
-            onClick = {
-                val token =
-                    retrieveToken(context)
-                if (token != null) {
-                    deleteToken(context)
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(
+                onClick = {
+                    val token =
+                        retrieveToken(context)
+                    if (token != null) {
+                        deleteToken(context)
 
-                    tokenViewModel.deleteToken(Constant.user.id, token)
-                }
-                navigateToMainActivity(
-                    context
-                )
-            },
-            modifier = Modifier.padding(top = 16.dp)
-        ) {
-            Text("Logout")
+                        tokenViewModel.deleteToken(Constant.user.id, token)
+                    }
+                    navigateToMainActivity(
+                        context
+                    )
+                },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text("Logout")
+            }
+
         }
-
 
     }
 
@@ -191,6 +207,12 @@ private fun sendEmail(){
 
     })
 }
+
+//@Preview
+//@Composable
+//private fun displayEmailAct() {
+//    VerificationCodeUI()
+//}
 
 
 private fun navigateToHomePageActivity(context: Context) {

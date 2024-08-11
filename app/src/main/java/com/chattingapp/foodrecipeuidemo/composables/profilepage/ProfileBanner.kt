@@ -12,7 +12,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -57,10 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
-import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
