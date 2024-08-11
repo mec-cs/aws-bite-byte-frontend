@@ -24,7 +24,7 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 @Composable
 fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
 
-    
+
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipeId] ?: false
 
@@ -33,14 +33,7 @@ fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
 
     val loadingState by likeViewModel.loadingState.collectAsState()
     val isLoading = loadingState[recipeId] ?: false
-
-    /*LaunchedEffect(recipeId) {
-        likeViewModel.fetchLikeCounts(recipeId)
-    }
-
-    LaunchedEffect(Constant.userProfile.id, recipeId) {
-        likeViewModel.checkLike(Constant.userProfile.id, recipeId)
-    }*/
+    
 
     LaunchedEffect(recipeId) {
         likeViewModel.fetchLikeCounts(recipeId)
