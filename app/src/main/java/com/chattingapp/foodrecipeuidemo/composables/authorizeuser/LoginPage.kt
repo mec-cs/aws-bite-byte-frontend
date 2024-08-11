@@ -5,13 +5,15 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -28,12 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.chattingapp.foodrecipeuidemo.activitiy.EmailActivity
-import com.chattingapp.foodrecipeuidemo.activitiy.HomePageActivity
+import androidx.navigation.compose.rememberNavController
+import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
+import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
@@ -58,20 +64,30 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Login", style = MaterialTheme.typography.h4)
-        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.yumbyte_logo),
+                contentDescription = "Yumbyte Logo",
+                modifier = Modifier
+                    .height(250.dp) // Adjust the size as needed
+            )
+        }
+
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") }
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         OutlinedTextField(
             value = password,
@@ -177,6 +193,14 @@ fun LoginPage(onSwitchToSignup: () -> Unit, navController: NavController) {
         }
     }
 }
+
+
+@Preview
+@Composable
+private fun displayLoginPage() {
+    LoginPage(onSwitchToSignup = { /*TODO*/ }, navController = rememberNavController())
+}
+
 
 fun generateToken(): String {
     return UUID.randomUUID().toString()

@@ -1,4 +1,4 @@
-package com.chattingapp.foodrecipeuidemo.activitiy.ui.theme
+package com.chattingapp.foodrecipeuidemo.activity.ui.theme
 
 import android.app.Activity
 import android.os.Build

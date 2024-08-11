@@ -9,7 +9,7 @@ object RetrofitHelper {
     var gson = GsonBuilder()
         .setLenient()
         .create()
-    private const val BASE_URL = "http://192.168.1.100:8765/"
+    private const val BASE_URL = "http://192.168.1.4:8765/"
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -23,7 +23,7 @@ object RetrofitHelperRecommendation {
     var gson = GsonBuilder()
         .setLenient()
         .create()
-    private const val BASE_URL = "http://192.168.1.100:80/"
+    private const val BASE_URL = "http://192.168.1.4:5000/"
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)

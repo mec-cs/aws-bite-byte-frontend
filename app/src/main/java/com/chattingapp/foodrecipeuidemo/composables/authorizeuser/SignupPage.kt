@@ -31,7 +31,6 @@ import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
-import org.mindrot.jbcrypt.BCrypt
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -171,3 +170,11 @@ private fun navigateToMainActivity(context: Context) {
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
 }
+
+//@Preview
+//@Composable
+//fun displaySignUpPage() {
+//    SignupPage {
+//
+//    }
+//}
