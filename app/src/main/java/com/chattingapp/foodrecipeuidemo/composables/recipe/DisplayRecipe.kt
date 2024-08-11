@@ -75,14 +75,14 @@ fun DisplayRecipe(
 
     val userProfileViewModel: UserProfileViewModel = viewModel()
 
-    Log.d("RECIPE USERNAME", recipe.username.toString())
+    //Log.d("RECIPE USERNAME", recipe.username.toString())
     // Fetch recipe image
     LaunchedEffect(recipe.id) {
-        Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
+        //Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
         viewModel.fetchImage(recipe) {
             bitmap = it
             isLoading = false
-            Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
+            //Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
         }
         userProfileViewModel.fetchImage(recipe){
             profileBitmap = it
@@ -95,10 +95,10 @@ fun DisplayRecipe(
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
         if (isProfileLoading) {
-            Log.d("DisplayRecipe", "Profile is loading for recipe: ${recipe.id}")
+            //Log.d("DisplayRecipe", "Profile is loading for recipe: ${recipe.id}")
 
         } else {
-            Log.d("DisplayRecipe", "Profile loaded for recipe: ${recipe.id}")
+            //Log.d("DisplayRecipe", "Profile loaded for recipe: ${recipe.id}")
             // Conditional profile display
             val displayedProfileBitmap = when {
                 Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
@@ -120,7 +120,7 @@ fun DisplayRecipe(
         }
 
         if (isLoading) {
-            Log.d("DisplayRecipe", "Recipe image is loading for recipe: ${recipe.id}")
+            //Log.d("DisplayRecipe", "Recipe image is loading for recipe: ${recipe.id}")
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -134,7 +134,7 @@ fun DisplayRecipe(
                 )
             }
         } else {
-            Log.d("DisplayRecipe", "Recipe image loaded for recipe: ${recipe.id}")
+            //Log.d("DisplayRecipe", "Recipe image loaded for recipe: ${recipe.id}")
             bitmap?.let {
                 Column(modifier = Modifier.clickable {
                     Constant.recipeDetailProjection = recipe

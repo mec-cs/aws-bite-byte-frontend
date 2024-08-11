@@ -1,5 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
+import android.os.SystemClock
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -11,11 +12,17 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
 fun AppNavigationBar(navController: NavController) {
+    var lastClickTime by remember { mutableStateOf(0L) }
+    val clickInterval = 10000L // 10 seconds
     BottomNavigation(
         backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onSurface,
@@ -37,11 +44,24 @@ fun AppNavigationBar(navController: NavController) {
             selected = currentRoute(navController) == "create recipe",
             onClick = { navController.navigate("create recipe") }
         )
-        BottomNavigationItem(
+        /*BottomNavigationItem(
             icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Feed") },
             selected = currentRoute(navController) == "feed",
             onClick = { navController.navigate("feed") }
+        )*/
+
+        BottomNavigationItem(
+            icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Feed") },
+            selected = currentRoute(navController) == "feed",
+            onClick = {
+                val currentTime = SystemClock.elapsedRealtime()
+                if (currentTime - lastClickTime >= clickInterval) {
+                    lastClickTime = currentTime
+                    navController.navigate("feed")
+                }
+            }
         )
+
         BottomNavigationItem(
             icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
             selected = currentRoute(navController) == "profile",

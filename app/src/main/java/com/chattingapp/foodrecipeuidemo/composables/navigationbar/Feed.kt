@@ -1,55 +1,152 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
 import android.util.Log
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FeedViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun Feed(navController: NavHostController) {
     // Collect the followed recipes and isLoading state as state
-    val feedViewModel:FeedViewModel = viewModel()
+    val feedViewModel: FeedViewModel = viewModel()
 
-    val followedRecipes by feedViewModel.followedRecipes.observeAsState(emptyList())
-    val isLoadingFollowed by feedViewModel.isLoading.observeAsState(false)
+    val followedRecipes by feedViewModel.followedRecipes.collectAsState()
+    val isLoadingFollowed by feedViewModel.isLoadingFollowingsRecipes.collectAsState()
 
-    val recommendedRecipes by feedViewModel.recommendedRecipes.observeAsState(emptyList())
-    val isLoadingRecommended by feedViewModel.isLoadingRecommended.observeAsState(false)
+    val recommendedRecipes by feedViewModel.recommendedRecipes.collectAsState()
+    val isLoadingRecommended by feedViewModel.isLoadingRecommended.collectAsState()
 
-    val cachedRecipes by feedViewModel.cachedRecipes.observeAsState(emptyList())
-    val isLoadingCached by feedViewModel.isLoadingCached.observeAsState(false)
-    
+    val cachedRecipes by feedViewModel.cachedRecipes.collectAsState()
+    val isLoadingCached by feedViewModel.isLoadingCached.collectAsState()
+
+    val initializationComplete by feedViewModel.initializationComplete.collectAsState()
+    val mergeComplete by feedViewModel.mergeComplete.collectAsState()
+
+    var isFirstTimeFetch by rememberSaveable { mutableStateOf(true) }
+    var isFirstTimeSetup by rememberSaveable { mutableStateOf(true) }
+    var isFirstTimeLoad by rememberSaveable { mutableStateOf(true) }
 
     // Fetch recipes when the composable is first displayed
-    LaunchedEffect(Constant.userProfile.id) {
-        feedViewModel.fetchRecommendedRecipes(userId = Constant.userProfile.id) // Replace with actual userId if needed
+    if(isFirstTimeFetch) {
+        LaunchedEffect(Unit) {
+            if (followedRecipes.isEmpty()) {
+                feedViewModel.fetchFollowedRecipes(Constant.userProfile.id)
+            }
+            if (recommendedRecipes.isEmpty()) {
+                feedViewModel.fetchRecommendedRecipes(userId = Constant.userProfile.id)
+            }
+            if (cachedRecipes.isEmpty()) {
+                feedViewModel.fetchCachedRecipes()
+            }
+            isFirstTimeFetch = false
+        }
     }
 
-    // Call the API when the composable is first composed
-    LaunchedEffect(Constant.userProfile.id) {
-        feedViewModel.fetchFollowedRecipes(Constant.userProfile.id)
-    }
 
-    // Call the API when the composable is first composed
-    LaunchedEffect(Unit) {
-        feedViewModel.fetchCachedRecipes()
-    }
 
     if(isLoadingFollowed || isLoadingRecommended || isLoadingCached) {
         CircularProgressIndicator()
     }
     else{
-        // Loading completed
-        //Text(text = "feed")
-        Log.d("FEED PAGE", followedRecipes.size.toString())
-        Log.d("FEED PAGE", recommendedRecipes.size.toString())
-        Log.d("FEED PAGE", cachedRecipes.size.toString())
+
+        if(isFirstTimeSetup) {
+            LaunchedEffect(Unit) {
+                if (!initializationComplete) {
+                    feedViewModel.initializeCurrentSmallestNumber()
+                }
+                if (!mergeComplete) {
+                    feedViewModel.mergeAndInterleaveRecipes()
+                }
+                isFirstTimeSetup = false
+            }
+        }
+            if(initializationComplete && mergeComplete){
+                // write your code to display the recommended recipes
+                val recipesClick by feedViewModel.recipes.collectAsState()
+                val isLoadingClick by feedViewModel.isLoadingRecipes.collectAsState()
+                val allIdSizeClick by feedViewModel.allIdsSize.collectAsState()
+                val listStateClick = rememberLazyListState()
+
+                if(isFirstTimeLoad) {
+                    LaunchedEffect(Unit) {
+                        if (recipesClick.isEmpty()) {
+                            feedViewModel.loadMoreRecipes()
+                        }
+                        isFirstTimeLoad = false
+                    }
+                }
+
+                if (isLoadingClick && recipesClick.isEmpty()) {
+                    CircularProgressIndicator()
+                }
+                else {
+                    Column(modifier = Modifier
+                        .fillMaxSize()
+                        .wrapContentHeight()
+                        .padding(16.dp, 32.dp, 16.dp, 32.dp)
+                    ) {
+                    Text(
+                        text = "Feed",
+                        fontSize = 24.sp,       // Increase font size
+                        fontWeight = FontWeight.Bold,  // Make the text bold
+                        modifier = Modifier.padding(bottom = 32.dp)
+                    )
+                    LazyColumn(
+                        state = listStateClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                    ) {
+                        items(recipesClick) { recipe ->
+                            Constant.isFeedScreen = true
+                            if(recipe.ownerId != Constant.userProfile.id)
+                                DisplayRecipe(recipe = recipe, navController = navController)
+                        }
+
+                    }
+
+                    LaunchedEffect(listStateClick) {
+                        snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
+                            .collect { lastVisibleItem ->
+                                if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1 /*&& allIdSizeClick > recipesClick.size*/) {
+                                    feedViewModel.loadMoreRecipes()
+                                    Log.d("CALLING API", "FETCHED MORE")
+                                    delay(1000)
+                                    Log.d("recipes.size", recipesClick.size.toString())
+                                    Log.d("recipes.size", allIdSizeClick.toString())
+                                }
+                            }
+                    }
+                }
+            }
+        }
+
+
     }
 
 

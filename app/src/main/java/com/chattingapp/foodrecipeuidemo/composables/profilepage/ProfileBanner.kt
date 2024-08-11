@@ -101,10 +101,7 @@ fun ProfileBanner(  navController: NavController) {
         }
     }
 
-
     var displayProfileImage by remember { mutableStateOf(false) }
-
-
 
     Column {
         Row(
@@ -343,7 +340,7 @@ fun ProfileBanner(  navController: NavController) {
                     recipeViewModel.recipeListDetail = recipeList
                     Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
                     Constant.isProfilePage = true
-                    DisplayRecipe(recipe, /*recipeViewModel,*/ navController/*, userProfileViewModel*/)
+                    DisplayRecipe(recipe, navController)
                 }
             }
 
@@ -378,32 +375,6 @@ fun deleteToken(context: Context) {
     editor.apply() // Commit changes
 }
 
-/*fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
-    val inputStream = contentResolver.openInputStream(uri)
-    val file = File.createTempFile("profile_picture", ".jpg")
-    file.outputStream().use { outputStream ->
-        inputStream?.copyTo(outputStream)
-    }
-
-    val requestFile = RequestBody.create(MultipartBody.FORM, file)
-    val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-    RetrofitHelper.apiService.changeProfilePicture(body, userProfileId).enqueue(object : Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-            if (response.isSuccessful) {
-                // Handle success
-                println("Profile picture updated successfully!")
-            } else {
-                // Handle error
-                println("Failed to update profile picture: ${response.message()}")
-            }
-        }
-
-        override fun onFailure(call: Call<Void>, t: Throwable) {
-            println("Error: ${t.message}")
-        }
-    })
-}*/
 
 fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
     // Open an input stream to the image file

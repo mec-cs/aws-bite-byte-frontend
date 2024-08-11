@@ -229,11 +229,11 @@ interface RetrofitAPICredentials {
     fun changePassword(@Body request: ChangePasswordRequest): Call<Boolean>
 
     @GET("/profile-recipe/{followerId}/followed-recipes")
-    fun getFollowedRecipes(@Path("followerId") followerId: Long): Call<List<Long>>
+    suspend fun getFollowedRecipes(@Path("followerId") followerId: Long): List<Long>
 
     @GET("recommend")
-    fun recommendRecipes(@Query("user_id") userId: Long): Call<List<Long>>
+    suspend fun recommendRecipes(@Query("user_id") userId: Long): List<Long>
 
     @GET("recipe-getter/get-last-ten-percent-of-recipes")
-    fun getCachedRecipes(): Call<List<Long>>
+    suspend fun getCachedRecipes(): List<Long>
 }

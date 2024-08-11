@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategory
+import com.chattingapp.foodrecipeuidemo.composables.feednavigator.FeedNavigator
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.AppNavigationBar
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.CreateRecipeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.Feed
@@ -87,12 +88,14 @@ class HomePageActivity : ComponentActivity() {
                                 Constant.isCardScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
+                                Constant.isFeedScreen = false
                                 HomeScreen(navController)
                             }
                             composable("search") {
                                 Constant.isCardScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
+                                Constant.isFeedScreen = false
                                 Constant.targetUserProfile = null
                                 SearchScreen(navController)
                             }
@@ -100,6 +103,7 @@ class HomePageActivity : ComponentActivity() {
                                 Constant.isCardScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
+                                Constant.isFeedScreen = false
                                 Constant.targetUserProfile = null
                                 val recipeViewModel = RecipeViewModel()
                                 CreateRecipeScreen(navController)
@@ -108,13 +112,16 @@ class HomePageActivity : ComponentActivity() {
                                 Constant.isCardScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
+                                Constant.isFeedScreen = false
                                 Constant.targetUserProfile = null
-                                Feed(navController)
+                                //Feed(navController)
+                                FeedNavigator(navController = navController)
                             }
                             composable("profile") {
                                 Constant.targetUserProfile = null
                                 Constant.isProfilePage = true
                                 Constant.isCardScreen = false
+                                Constant.isFeedScreen = false
                                 Constant.isProfilePage = false
                                 Constant.isSearchScreen = false
 

@@ -17,6 +17,7 @@ object Constant {
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
     var isCardScreen = false
+    var isFeedScreen = false
     const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"
     const val NULL_EXCEPTION_ERROR = "Invalid request, please fill crucial parts!"
     var deletedCommentCount = 0

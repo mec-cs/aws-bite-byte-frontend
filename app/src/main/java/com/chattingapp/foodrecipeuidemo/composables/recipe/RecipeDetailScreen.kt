@@ -64,6 +64,10 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                             Constant.isCardScreen = false
                             navController.popBackStack("recipeCategory/{cardId}", false, true)
                         }
+                        else if(Constant.isFeedScreen){
+                            Constant.isFeedScreen = false
+                            navController.popBackStack("feedNavigator", false, true)
+                        }
 
 
                         commentViewModel.resetState()
