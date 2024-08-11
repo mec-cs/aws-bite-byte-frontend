@@ -170,36 +170,6 @@ class LikeViewModel() : ViewModel() {
     }
 
 
-
-
-
-    fun addLike(like: Like) {
-        viewModelScope.launch(Dispatchers.IO) {
-            RetrofitHelper.apiService.addLike(like).enqueue(object : Callback<Like> {
-                override fun onResponse(call: Call<Like>, response: Response<Like>) {
-
-                }
-
-                override fun onFailure(call: Call<Like>, t: Throwable) {
-                    // Handle failure
-                }
-            })
-        }
-    }
-
-    fun deleteLike(recipeId: Long, userId: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            RetrofitHelper.apiService.deleteLike(recipeId, userId).enqueue(object : Callback<Void> {
-                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-
-                }
-
-                override fun onFailure(call: Call<Void>, t: Throwable) {
-                    // Handle failure
-                }
-            })
-        }
-    }
     val isActionInProgressFlow = MutableStateFlow(isActionInProgress)
 
 }

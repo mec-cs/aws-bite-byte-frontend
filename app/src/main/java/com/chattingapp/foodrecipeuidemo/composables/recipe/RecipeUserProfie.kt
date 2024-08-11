@@ -46,7 +46,7 @@ fun RecipeUserProfile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(bottom = 10.dp, end = 10.dp, top = 0.dp , start = 0.dp)
+            .padding(bottom = 10.dp, end = 10.dp, top = 0.dp, start = 0.dp)
             .fillMaxWidth()
     ) {
         Image(
@@ -71,21 +71,26 @@ fun RecipeUserProfile(
                     .padding(16.dp)
             )
         } else {
+            val isActionInProgress by favoriteViewModel.isActionInProgressFlow.collectAsState()
+
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                 contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
                 tint = if (isFavorite) Color.Red else Color.Gray,
+
                 modifier = Modifier
                     .padding(16.dp)
                     .clickable {
-                        if (isFavorite) {
-                            // Call method to delete favorite
-                            //favoriteViewModel.deleteFavorite(Constant.userProfile.id, recipeId)
-                            favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
-                        } else {
-                            // Call method to add favorite
-                            //favoriteViewModel.addFavorite(Constant.userProfile.id, recipeId)
-                            favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
+                        if (!isActionInProgress) {
+                            if (isFavorite) {
+                                // Call method to delete favorite
+                                //favoriteViewModel.deleteFavorite(Constant.userProfile.id, recipeId)
+                                favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
+                            } else {
+                                // Call method to add favorite
+                                //favoriteViewModel.addFavorite(Constant.userProfile.id, recipeId)
+                                favoriteViewModel.toggleFavorite(Constant.userProfile.id, recipeId)
+                            }
                         }
                     }
             )

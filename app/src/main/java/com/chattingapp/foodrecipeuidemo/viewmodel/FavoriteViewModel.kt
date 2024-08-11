@@ -18,71 +18,71 @@ class FavoriteViewModel : ViewModel() {
 
     private val _checkedFavoriteStatus = MutableStateFlow<Set<Long>>(emptySet())
 
-    fun checkFavorite(userId: Long, recipeId: Long) {
-        if (_checkedFavoriteStatus.value.contains(recipeId)) return
+    private var isActionInProgress = false
 
-        viewModelScope.launch {
-            _loadingState.value = _loadingState.value.toMutableMap().apply { put(recipeId, true) }
-            try {
-                val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId).await()
-                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, response) }
-                _checkedFavoriteStatus.value = _checkedFavoriteStatus.value + recipeId
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
-            } finally {
-                _loadingState.value = _loadingState.value.toMutableMap().apply { put(recipeId, false) }
+
+    fun checkFavorite(userId: Long, recipeId: Long) {
+            if (_checkedFavoriteStatus.value.contains(recipeId)) return
+
+            viewModelScope.launch {
+                _loadingState.value =
+                    _loadingState.value.toMutableMap().apply { put(recipeId, true) }
+                try {
+                    val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId).await()
+                    _isFavoriteMap.value =
+                        _isFavoriteMap.value.toMutableMap().apply { put(recipeId, response) }
+                    _checkedFavoriteStatus.value = _checkedFavoriteStatus.value + recipeId
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _isFavoriteMap.value =
+                        _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
+                } finally {
+                    _loadingState.value =
+                        _loadingState.value.toMutableMap().apply { put(recipeId, false) }
+
+                }
             }
-        }
+
     }
 
     fun toggleFavorite(userId: Long, recipeId: Long) {
-        viewModelScope.launch {
-            try {
-                val currentFavoriteState = _isFavoriteMap.value[recipeId] ?: false
-                val newFavoriteState = !currentFavoriteState
-                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, newFavoriteState) }
+        if(!isActionInProgress) {
+            isActionInProgress = true
 
-                if (newFavoriteState) {
-                    val response = RetrofitHelper.apiService.addFavorite(userId, recipeId).await()
-                    if (!response) {
-                        _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
+            viewModelScope.launch {
+                try {
+                    val currentFavoriteState = _isFavoriteMap.value[recipeId] ?: false
+                    val newFavoriteState = !currentFavoriteState
+                    _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap()
+                        .apply { put(recipeId, newFavoriteState) }
+
+                    if (newFavoriteState) {
+                        val response =
+                            RetrofitHelper.apiService.addFavorite(userId, recipeId).await()
+                        if (!response) {
+                            _isFavoriteMap.value =
+                                _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
+                        }
+                    } else {
+                        RetrofitHelper.apiService.deleteFavorite(userId, recipeId).await()
+                        _isFavoriteMap.value =
+                            _isFavoriteMap.value.toMutableMap().apply { put(recipeId, true) }
+
                     }
-                } else {
-                    RetrofitHelper.apiService.deleteFavorite(userId, recipeId).await()
-                    _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, true) }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap()
+                        .apply { put(recipeId, _isFavoriteMap.value[recipeId] ?: false) }
+                }
+                finally {
+                    isActionInProgress = false
 
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, _isFavoriteMap.value[recipeId] ?: false) }
             }
         }
     }
 
-    fun addFavorite(userId: Long, recipeId: Long) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitHelper.apiService.addFavorite(userId, recipeId).await()
-                if (response) {
-                    _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, true) }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
+    val isActionInProgressFlow = MutableStateFlow(isActionInProgress)
 
-    fun deleteFavorite(userId: Long, recipeId: Long) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitHelper.apiService.deleteFavorite(userId, recipeId).await()
-
-                _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 }
