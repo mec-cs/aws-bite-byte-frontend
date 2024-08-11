@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Like
@@ -25,8 +24,7 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 @Composable
 fun LikeRecipe(recipeId: Long, likeViewModel: LikeViewModel){
 
-
-
+    
     val isLikeMap by likeViewModel.isLikedMap.collectAsState()
     val isLike = isLikeMap[recipeId] ?: false
 

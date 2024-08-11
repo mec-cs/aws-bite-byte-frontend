@@ -169,6 +169,8 @@ fun ForgotPassword(navController: NavController) {
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
                     ),
+                    placeholder = { Text("Enter your verification code") }
+                    ,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
