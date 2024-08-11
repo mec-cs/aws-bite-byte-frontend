@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -85,7 +86,7 @@ fun ProfileBanner(  navController: NavController) {
         Constant.targetUserProfile ?: Constant.userProfile
     }
 
-    var isFirstTime by remember { mutableStateOf(true) }
+    var isFirstTime by rememberSaveable { mutableStateOf(true) }
 
 
 
