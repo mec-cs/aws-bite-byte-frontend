@@ -46,12 +46,11 @@ interface RetrofitAPICredentials {
     suspend fun getUserByToken(@Query("token") token:String) : User
 
     @PUT("credentials/verify-email/")
-    fun verifyUser(@Query("email") email:String) : Call<Boolean>
-
-
+    suspend fun verifyUser(@Query("email") email:String) : Boolean
+    
     // EMAIL API
     @GET("email-sender/send-verification-code/")
-    fun sendVerificationEmail(@Query("email") email:String) : Call<Int>
+    suspend fun sendVerificationEmail(@Query("email") email:String) : Int
 
     @GET("email-sender/send-change-password-code/")
     fun sendChangePasswordEmail(@Query("email") email:String) : Call<Int>

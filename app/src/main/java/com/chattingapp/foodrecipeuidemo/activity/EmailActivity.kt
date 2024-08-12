@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,13 +39,14 @@ import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.FoodRecipeUiDemoTheme
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import com.chattingapp.foodrecipeuidemo.viewmodel.CredentialsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-var serverCode = -761458
+//var serverCode = -761458
 
 class EmailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,9 +58,12 @@ class EmailActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val viewModel: CredentialsViewModel = viewModel()
 
-                    sendEmail()
-                    VerificationCodeUI()
+                    LaunchedEffect(Unit) {
+                        viewModel.sendEmail(Constant.user.email)
+                    }
+                    VerificationCodeUI(viewModel)
                 }
             }
         }
@@ -68,7 +72,7 @@ class EmailActivity : ComponentActivity() {
 
 }
 @Composable
-fun VerificationCodeUI() {
+fun VerificationCodeUI(viewModel: CredentialsViewModel) {
     var userCode by remember { mutableStateOf(TextFieldValue("")) }
     val context = LocalContext.current
 
@@ -113,34 +117,18 @@ fun VerificationCodeUI() {
                 .size(50.dp)
             ,
             placeholder = {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Enter code here",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                Text(text = "Enter code here")
             }
         )
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            val verificationResult by viewModel.verificationResult.collectAsState()
+            val serverCode by viewModel.serverCode.collectAsState()
             Button(
                 onClick = {
                     if (userCode.text == serverCode.toString()) {
 
-                        val apiService = RetrofitHelper.apiService
-
-                        apiService.verifyUser(Constant.user.email).enqueue(object : Callback<Boolean> {
-                            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                                if(response.body() == true){
-                                    navigateToHomePageActivity(context)
-                                }
-                            }
-
-                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                t.message?.let { Log.d("EMAIL VERIFY ERROR:", it) }
-                            }
-
-                        })
+                        viewModel.verifyUser(Constant.user.email)
 
                     } else {
                         displayToast("Please check your code!", context)
@@ -149,12 +137,20 @@ fun VerificationCodeUI() {
             ) {
                 Text("Verify the account")
             }
+            verificationResult?.let { result ->
+                if (result) {
+                    // Navigate to home page
+                    navigateToHomePageActivity(context)
+                } else {
+                    displayToast("Please check your code!", context)
+                }
+            }
         }
 
         Button(
             onClick = {
                 // Logic to resend the code
-                sendEmail()
+                viewModel.sendEmail(Constant.user.email)
                 resendAttempts++
             },
             enabled = isButtonEnabled,
@@ -192,21 +188,7 @@ private fun displayToast(msg:String, context: Context){
     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 }
 
-private fun sendEmail(){
-    val apiService = RetrofitHelper.apiService
 
-    apiService.sendVerificationEmail(Constant.user.email).enqueue(object : Callback<Int> {
-        override fun onResponse(call: Call<Int>, response: Response<Int>) {
-            serverCode = response.body()!!
-        }
-
-        override fun onFailure(call: Call<Int>, t: Throwable) {
-
-        }
-
-
-    })
-}
 
 //@Preview
 //@Composable
