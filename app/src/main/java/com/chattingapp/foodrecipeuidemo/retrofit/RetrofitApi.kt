@@ -137,39 +137,30 @@ interface RetrofitAPICredentials {
 
     @GET("comment/count/{recipeId}")
     suspend fun countCommentsByRecipeId(@Path("recipeId") recipeId: Long): Long
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
     @GET("comment/get-comments/{recipeId}/{page}")
-    fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): Call<List<CommentProjection>>
-
-    @GET("profile-api/get-user-profile/{id}")
-    fun getUserProfileById(@Path("id") id: Long): Call<UserProfile>
+    suspend fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): List<CommentProjection>
 
     @POST("recipe-getter/get-recipes")
     suspend fun getRecipes(@Query("ids") ids: List<Long>): List<RecipeProjection>
 
     @GET("like-dislike/most-liked-recipes")
-    fun getMostLikedRecipes(): Call<List<Long>>
-
+    suspend fun getMostLikedRecipes(): List<Long>
+// limit number and digits, background colors, loading symbol, food colors dont go beyond 7-8 slides,
+    // give expla. about application in the first slide, how the world is (give info)
+    // happy path , ss , video, get real time feedback from people and record them
+    // market it,
     @GET("click/most-clicked-recipes")
-    fun getMostClickedRecipes(): Call<List<Long>>
+    suspend fun getMostClickedRecipes(): List<Long>
 
     @GET("favorite/get-recipe/{ownerId}/{page}")
-    fun getRecipesFavorite(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
+    suspend fun getRecipesFavorite(@Path("ownerId") ownerId: Long, @Path("page") page: Int): List<RecipeProjection>
 
     @GET("favorite/favorites/count/{userId}")
-    fun getFavoriteCount(@Path("userId") userId: Long): Call<Long>
-
-    @GET("like-dislike/likes/count/{userId}")
-    fun getLikeCountByUserId(@Path("userId") userId: Long): Call<Long>
-
-    @GET("like-dislike/get-recipe/{ownerId}/{page}")
-    fun getRecipesLike(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
+    suspend fun getFavoriteCount(@Path("userId") userId: Long): Long
 
     @GET("click/most-clicked/last-two-days")
-    fun getMostClickedRecipesLastTwo(): Call<List<Long>>
-
-    @GET("profile-getter/{id}")
-    fun getUserProfile(@Path("id") id: Long): Call<UserProfileResponse>
+    suspend fun getMostClickedRecipesLastTwo(): List<Long>
 
     @GET("profile-api/check-follow")
     suspend fun checkIfUserFollows(
@@ -184,19 +175,19 @@ interface RetrofitAPICredentials {
     suspend fun removeUserFollows(@Body followRequest: FollowRequest): Response<String>
 
     @GET("profile-api/users/{userId}/{page}/followers")
-    fun getFollowersByUserId(@Path("userId") userId: Long, @Path("page") page: Int): Call<List<UserFollowsResponse>>
+    suspend fun getFollowersByUserId(@Path("userId") userId: Long, @Path("page") page: Int): List<UserFollowsResponse>
 
     @GET("profile-api/users/{userId}/{page}/followings")
-    fun getFollowingsByUserId(@Path("userId") userId: Long, @Path("page") page: Int): Call<List<UserFollowsResponse>>
+    suspend fun getFollowingsByUserId(@Path("userId") userId: Long, @Path("page") page: Int): List<UserFollowsResponse>
 
     @DELETE("credentials/delete-token")
     suspend fun deleteToken(@Query("userId") userId: Long, @Query("token") token: String): Response<Unit>
 
     @POST("comment/save-comment")
-    fun addComment(@Body comment: Comment): Call<Comment>
+    suspend fun addComment(@Body comment: Comment): Comment
 
     @DELETE("comment/delete/{id}")
-    fun deleteComment(@Path("id") id: Long): Call<Void>
+    suspend fun deleteComment(@Path("id") id: Long): Boolean
 
     @Multipart
     @POST("profile-api/change-profile-picture")

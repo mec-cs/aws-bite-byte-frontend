@@ -158,7 +158,7 @@ fun FollowsPage(
                                 snapshotFlow { listStateFollower.layoutInfo.visibleItemsInfo.lastOrNull() }
                                     .collect { lastVisibleItem ->
                                         if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowerViewModel.userListDetail.size - 1 && userListFollower.size != followerCount!!.toInt()) {
-                                            profileFollowerViewModel.loadMoreUser(userProfile.id)
+                                            profileFollowerViewModel.loadMoreUsers(userProfile.id)
                                             delay(1000)
                                         }
                                     }
@@ -200,7 +200,7 @@ fun FollowsPage(
                                 snapshotFlow { listStateFollowing.layoutInfo.visibleItemsInfo.lastOrNull() }
                                     .collect { lastVisibleItem ->
                                         if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1 && followingCount!!.toInt() > userListFollowing.size) {
-                                            profileFollowingViewModel.loadMoreUser(userProfile.id)
+                                            profileFollowingViewModel.loadMoreUsers(userProfile.id)
                                             delay(1000)
                                         }
                                     }

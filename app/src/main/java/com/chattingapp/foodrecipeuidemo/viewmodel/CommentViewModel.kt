@@ -14,11 +14,15 @@ import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 class CommentViewModel : ViewModel() {
@@ -98,39 +102,33 @@ class CommentViewModel : ViewModel() {
         isLoading = true
         Log.d("CommentViewModel", "Fetching comments for recipeId=$recipeId, currentPage=$currentPage")
 
-        RetrofitHelper.apiService.getComments(recipeId, currentPage).enqueue(object :
-            Callback<List<CommentProjection>> {
-            override fun onResponse(call: Call<List<CommentProjection>>, response: Response<List<CommentProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newComments = response.body() ?: emptyList()
-                    Log.d("CommentViewModel", "Fetched ${newComments.size} new comments")
-                    if (newComments.isNotEmpty()) {
-                        val currentList = _comments.value?.toMutableList() ?: mutableListOf()
-                        val existingIds = currentList.map { it.id }.toSet()
-                        val filteredComments = newComments.filter { it.id !in existingIds }
-                        Log.d("CommentViewModel", "Filtered ${filteredComments.size} new comments")
-                        if (filteredComments.isNotEmpty()) {
-                            currentList.addAll(filteredComments)
-                            _comments.value = currentList
-                            currentPage += 1
-                            Log.d("CommentViewModel", "Current page updated to $currentPage")
-                        }
-                    } else {
-                        _hasMorePages.value = false
-                        Log.d("CommentViewModel", "No more pages available")
+        viewModelScope.launch {
+            try {
+                val response = RetrofitHelper.apiService.getComments(recipeId, currentPage)
+
+                if (response.isNotEmpty()) {
+                    val currentList = _comments.value?.toMutableList() ?: mutableListOf()
+                    val existingIds = currentList.map { it.id }.toSet()
+                    val filteredComments = response.filter { it.id !in existingIds }
+
+                    if (filteredComments.isNotEmpty()) {
+                        currentList.addAll(filteredComments)
+                        _comments.value = currentList
+                        currentPage += 1
+                        Log.d("CommentViewModel", "Current page updated to $currentPage")
                     }
                 } else {
-                    Log.e("CommentViewModel", "Response error: ${response.message()}")
+                    _hasMorePages.value = false
+                    Log.d("CommentViewModel", "No more pages available")
                 }
-            }
-
-            override fun onFailure(call: Call<List<CommentProjection>>, t: Throwable) {
+            } catch (e: Exception) {
+                Log.e("CommentViewModel", "Failed to load comments", e)
+            } finally {
                 isLoading = false
-                Log.e("CommentViewModel", "Failed to load comments", t)
             }
-        })
+        }
     }
+
 
 
     fun fetchMoreComments(recipeId: Long) {
@@ -141,26 +139,25 @@ class CommentViewModel : ViewModel() {
 
         Log.d("CommentViewModel", "Fetching more comments for recipeId=$recipeId, currentPage=$currentPage")
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             try {
-                val response = RetrofitHelper.apiService.getComments(recipeId, currentPage).execute()
-                if (response.isSuccessful) {
-                    response.body()?.let { newComments ->
-                        val currentComments = _comments.value ?: emptyList()
-                        val existingIds = currentComments.map { it.id }.toSet()
-                        val filteredComments = newComments.filter { it.id !in existingIds }
+                val newComments = withContext(Dispatchers.IO) {
+                    RetrofitHelper.apiService.getComments(recipeId, currentPage)
+                }
 
-                        _comments.postValue(currentComments + filteredComments)
-                        Log.d("CommentViewModel", "Fetched and added ${filteredComments.size} new comments")
+                val currentComments = _comments.value ?: emptyList()
+                val existingIds = currentComments.map { it.id }.toSet()
+                val filteredComments = newComments.filter { it.id !in existingIds }
 
-                       /* if (filteredComments.isEmpty()) {
-                            //isLastPage = true
-                            Log.d("CommentViewModel", "This is the last page")
-                        } else {*/
-                            currentPage++
-                            Log.d("CommentViewModel", "Current page updated to $currentPage")
-                        //}
-                    }
+                _comments.value = currentComments + filteredComments
+                Log.d("CommentViewModel", "Fetched and added ${filteredComments.size} new comments")
+
+                if (filteredComments.isEmpty()) {
+                    isLastPage = true
+                    Log.d("CommentViewModel", "This is the last page")
+                } else {
+                    currentPage++
+                    Log.d("CommentViewModel", "Current page updated to $currentPage")
                 }
             } catch (e: Exception) {
                 Log.e("CommentViewModel", "Network error while fetching more comments", e)
@@ -170,92 +167,103 @@ class CommentViewModel : ViewModel() {
 
 
 
+    // StateFlow to represent loading state
+    private var isLoadingAddComment = false
+
 
     fun addComment(recipeId: Long, commentText: String) {
-        val comment = Comment(-1, Constant.userProfile.id, commentText, null, recipeId)
-        Log.d("CommentViewModel", "Attempting to add comment: $comment")
+        if(!isLoadingAddComment) {
+            isLoadingAddComment = true
+            val comment = Comment(-1, Constant.userProfile.id, commentText, null, recipeId)
+            Log.d("CommentViewModel", "Attempting to add comment: $comment")
 
-        viewModelScope.launch {
-            try {
-                RetrofitHelper.apiService.addComment(comment).enqueue(object : Callback<Comment> {
-                    override fun onResponse(call: Call<Comment>, response: Response<Comment>) {
-                        Log.d("CommentViewModel", "API call made to add comment: ${response.raw()}")
-                        if (response.isSuccessful) {
-                            Log.d("CommentViewModel", "Successfully added comment: ${response.body()}")
-                            val newComment = response.body()
-                            if (newComment != null) {
-                                val commentProjection = CommentProjection(
-                                    newComment.id,
-                                    newComment.ownerId,
-                                    newComment.comment,
-                                    newComment.dateCreated,
-                                    Constant.userProfile.username,
-                                    Constant.userProfile.profilePicture
-                                )
-                                val updatedComments = _comments.value?.toMutableList() ?: mutableListOf()
-                                updatedComments.add(0, commentProjection)  // Insert at the start of the list
-                                _comments.value = updatedComments
+            viewModelScope.launch {
 
-                                Log.d("CommentViewModel", "Updated comments: $updatedComments")
+                try {
+                    // Call the suspend function directly
+                    val newComment = RetrofitHelper.apiService.addComment(comment)
+                    Log.d("CommentViewModel", "Successfully added comment: $newComment")
 
-                                // Optionally update comment count
-                                val currentCount = _commentCount.value ?: 0
-                                _commentCount.value = currentCount + 1
-                                Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
-                            } else {
-                                Log.e("CommentViewModel", "Response body is null despite successful response")
-                            }
-                        } else {
-                            Log.e("CommentViewModel", "Failed to add comment: ${response.errorBody()?.string()}")
-                        }
-                    }
+                    // Update comments and count
+                    val commentProjection = CommentProjection(
+                        newComment.id,
+                        newComment.ownerId,
+                        newComment.comment,
+                        newComment.dateCreated,
+                        Constant.userProfile.username,
+                        Constant.userProfile.profilePicture
+                    )
+                    val updatedComments = _comments.value?.toMutableList() ?: mutableListOf()
+                    updatedComments.add(0, commentProjection)  // Insert at the start of the list
+                    _comments.value = updatedComments
 
-                    override fun onFailure(call: Call<Comment>, t: Throwable) {
-                        Log.e("CommentViewModel", "Exception occurred while adding comment", t)
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e("CommentViewModel", "Exception occurred while adding comment", e)
+                    Log.d("CommentViewModel", "Updated comments: $updatedComments")
+
+                    // Optionally update comment count
+                    val currentCount = _commentCount.value ?: 0
+                    _commentCount.value = currentCount + 1
+                    Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
+
+                } catch (e: IOException) {
+                    Log.e("CommentViewModel", "Network Error: ${e.message}", e)
+                } catch (e: HttpException) {
+                    Log.e("CommentViewModel", "HTTP Error: ${e.message}", e)
+                } catch (e: Exception) {
+                    Log.e("CommentViewModel", "Unexpected Error: ${e.message}", e)
+                } finally {
+                    isLoadingAddComment = false
+                }
             }
         }
     }
 
+
+    private var isDeleting = false
 
     fun deleteComment(commentId: Long) {
-        Log.d("CommentViewModel", "Attempting to delete comment with id: $commentId")
+        if(!isDeleting) {
+            Log.d("CommentViewModel", "Attempting to delete comment with id: $commentId")
+            isDeleting = true
+            viewModelScope.launch {
+                try {
+                    // Making the network call using coroutines
+                    val isSuccess = RetrofitHelper.apiService.deleteComment(commentId)
 
-        viewModelScope.launch {
-            try {
-                RetrofitHelper.apiService.deleteComment(commentId).enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        Log.d("CommentViewModel", "API call made to delete comment: ${response.raw()}")
-                        if (response.isSuccessful) {
-                            Log.d("CommentViewModel", "Successfully deleted comment with id: $commentId")
+                    if (isSuccess) {
+                        Log.d(
+                            "CommentViewModel",
+                            "Successfully deleted comment with id: $commentId"
+                        )
 
-                            // Update the comment list after deletion
-                            val updatedComments = _comments.value?.filter { it.id != commentId } ?: mutableListOf()
-                            _comments.value = updatedComments
+                        // Update the comment list after deletion
+                        val updatedComments =
+                            _comments.value?.filter { it.id != commentId } ?: mutableListOf()
+                        _comments.value = updatedComments
 
-                            Log.d("CommentViewModel", "Updated comments after deletion: $updatedComments")
+                        Log.d(
+                            "CommentViewModel",
+                            "Updated comments after deletion: $updatedComments"
+                        )
 
-                            // Optionally update comment count
-                            val currentCount = _commentCount.value ?: 0
-                            _commentCount.value = (currentCount - 1).coerceAtLeast(0) // Ensure count doesn't go below 0
-                            Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
-                        } else {
-                            Log.e("CommentViewModel", "Failed to delete comment: ${response.errorBody()?.string()}")
-                        }
+                        // Optionally update comment count
+                        val currentCount = _commentCount.value ?: 0
+                        _commentCount.value =
+                            (currentCount - 1).coerceAtLeast(0) // Ensure count doesn't go below 0
+                        Log.d("CommentViewModel", "Updated comment count: ${_commentCount.value}")
+                    } else {
+                        Log.e("CommentViewModel", "Failed to delete comment")
                     }
-
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Log.e("CommentViewModel", "Exception occurred while deleting comment", t)
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e("CommentViewModel", "Exception occurred while deleting comment", e)
+                } catch (e: Exception) {
+                    Log.e("CommentViewModel", "Exception occurred while deleting comment", e)
+                }
+                finally {
+                    isDeleting = false
+                }
             }
         }
     }
+
+
 
 
     fun resetState() {

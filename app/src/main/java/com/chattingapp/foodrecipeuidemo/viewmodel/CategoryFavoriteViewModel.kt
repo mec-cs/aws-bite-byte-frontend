@@ -4,11 +4,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 class CategoryFavoriteViewModel : ViewModel(){
 
@@ -30,53 +34,18 @@ class CategoryFavoriteViewModel : ViewModel(){
             _isLoading.value = true
             Log.d("CategoryFavoriteViewModel", "Fetching recipes for user: $userId, page: $page")
 
-            RetrofitHelper.apiService.getRecipesFavorite(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-                override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                    _isLoading.value = false
-                    if (response.isSuccessful) {
-                        val newRecipes = response.body() ?: emptyList()
-                        Log.d("CategoryFavoriteViewModel", "Fetched ${newRecipes.size} recipes")
-                        if (newRecipes.isNotEmpty()) {
-                            val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
-                            val existingIds = currentList.map { it.id }.toSet()
-                            val filteredRecipes = newRecipes.filter { it.id !in existingIds }
-                            if (filteredRecipes.isNotEmpty()) {
-                                currentList.addAll(filteredRecipes)
-                                _recipeList.value = currentList
-                                recipeListDetail = currentList
-                                page += 1
-                                Log.d("CategoryFavoriteViewModel", "Updated recipe list with ${filteredRecipes.size} new recipes")
-                            }
-                        }
-                    } else {
-                        Log.e("CategoryFavoriteViewModel", "Failed to fetch recipes: ${response.errorBody()}")
-                    }
-                }
+            viewModelScope.launch {
+                try {
+                    // Call the suspend function directly
+                    val newRecipes = RetrofitHelper.apiService.getRecipesFavorite(userId, page)
 
-                override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                    _isLoading.value = false
-                    Log.e("CategoryFavoriteViewModel", "Failed to load recipes", t)
-                }
-            })
-        }
-    }
-
-
-    fun loadMoreRecipes(userId: Long) {
-        if (isLoadingMore || noMoreRecipes) return
-        isLoadingMore = true
-        Log.d("CategoryFavoriteViewModel", "Loading more recipes for user: $userId, page: $page")
-
-        RetrofitHelper.apiService.getRecipesFavorite(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoadingMore = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
-                    Log.d("CategoryFavoriteViewModel", "Loaded ${newRecipes.size} more recipes")
                     if (newRecipes.isNotEmpty()) {
+                        Log.d("CategoryFavoriteViewModel", "Fetched ${newRecipes.size} recipes")
+
                         val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
                         val existingIds = currentList.map { it.id }.toSet()
                         val filteredRecipes = newRecipes.filter { it.id !in existingIds }
+
                         if (filteredRecipes.isNotEmpty()) {
                             currentList.addAll(filteredRecipes)
                             _recipeList.value = currentList
@@ -84,21 +53,57 @@ class CategoryFavoriteViewModel : ViewModel(){
                             page += 1
                             Log.d("CategoryFavoriteViewModel", "Updated recipe list with ${filteredRecipes.size} new recipes")
                         }
-                    } else {
-                        noMoreRecipes = true
                     }
-                } else {
-                    Log.e("CategoryFavoriteViewModel", "Failed to load more recipes: ${response.errorBody()}")
+                } catch (e: IOException) {
+                    Log.e("CategoryFavoriteViewModel", "Network error while fetching recipes", e)
+                } catch (e: HttpException) {
+                    Log.e("CategoryFavoriteViewModel", "HTTP error while fetching recipes", e)
+                } finally {
+                    _isLoading.value = false
                 }
             }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoadingMore = false
-                Log.e("CategoryFavoriteViewModel", "Failed to load more recipes", t)
-                page -= 1
-            }
-        })
+        }
     }
+
+
+
+    fun loadMoreRecipes(userId: Long) {
+        if (isLoadingMore || noMoreRecipes) return
+        isLoadingMore = true
+        Log.d("CategoryFavoriteViewModel", "Loading more recipes for user: $userId, page: $page")
+
+        viewModelScope.launch {
+            try {
+                // Call the suspend function directly
+                val newRecipes = RetrofitHelper.apiService.getRecipesFavorite(userId, page)
+
+                if (newRecipes.isNotEmpty()) {
+                    Log.d("CategoryFavoriteViewModel", "Loaded ${newRecipes.size} more recipes")
+
+                    val currentList = _recipeList.value?.toMutableList() ?: mutableListOf()
+                    val existingIds = currentList.map { it.id }.toSet()
+                    val filteredRecipes = newRecipes.filter { it.id !in existingIds }
+
+                    if (filteredRecipes.isNotEmpty()) {
+                        currentList.addAll(filteredRecipes)
+                        _recipeList.value = currentList
+                        recipeListDetail = currentList
+                        page += 1
+                        Log.d("CategoryFavoriteViewModel", "Updated recipe list with ${filteredRecipes.size} new recipes")
+                    }
+                } else {
+                    noMoreRecipes = true
+                }
+            } catch (e: IOException) {
+                Log.e("CategoryFavoriteViewModel", "Network error while loading more recipes", e)
+            } catch (e: HttpException) {
+                Log.e("CategoryFavoriteViewModel", "HTTP error while loading more recipes", e)
+            } finally {
+                isLoadingMore = false
+            }
+        }
+    }
+
 
 
     private val _favoriteCount = MutableLiveData<Long>(-1L)
@@ -108,24 +113,23 @@ class CategoryFavoriteViewModel : ViewModel(){
     val isLoadingCount: LiveData<Boolean> get() = _isLoadingCount
 
     fun fetchFavoriteCount(userId: Long) {
-        _isLoadingCount.value = true
-        RetrofitHelper.apiService.getFavoriteCount(userId).enqueue(object : Callback<Long> {
-            override fun onResponse(call: Call<Long>, response: Response<Long>) {
+        viewModelScope.launch {
+            _isLoadingCount.value = true
+            try {
+                // Directly call the suspend function
+                val favoriteCount = RetrofitHelper.apiService.getFavoriteCount(userId)
+                _favoriteCount.value = favoriteCount
+                Log.d("FavoriteCountViewModel", "Favorite count: $favoriteCount")
+            } catch (e: IOException) {
+                Log.e("FavoriteCountViewModel", "Network error while fetching favorite count", e)
+            } catch (e: HttpException) {
+                Log.e("FavoriteCountViewModel", "HTTP error while fetching favorite count", e)
+            } finally {
                 _isLoadingCount.value = false
-                if (response.isSuccessful) {
-                    _favoriteCount.value = response.body()
-                    Log.d("FavoriteCountViewModel", "Favorite count: ${response.body()}")
-                } else {
-                    Log.e("FavoriteCountViewModel", "Failed to fetch favorite count: ${response.errorBody()}")
-                }
             }
-
-            override fun onFailure(call: Call<Long>, t: Throwable) {
-                _isLoadingCount.value = false
-                Log.e("FavoriteCountViewModel", "Failed to fetch favorite count", t)
-            }
-        })
+        }
     }
+
 
 
 

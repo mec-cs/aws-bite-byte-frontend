@@ -35,16 +35,11 @@ class CategoryMostLikedViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = withContext(Dispatchers.IO) {
-                    RetrofitHelper.apiService.getMostLikedRecipes().execute()
-                }
-                if (response.isSuccessful) {
-                    allIds = response.body() ?: emptyList()
-                    _allIdsSize.value = allIds.size // Update the size
-                    loadMoreRecipes()
-                } else {
-                    _errorMessage.value = "Error: ${response.code()}"
-                }
+                // Directly call the suspend function
+                val mostLikedIds = RetrofitHelper.apiService.getMostLikedRecipes()
+                allIds = mostLikedIds ?: emptyList()
+                _allIdsSize.value = allIds.size // Update the size
+                loadMoreRecipes()
             } catch (e: IOException) {
                 _errorMessage.value = "Network Error: ${e.message}"
             } catch (e: HttpException) {
@@ -54,6 +49,7 @@ class CategoryMostLikedViewModel : ViewModel() {
             }
         }
     }
+
 
     fun loadMoreRecipes() {
         if (currentPage * pageSize >= allIds.size) return // No more pages

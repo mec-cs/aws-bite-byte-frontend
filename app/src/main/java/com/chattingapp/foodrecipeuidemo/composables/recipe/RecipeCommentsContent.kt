@@ -73,8 +73,9 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
     if(commentCount != -1L)
     // Fetch comments when the composable is first displayed
     {
-        if (comments.isEmpty()) {
+        if (comments.isEmpty() && commentCount.toInt() != 0) {
             LaunchedEffect(Constant.recipeDetailProjection!!.id!!) {
+                Log.d("HERE", "HERE")
                 commentViewModel.fetchComments(Constant.recipeDetailProjection!!.id!!)
             }
         }
@@ -173,7 +174,9 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
                                 commentViewModel.currentPage -= (Constant.deletedCommentCount / Constant.PAGE_SIZE_CLICK_LIKE + 1)
                                 Constant.deletedCommentCount = 0
                             }
-                            commentViewModel.fetchMoreComments(Constant.recipeDetailProjection?.id!!)
+                            if(commentCount.toInt() != 0) {
+                                commentViewModel.fetchMoreComments(Constant.recipeDetailProjection?.id!!)
+                            }
                             Log.d("FETCH COMMENT", "RECIPE COMMENT CONTENT")
                             delay(1000)
                         }
