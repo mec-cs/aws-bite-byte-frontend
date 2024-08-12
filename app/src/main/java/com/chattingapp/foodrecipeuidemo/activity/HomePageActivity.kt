@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +46,10 @@ class HomePageActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val userProfileViewModel:UserProfileViewModel = viewModel()
-                    val apiService = RetrofitHelper.apiService
                     var isFirstTime by remember { mutableStateOf(true) }
+                    val userProfile by userProfileViewModel.userProfile.collectAsState()
+                    val isLoading by userProfileViewModel.isLoading.collectAsState()
+
                     if(isFirstTime) {
                         LaunchedEffect(Unit) {
                             userProfileViewModel.fetchUserProfile()
@@ -57,7 +60,7 @@ class HomePageActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
 
-                    if(!isFirstTime) {
+                    if(!isFirstTime && !isLoading && userProfile != null) {
                         Scaffold(
                             bottomBar = { AppNavigationBar(navController = navController) }
                         ) { innerPadding ->

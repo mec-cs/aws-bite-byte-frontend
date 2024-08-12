@@ -80,6 +80,7 @@ fun ProfileBanner(  navController: NavController) {
     val profileImageViewModel: ProfileImageViewModel = viewModel()
     val recipeList by recipeViewModel.recipeList.collectAsState(emptyList())
     val followCounts by viewModel.followCounts.collectAsState(null)
+    val userProfileViewModel = UserProfileViewModel()
 
 
     val userProfile = remember {
@@ -177,10 +178,27 @@ fun ProfileBanner(  navController: NavController) {
                         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
                             selectedImageUri = uri
                             uri?.let {
-                                uploadProfilePicture(it, userProfile.id, context.contentResolver)
+                                val contentResolver = context.contentResolver
+                                val inputStream = contentResolver.openInputStream(uri)
+
+                                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true)
+
+                                val file = File.createTempFile("profile_picture", ".jpg")
+                                val outputStream = FileOutputStream(file)
+                                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                                outputStream.flush()
+                                outputStream.close()
+
+                                val requestFile = RequestBody.create(MultipartBody.FORM, file)
+                                val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+                                userProfileViewModel.changeProfilePicture(body, userProfile.id)
                             }
                         }
 
+
+                        // Display the image
                         val bitmap = selectedImageUri?.let { uri ->
                             loadBitmapFromUri(uri, context.contentResolver)
                         }
@@ -319,7 +337,6 @@ fun ProfileBanner(  navController: NavController) {
 
         }
         if(displayProfileImage){
-            val userProfileViewModel = UserProfileViewModel()
             val listState = rememberLazyListState()
             LazyColumn(
                 state = listState,
@@ -373,46 +390,6 @@ fun deleteToken(context: Context) {
 }
 
 
-fun uploadProfilePicture(uri: Uri, userProfileId: Long, contentResolver: ContentResolver) {
-    // Open an input stream to the image file
-    val inputStream = contentResolver.openInputStream(uri)
-
-    // Decode the input stream to a Bitmap
-    val originalBitmap = BitmapFactory.decodeStream(inputStream)
-
-    // Resize the bitmap to 100x100
-    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true)
-
-    // Create a temporary file to store the resized image
-    val file = File.createTempFile("profile_picture", ".jpg")
-    val outputStream = FileOutputStream(file)
-
-    // Compress the bitmap and save it to the file
-    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-    outputStream.flush()
-    outputStream.close()
-
-    // Create a RequestBody and MultipartBody.Part from the file
-    val requestFile = RequestBody.create(MultipartBody.FORM, file)
-    val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-    // Make the API call to upload the image
-    RetrofitHelper.apiService.changeProfilePicture(body, userProfileId).enqueue(object : Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-            if (response.isSuccessful) {
-                // Handle success
-                println("Profile picture updated successfully!")
-            } else {
-                // Handle error
-                println("Failed to update profile picture: ${response.message()}")
-            }
-        }
-
-        override fun onFailure(call: Call<Void>, t: Throwable) {
-            println("Error: ${t.message}")
-        }
-    })
-}
 fun loadBitmapFromUri(uri: Uri, contentResolver: ContentResolver): Bitmap? {
     return try {
         contentResolver.openInputStream(uri)?.use { inputStream ->

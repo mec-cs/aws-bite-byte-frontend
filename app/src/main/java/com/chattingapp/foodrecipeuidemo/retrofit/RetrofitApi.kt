@@ -17,7 +17,6 @@ import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
-import com.chattingapp.foodrecipeuidemo.entity.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -47,13 +46,10 @@ interface RetrofitAPICredentials {
 
     @PUT("credentials/verify-email/")
     suspend fun verifyUser(@Query("email") email:String) : Boolean
-    
+
     // EMAIL API
     @GET("email-sender/send-verification-code/")
     suspend fun sendVerificationEmail(@Query("email") email:String) : Int
-
-    @GET("email-sender/send-change-password-code/")
-    fun sendChangePasswordEmail(@Query("email") email:String) : Call<Int>
 
     // PROFILE API
     @GET("/profile-api/get-user-profile-by-email/")
@@ -62,14 +58,12 @@ interface RetrofitAPICredentials {
     @GET("/profile-api/user/{id}/followers-followings/count")
     suspend fun getFollowersCount(@Path("id") id: Long): FollowCountsDTO
 
-
     // SEARCH API
     @POST("search-profile/search")
     fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
 
     @POST("search-recipe/search")
     fun getRecipesByNames(@Body searchRecipeDTO: SearchRecipeDTO) : Call<List<Recipe>>
-
 
     // PROFILE-PHOTO DOWNLOADER API
     @POST("/profile-picture-downloader/download/images")
@@ -84,7 +78,6 @@ interface RetrofitAPICredentials {
 
     @POST("/recipe-picture-downloader/download/images")
     fun getRecipeImagesList(@Body recipeList: List<String>) : Call<List<String>>
-
 
     // RECIPE API
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
@@ -190,7 +183,10 @@ interface RetrofitAPICredentials {
 
     @Multipart
     @POST("profile-api/change-profile-picture")
-    fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long): Call<Void>
+    suspend fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long) // Use Unit instead of Void for suspend functions
+
+    @GET("email-sender/send-change-password-code/")
+    fun sendChangePasswordEmail(@Query("email") email:String) : Call<Int>
 
     @GET("credentials/exists-by-email/{email}")
     fun userExistsByEmail(@Path("email") email: String): Call<Boolean>
