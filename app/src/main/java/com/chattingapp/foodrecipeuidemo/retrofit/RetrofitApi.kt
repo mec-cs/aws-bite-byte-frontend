@@ -60,7 +60,7 @@ interface RetrofitAPICredentials {
     suspend fun getUserProfileByEmail(@Query("email") email:String): UserProfile
 
     @GET("/profile-api/user/{id}/followers-followings/count")
-    fun getFollowersCount(@Path("id") id: Long): Call<FollowCountsDTO>
+    suspend fun getFollowersCount(@Path("id") id: Long): FollowCountsDTO
 
 
     // SEARCH API

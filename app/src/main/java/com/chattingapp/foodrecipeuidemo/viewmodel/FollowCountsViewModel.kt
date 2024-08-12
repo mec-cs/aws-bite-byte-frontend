@@ -1,7 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.FollowCountsDTO
@@ -22,7 +20,7 @@ class FollowCountsViewModel : ViewModel() {
 
     private var isActionInProgress = false
 
-    fun fetchFollowersCount(userId: Long) {
+    /*fun fetchFollowersCount(userId: Long) {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
@@ -37,6 +35,20 @@ class FollowCountsViewModel : ViewModel() {
                 }
             }
             response?.let { _followCounts.value = it }
+        }
+    }*/
+
+    fun fetchFollowersCount(userId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    apiService.getFollowersCount(userId)
+                }
+                _followCounts.value = response
+            } catch (e: Exception) {
+                // Handle or log the exception
+                _followCounts.value = null
+            }
         }
     }
 
