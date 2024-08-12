@@ -27,10 +27,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
+import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -49,7 +52,7 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-
+    val viewModel: UserProfileViewModel = viewModel()
 
     Column(
         modifier = Modifier
@@ -99,31 +102,15 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
 
             val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
 
-            val apiService = RetrofitHelper.apiService
-
-            apiService.saveUser(userProfileDTO).enqueue(object : Callback<String> {
-
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-                    if (response.isSuccessful) {
-                        val responseBody = response.body()
-                        if (responseBody != null) {
-                            // Display or process the response body for successful cases
-                            displayToast(responseBody, context)
-                            navigateToMainActivity(context)
-                        } else {
-                            displayToast("Empty response body", context)
-                        }
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        displayToast("${response.message()} $errorBody", context)
-                    }
+            viewModel.saveUser(userProfileDTO,
+                onSuccess = { responseBody ->
+                    displayToast(responseBody, context)
+                    navigateToMainActivity(context)
+                },
+                onError = { error ->
+                    displayToast(error, context)
                 }
-
-                override fun onFailure(call: Call<String>, t: Throwable) {
-                    Log.e("API_CALL_FAILURE", "Failed to create user", t)
-                    displayToast("Failed to create user: Something went wrong!", context)
-                }
-            })
+            )
         }
         else{
             if(!isEmailValid(email)){
@@ -159,22 +146,9 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
     }
 }
 
-/*fun hashPassword(password: String): String {
-    val salt = BCrypt.gensalt()
-    Log.d("HASH: ",BCrypt.hashpw(password, salt))
-    return BCrypt.hashpw(password, salt)
-}*/
-
 private fun navigateToMainActivity(context: Context) {
     val intent = Intent(context, MainActivity::class.java)
     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     context.startActivity(intent)
 }
 
-//@Preview
-//@Composable
-//fun displaySignUpPage() {
-//    SignupPage {
-//
-//    }
-//}

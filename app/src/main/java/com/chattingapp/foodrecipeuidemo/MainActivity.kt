@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +27,9 @@ import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 
 
 class MainActivity : ComponentActivity() {
@@ -46,26 +45,26 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val authToken = getAuthToken(this)
 
-                    val apiService = RetrofitHelper.apiService
 
                     if (authToken != null) {
-                        apiService.getUserByToken(authToken).enqueue(object : Callback<User> {
-                            override fun onResponse(call: Call<User>, response: Response<User>) {
-                                val user = response.body()
-                                if (user != null) {
-                                    Constant.user = user
-                                    if(user.verified){
+                        val apiService = RetrofitHelper.apiService
+
+                        LaunchedEffect(authToken) {
+                                try {
+                                    // Call the API using the suspend function
+                                    val user = apiService.getUserByToken(authToken)
+
+                                    if (user.verified) {
+                                        Constant.user = user
                                         navigateToHomePage()
-                                    }
-                                    else{
+                                    } else {
                                         navigateToEmailPage()
                                     }
+                                } catch (e: Exception) {
+                                    Log.e("API_CALL_FAILURE", "Failed to fetch user data", e)
                                 }
-                            }
-                            override fun onFailure(call: Call<User>, t: Throwable) {
-                                
-                            }
-                        })
+
+                        }
                     }
                     else{
                         val navController = rememberNavController()

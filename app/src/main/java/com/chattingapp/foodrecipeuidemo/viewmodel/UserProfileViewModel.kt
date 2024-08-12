@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
+import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,4 +72,23 @@ class UserProfileViewModel : ViewModel() {
             }
         }
     }
+
+    fun saveUser(userProfileDTO: UserProfileDTO, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                // Making the network call on IO dispatcher
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitHelper.apiService.saveUser(userProfileDTO)
+                }
+
+                // Handling the response after it's received
+                onSuccess(response)
+            } catch (e: Exception) {
+                // If an error occurs, invoke the onError callback
+                onError("Failed to create user: ${e.message ?: "Unknown error"}")
+            }
+        }
+    }
+
+
 }

@@ -36,13 +36,13 @@ interface RetrofitAPICredentials {
 
     // CREDENTIALS API
     @POST("credentials/create-user/")
-    fun saveUser(@Body userProfileDTO: UserProfileDTO?): Call<String>
+    suspend fun saveUser(@Body userProfileDTO: UserProfileDTO?): String
 
     @POST("credentials/check-login-credentials/")
-    fun checkLoginCredentials(@Body authenticationDTO: AuthenticationDTO) : Call<User>
+    suspend fun checkLoginCredentials(@Body authenticationDTO: AuthenticationDTO) : User
 
     @GET("credentials/get-user-token/")
-    fun getUserByToken(@Query("token") token:String) : Call<User>
+    suspend fun getUserByToken(@Query("token") token:String) : User
 
     @PUT("credentials/verify-email/")
     fun verifyUser(@Query("email") email:String) : Call<Boolean>
