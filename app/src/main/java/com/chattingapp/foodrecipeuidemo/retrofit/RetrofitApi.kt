@@ -76,7 +76,7 @@ interface RetrofitAPICredentials {
     fun getProfilePicturesList(@Body ppList: List<String>) : Call<List<String>>
 
     @GET("/profile-picture-downloader/download/{fileName}")
-    fun getImage(@Path("fileName") imageName:String): Call<String>
+    suspend fun getImage(@Path("fileName") imageName:String): String
 
 
     // RECIPE PICTURE DOWNLOADER API

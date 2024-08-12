@@ -26,23 +26,23 @@ class ProfileImageViewModel : ViewModel() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
-                    val response = apiService.getImage(profilePictureUrl).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
+                    // Directly call the suspend function
+                    val imageString = apiService.getImage(profilePictureUrl)
+                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
                     null
                 }
             }
+
             _profileImage.value = response
-            if (response != null && Constant.targetUserProfile == null) {
-                Constant.userProfile.bm = response
-            }
-            else if(response != null && Constant.targetUserProfile != null){
-                Constant.targetUserProfile!!.bm = response
+
+            if (response != null) {
+                if (Constant.targetUserProfile == null) {
+                    Constant.userProfile.bm = response
+                } else {
+                    Constant.targetUserProfile?.bm = response
+                }
             }
         }
     }

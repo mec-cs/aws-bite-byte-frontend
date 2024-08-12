@@ -29,20 +29,17 @@ class ProfileFollowingViewModel: ViewModel() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
-                    val response = RetrofitHelper.apiService.getImage(user.followed.profilePicture).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
+                    // Call the suspend function directly
+                    val imageString = RetrofitHelper.apiService.getImage(user.followed.profilePicture)
+                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
                     null
                 }
             }
 
-            response?.let {
-                imageCache[user.followed.profilePicture] = it
+            if (response != null) {
+                imageCache[user.followed.profilePicture] = response
             }
 
             onImageLoaded(response)

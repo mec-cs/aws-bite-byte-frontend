@@ -62,13 +62,10 @@ class CommentViewModel : ViewModel() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
-                    val response = RetrofitHelper.apiService.getImage(comment.profilePicture!!).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
+                    // Directly call the suspend function
+                    val response = RetrofitHelper.apiService.getImage(comment.profilePicture!!)
+                    val decodedBytes = Base64.decode(response, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
                     null
                 }

@@ -34,13 +34,10 @@ class UserProfileViewModel : ViewModel() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
-                    val response = apiService.getImage(recipe.ownerImage!!).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
+                    // Directly call the suspend function
+                    val imageString = apiService.getImage(recipe.ownerImage!!)
+                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
                     null
                 }
