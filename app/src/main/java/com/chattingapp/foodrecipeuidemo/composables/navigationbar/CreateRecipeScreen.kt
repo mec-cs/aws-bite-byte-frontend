@@ -38,7 +38,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,11 +53,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper.apiService
+import com.chattingapp.foodrecipeuidemo.viewmodel.CreateRecipeViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -79,19 +84,30 @@ fun CreateRecipeScreen(navController: NavHostController) {
     var instructions by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageFile by remember { mutableStateOf<File?>(null) }
-    var showDialog by remember { mutableStateOf(false) }
-    var nullSave by remember { mutableStateOf(false) }
-
-    var isLoading by remember { mutableStateOf(false) }
-
-
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
+    val createRecipeViewModel: CreateRecipeViewModel = viewModel()
+    val isLoadingCreateRecipe by createRecipeViewModel.isLoading.collectAsState()
+    val isSuccessCreateRecipe by createRecipeViewModel.isSuccess.collectAsState()
 
     fun showSuccessMessage(message: String) {
         coroutineScope.launch {
             snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    LaunchedEffect(isSuccessCreateRecipe) {
+        if (isSuccessCreateRecipe) {
+            recipeName = ""
+            description = ""
+            cuisine = ""
+            course = ""
+            diet = ""
+            prepTime = ""
+            ingredients = ""
+            instructions = ""
+            imageUri = null
+            selectedImageFile = null
         }
     }
 
@@ -106,79 +122,16 @@ fun CreateRecipeScreen(navController: NavHostController) {
         }
     }
 
-    fun createRecipe() {
-        isLoading = true
-        coroutineScope.launch {
-            val namePart = recipeName.toRequestBody("text/plain".toMediaTypeOrNull())
-            val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
-            val cuisinePart = cuisine.toRequestBody("text/plain".toMediaTypeOrNull())
-            val coursePart = course.toRequestBody("text/plain".toMediaTypeOrNull())
-            val dietPart = diet.toRequestBody("text/plain".toMediaTypeOrNull())
-            val prepTimePart = prepTime.toRequestBody("text/plain".toMediaTypeOrNull())
-            val ingredientsPart = ingredients.toRequestBody("text/plain".toMediaTypeOrNull())
-            val instructionsPart = instructions.toRequestBody("text/plain".toMediaTypeOrNull())
-            val imageUriPart = selectedImageFile?.name?.toRequestBody("text/plain".toMediaTypeOrNull())
-            val ownerIdPart = Constant.userProfile.id.toString().toRequestBody("text/plain".toMediaTypeOrNull())
-            val typePart = "true".toRequestBody("text/plain".toMediaTypeOrNull())
+    fun createRecipe(createRecipeViewModel: CreateRecipeViewModel) {
 
 
-            val imageFile = selectedImageFile?.let {
-                MultipartBody.Part.createFormData("file", it.name, it.asRequestBody("image/jpeg".toMediaTypeOrNull()))
-            }
-
-            apiService.createTheRecipe(
-                file = imageFile!!,
-                name = namePart,
-                description = descriptionPart,
-                cuisine = cuisinePart,
-                course = coursePart,
-                diet = dietPart,
-                prepTime = prepTimePart,
-                ingredients = ingredientsPart,
-                instructions = instructionsPart,
-                image = imageUriPart!!,
-                ownerId = ownerIdPart,
-                type = typePart
-            ).enqueue(object : Callback<Recipe> {
-                override fun onResponse(call: Call<Recipe>, response: Response<Recipe>) {
-                    isLoading = false
-                    if (response.body() == null) {
-                        Log.d("Save NULL Response", "Response is null, please check conditions")
-                        nullSave = true
-                    } else if (response.isSuccessful) {
-                        Log.d("Recipe Created, HTTP: " + response.code(), response.body().toString())
-                        nullSave = false
-                        showSuccessMessage("Your recipe successfully created!")
-
-                        recipeName = ""
-                        description = ""
-                        cuisine = ""
-                        course = ""
-                        diet = ""
-                        prepTime = ""
-                        ingredients = ""
-                        instructions = ""
-                        imageUri = null
-                        selectedImageFile = null
-
-                    } else {
-                        Log.d("onResponse Fail", "Response Unsuccessful!")
-                        nullSave = false
-                    }
-                }
-
-                override fun onFailure(call: Call<Recipe>, t: Throwable) {
-                    isLoading = false
-                    Log.d("onFailure", "Fail to call the API function")
-                    nullSave = false
-                }
-            })
-        }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
+
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -356,21 +309,37 @@ fun CreateRecipeScreen(navController: NavHostController) {
                                 ingredients.isNotEmpty() && instructions.isNotEmpty() &&
                                 selectedImageFile != null
                             ) {
-                                createRecipe()
+                                // Call the createRecipe function from the ViewModel
+                                createRecipeViewModel.createRecipe(
+                                    recipeName = recipeName,
+                                    description = description,
+                                    cuisine = cuisine,
+                                    course = course,
+                                    diet = diet,
+                                    prepTime = prepTime,
+                                    ingredients = ingredients,
+                                    instructions = instructions,
+                                    selectedImageFile = selectedImageFile
+                                )
+
                             } else {
                                 showSuccessMessage("Please fill out all fields.")
                             }
                         },
-                        enabled = !isLoading,
-                        modifier = Modifier.width(150.dp).padding(bottom = 400.dp)
+                        enabled = !isLoadingCreateRecipe,
+                        modifier = Modifier
+                            .width(150.dp)
+                            .padding(bottom = 400.dp)
                     ) {
                         Text("Create Recipe")
                     }
+
                 }
+
             }
         }
 
-        if (isLoading) {
+        if (isLoadingCreateRecipe) {
             // Show a loading indicator or dialog
             Box(
                 modifier = Modifier
@@ -387,18 +356,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
     }
 }
 
-/*fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (File) -> Unit) {
-    val inputStream = contentResolver.openInputStream(uri)
-    val file = File.createTempFile("image", ".jpg")
 
-    inputStream?.use { input ->
-        FileOutputStream(file).use { output ->
-            input.copyTo(output)
-        }
-    }
-
-    onFileCopied(file)
-}*/
 
 fun copyUriToFile(uri: Uri, contentResolver: ContentResolver, onFileCopied: (File) -> Unit) {
     // Open an input stream from the given Uri

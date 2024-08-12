@@ -106,7 +106,7 @@ interface RetrofitAPICredentials {
 
     @Multipart
     @POST("create-recipe/create-recipe")
-    fun createTheRecipe(
+    suspend fun createTheRecipe(
         @Part file: MultipartBody.Part,
         @Part("name") name: RequestBody,
         @Part("description") description: RequestBody,
@@ -119,7 +119,7 @@ interface RetrofitAPICredentials {
         @Part("image") image: RequestBody,
         @Part("ownerId") ownerId: RequestBody,
         @Part("type") type: RequestBody
-    ): Call<Recipe>
+    ): Recipe
 
     @GET("recipe-getter/specific-fields/{id}")
     suspend fun getRecipeById(@Path("id") id: Long): RecipeSpecificDTO
