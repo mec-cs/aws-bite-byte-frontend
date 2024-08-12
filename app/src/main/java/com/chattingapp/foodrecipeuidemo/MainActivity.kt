@@ -53,9 +53,9 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     // Call the API using the suspend function
                                     val user = apiService.getUserByToken(authToken)
+                                    Constant.user = user
 
                                     if (user.verified) {
-                                        Constant.user = user
                                         navigateToHomePage()
                                     } else {
                                         navigateToEmailPage()

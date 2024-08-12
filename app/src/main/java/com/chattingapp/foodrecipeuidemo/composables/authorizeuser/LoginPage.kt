@@ -133,8 +133,8 @@ private suspend fun loginUser(
     val apiService = RetrofitHelper.apiService
     try {
         val response = apiService.checkLoginCredentials(authenticationDTO)
+        Constant.user = response
         if (response.verified) {
-            Constant.user = response
             navigateToHomePageActivity(context)
         } else {
             navigateToEmailActivity(context)
