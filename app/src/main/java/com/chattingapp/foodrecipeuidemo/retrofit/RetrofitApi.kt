@@ -20,6 +20,7 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -78,10 +79,9 @@ interface RetrofitAPICredentials {
     @GET("/profile-picture-downloader/download/{fileName}")
     suspend fun getImage(@Path("fileName") imageName:String): String
 
-
     // RECIPE PICTURE DOWNLOADER API
     @GET("/recipe-picture-downloader/download/{fileName}")
-    fun getImageRecipe(@Path("fileName") imageName:String): Call<String>
+    suspend fun getImageRecipe(@Path("fileName") imageName:String): String
 
     @POST("/recipe-picture-downloader/download/images")
     fun getRecipeImagesList(@Body recipeList: List<String>) : Call<List<String>>
@@ -89,48 +89,28 @@ interface RetrofitAPICredentials {
 
     // RECIPE API
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
-    fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): Call<List<RecipeProjection>>
+    suspend fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): List<RecipeProjection>
 
     @GET("favorite/check-favorite")
-    fun checkFavorite(@Query("userId") userId:Long, @Query("recipeId") recipeId:Long): Call<Boolean>
+    suspend fun checkFavorite(@Query("userId") userId:Long, @Query("recipeId") recipeId:Long): Boolean
 
     @DELETE("favorite/delete/{userId}/{recipeId}")
-    fun deleteFavorite(@Path("userId") userId: Long, @Path("recipeId") recipeId: Long): Call<Void>
+    suspend fun deleteFavorite(@Path("userId") userId: Long, @Path("recipeId") recipeId: Long): Boolean
 
     @POST("favorite/add")
-    fun addFavorite(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long): Call<Boolean>
+    suspend fun addFavorite(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long): Boolean
 
     @GET("like-dislike/count")
-    fun getLikeCounts(@Query("recipeId") recipeId: Long): Call<LikeCountResponse>
+    suspend fun getLikeCounts(@Query("recipeId") recipeId: Long): LikeCountResponse
 
     @GET("like-dislike/check-like")
-    fun getLike(@Query("recipeId") recipeId: Long, @Query("userId") userId:Long): Call<Boolean>
+    suspend fun getLike(@Query("recipeId") recipeId: Long, @Query("userId") userId:Long): Boolean
 
     @POST("like-dislike/add-like")
-    fun addLike(@Body like:Like): Call<Like>
+    suspend fun addLike(@Body like:Like): Like
 
     @DELETE("like-dislike/remove-like/{recipeId}/{userId}")
-    fun deleteLike(@Path("recipeId") recipeId: Long , @Path("userId") userId: Long): Call<Void>
-
-
-    // MANAGE RECIPE API
-    @Multipart
-    @POST("create-recipe/create-draft")
-    fun saveRecipeAsDraft(
-        @Part file: MultipartBody.Part?,
-        @Part("name") name: RequestBody,
-        @Part("description") description: RequestBody,
-        @Part("cuisine") cuisine: RequestBody,
-        @Part("course") course: RequestBody,
-        @Part("diet") diet: RequestBody,
-        @Part("prepTime") prepTime: RequestBody,
-        @Part("ingredients") ingredients: RequestBody,
-        @Part("instructions") instructions: RequestBody,
-        @Part("image") image: RequestBody,
-        @Part("ownerId") ownerId: RequestBody,
-        @Part("type") type: RequestBody,
-        @Part("isImgChanged") isImgChanged: RequestBody
-    ): Call<Recipe>
+    suspend fun deleteLike(@Path("recipeId") recipeId: Long , @Path("userId") userId: Long): ResponseBody
 
     @Multipart
     @POST("create-recipe/create-recipe")

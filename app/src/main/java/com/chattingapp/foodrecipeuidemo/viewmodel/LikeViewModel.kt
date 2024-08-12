@@ -51,7 +51,8 @@ class LikeViewModel() : ViewModel() {
                 put(recipeId, true)
             }
             try {
-                val response = RetrofitHelper.apiService.getLike(recipeId, userId).await()
+                // Directly call the suspend function
+                val response = RetrofitHelper.apiService.getLike(recipeId, userId)
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                     put(recipeId, response)
                 }
@@ -68,10 +69,11 @@ class LikeViewModel() : ViewModel() {
             }
         }
     }
+
     private var isActionInProgress = false
 
     fun toggleLike(like: Like) {
-        if(!isActionInProgress) {
+        if (!isActionInProgress) {
             isActionInProgress = true
             viewModelScope.launch {
                 try {
@@ -82,57 +84,42 @@ class LikeViewModel() : ViewModel() {
                     }
 
                     if (newLikeState) {
-                        val response = RetrofitHelper.apiService.addLike(like).awaitResponse()
-                        if (response.isSuccessful) {
+                        try {
+                            RetrofitHelper.apiService.addLike(like)
                             updateLikeCount(like.recipeId, 1)
-                            isActionInProgress = false
-
-                            // Handle successful addition of like
                             Log.d("LikeToggle", "Like added successfully")
-                        } else {
-                            // Handle error response
-                            Log.e(
-                                "LikeToggle",
-                                "Error adding like: ${response.errorBody()?.string()}"
-                            )
+                        } catch (e: Exception) {
+                            Log.e("LikeToggle", "Error adding like: ${e.message}")
                             _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                                 put(like.recipeId, false)
                             }
                         }
-                        delay(1000)
-
                     } else {
-                        val response =
+                        try {
                             RetrofitHelper.apiService.deleteLike(like.recipeId, like.userId)
-                                .awaitResponse()
-                        if (response.isSuccessful) {
-                            // Handle successful removal of like
                             updateLikeCount(like.recipeId, -1)
-                            isActionInProgress = false
-
                             Log.d("LikeToggle", "Like removed successfully")
-                        } else {
-                            // Handle error response
+                        } catch (e: Exception) {
+                            Log.e("LikeToggle", "Error removing like: ${e.message}")
                             _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                                 put(like.recipeId, true)
                             }
                         }
-                        delay(1000)
-
                     }
-
+                    delay(1000)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                         put(like.recipeId, _isLikedMap.value[like.recipeId] ?: false)
-                        isActionInProgress = false
-                        delay(1000)
-
                     }
+                } finally {
+                    isActionInProgress = false
                 }
             }
         }
     }
+
+
 
     private fun updateLikeCount(recipeId: Long, delta: Int) {
         viewModelScope.launch {
@@ -155,19 +142,17 @@ class LikeViewModel() : ViewModel() {
             }
 
             try {
-                val response = RetrofitHelper.apiService.getLikeCounts(recipeId).awaitResponse()
-                if (response.isSuccessful) {
-                    _likeCounts.value = _likeCounts.value + (recipeId to response.body())
-                } else {
-                    // Handle the error here
-                    _likeCounts.value = _likeCounts.value + (recipeId to null)
-                }
+                // Directly call the suspend function
+                val response = RetrofitHelper.apiService.getLikeCounts(recipeId)
+                _likeCounts.value = _likeCounts.value + (recipeId to response)
             } catch (e: Exception) {
                 // Handle the exception here
                 _likeCounts.value = _likeCounts.value + (recipeId to null)
+                e.printStackTrace() // Optional: log the exception for debugging
             }
         }
     }
+
 
 
     val isActionInProgressFlow = MutableStateFlow(isActionInProgress)

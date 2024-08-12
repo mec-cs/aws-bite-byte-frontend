@@ -22,32 +22,31 @@ class FavoriteViewModel : ViewModel() {
 
 
     fun checkFavorite(userId: Long, recipeId: Long) {
-            if (_checkedFavoriteStatus.value.contains(recipeId)) return
+        if (_checkedFavoriteStatus.value.contains(recipeId)) return
 
-            viewModelScope.launch {
+        viewModelScope.launch {
+            _loadingState.value =
+                _loadingState.value.toMutableMap().apply { put(recipeId, true) }
+            try {
+                // Directly call the suspend function
+                val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId)
+                _isFavoriteMap.value =
+                    _isFavoriteMap.value.toMutableMap().apply { put(recipeId, response) }
+                _checkedFavoriteStatus.value = _checkedFavoriteStatus.value + recipeId
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _isFavoriteMap.value =
+                    _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
+            } finally {
                 _loadingState.value =
-                    _loadingState.value.toMutableMap().apply { put(recipeId, true) }
-                try {
-                    val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId).await()
-                    _isFavoriteMap.value =
-                        _isFavoriteMap.value.toMutableMap().apply { put(recipeId, response) }
-                    _checkedFavoriteStatus.value = _checkedFavoriteStatus.value + recipeId
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    _isFavoriteMap.value =
-                        _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
-                } finally {
-                    _loadingState.value =
-                        _loadingState.value.toMutableMap().apply { put(recipeId, false) }
-
-                }
+                    _loadingState.value.toMutableMap().apply { put(recipeId, false) }
             }
-
+        }
     }
 
     fun toggleFavorite(userId: Long, recipeId: Long) {
-        if(!isActionInProgress) {
+        if (!isActionInProgress) {
             isActionInProgress = true
 
             viewModelScope.launch {
@@ -58,30 +57,31 @@ class FavoriteViewModel : ViewModel() {
                         .apply { put(recipeId, newFavoriteState) }
 
                     if (newFavoriteState) {
-                        val response =
-                            RetrofitHelper.apiService.addFavorite(userId, recipeId).await()
+                        // Add to favorites
+                        val response = RetrofitHelper.apiService.addFavorite(userId, recipeId)
                         if (!response) {
-                            _isFavoriteMap.value =
-                                _isFavoriteMap.value.toMutableMap().apply { put(recipeId, false) }
+                            _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap()
+                                .apply { put(recipeId, false) }
                         }
                     } else {
-                        RetrofitHelper.apiService.deleteFavorite(userId, recipeId).await()
-                        _isFavoriteMap.value =
-                            _isFavoriteMap.value.toMutableMap().apply { put(recipeId, true) }
-
+                        // Remove from favorites
+                        val response = RetrofitHelper.apiService.deleteFavorite(userId, recipeId)
+                        if (!response) {
+                            _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap()
+                                .apply { put(recipeId, true) }
+                        }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _isFavoriteMap.value = _isFavoriteMap.value.toMutableMap()
                         .apply { put(recipeId, _isFavoriteMap.value[recipeId] ?: false) }
-                }
-                finally {
+                } finally {
                     isActionInProgress = false
-
                 }
             }
         }
     }
+
 
     val isActionInProgressFlow = MutableStateFlow(isActionInProgress)
 

@@ -54,13 +54,10 @@ class RecipeViewModel : ViewModel() {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 try {
-                    val response = apiService.getImageRecipe(recipe.image!!).execute()
-                    if (response.isSuccessful) {
-                        val decodedBytes = Base64.decode(response.body(), Base64.DEFAULT)
-                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                    } else {
-                        null
-                    }
+                    // Directly call the suspend function
+                    val imageString = apiService.getImageRecipe(recipe.image!!)
+                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
+                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
                     null
                 }
@@ -89,43 +86,13 @@ class RecipeViewModel : ViewModel() {
             if (isLoading) return
             isLoading = true
 
-            apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-                override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                    isLoading = false
-                    if (response.isSuccessful) {
-                        val newRecipes = response.body() ?: emptyList()
-                        if (newRecipes.isNotEmpty()) {
-                            val currentList = _recipeList.value.toMutableList()
-                            val existingIds = currentList.map { it.id }.toSet()
-                            val filteredRecipes = newRecipes.filter { it.id !in existingIds }
-                            if (filteredRecipes.isNotEmpty()) {
-                                currentList.addAll(filteredRecipes)
-                                _recipeList.value = currentList
-                                recipeListDetail = currentList
-                                _displayRecipes.value = true
-                                page += 1
-                            }
-                        }
+            viewModelScope.launch {
+                try {
+                    val newRecipes = withContext(Dispatchers.IO) {
+                        apiService.getRecipeDisplay(userId, page)
                     }
-                }
 
-                override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
                     isLoading = false
-                    Log.e("RecipeViewModel", "Failed to load recipes", t)
-                }
-            })
-        }
-    }
-
-    fun loadMoreRecipes(userId: Long) {
-        if (isLoading) return
-        isLoading = true
-
-        apiService.getRecipeDisplay(userId, page).enqueue(object : Callback<List<RecipeProjection>> {
-            override fun onResponse(call: Call<List<RecipeProjection>>, response: Response<List<RecipeProjection>>) {
-                isLoading = false
-                if (response.isSuccessful) {
-                    val newRecipes = response.body() ?: emptyList()
                     if (newRecipes.isNotEmpty()) {
                         val currentList = _recipeList.value.toMutableList()
                         val existingIds = currentList.map { it.id }.toSet()
@@ -134,19 +101,48 @@ class RecipeViewModel : ViewModel() {
                             currentList.addAll(filteredRecipes)
                             _recipeList.value = currentList
                             recipeListDetail = currentList
+                            _displayRecipes.value = true
                             page += 1
                         }
                     }
+                } catch (e: Exception) {
+                    isLoading = false
+                    Log.e("RecipeViewModel", "Failed to load recipes", e)
                 }
             }
-
-            override fun onFailure(call: Call<List<RecipeProjection>>, t: Throwable) {
-                isLoading = false
-                Log.e("RecipeViewModel", "Failed to load more recipes", t)
-                page -= 1
-            }
-        })
+        }
     }
+
+    fun loadMoreRecipes(userId: Long) {
+        if (isLoading) return
+        isLoading = true
+
+        viewModelScope.launch {
+            try {
+                val newRecipes = withContext(Dispatchers.IO) {
+                    apiService.getRecipeDisplay(userId, page)
+                }
+
+                if (newRecipes.isNotEmpty()) {
+                    val currentList = _recipeList.value.toMutableList()
+                    val existingIds = currentList.map { it.id }.toSet()
+                    val filteredRecipes = newRecipes.filter { it.id !in existingIds }
+                    if (filteredRecipes.isNotEmpty()) {
+                        currentList.addAll(filteredRecipes)
+                        _recipeList.value = currentList
+                        recipeListDetail = currentList
+                        page += 1
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RecipeViewModel", "Failed to load more recipes", e)
+                page -= 1
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
 
 
     private val _recipe = mutableStateOf<RecipeSpecificDTO?>(null)
