@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -158,7 +159,9 @@ fun CreateRecipeScreen(navController: NavHostController) {
                         modifier = Modifier
                             .size(100.dp)
                             .clickable { launcher.launch("image/*") }
-                            .background(Color.White), // This is applied directly to Box
+                            .background(Color.Transparent)
+                            .border(1.dp, Color.Black), // This is applied directly to Box
+
                         contentAlignment = Alignment.Center
                     ) {
                         if (imageUri != null) {
