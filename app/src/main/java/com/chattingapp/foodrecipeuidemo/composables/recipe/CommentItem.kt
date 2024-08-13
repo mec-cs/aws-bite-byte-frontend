@@ -30,10 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
@@ -43,12 +45,10 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
     var expanded by remember { mutableStateOf(false) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(comment.id) {
         viewModel.fetchImage(comment) {
             bitmap = it
-            isLoading = false
         }
     }
 
@@ -59,7 +59,6 @@ fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (!isLoading) {
             bitmap?.let {
                 Image(
                     bitmap = it.asImageBitmap(),
@@ -68,7 +67,13 @@ fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
                         .size(50.dp)
                         .clip(CircleShape)
                 )
-            } ?: CircularProgressIndicator()
+            } ?: Image(
+                painter = painterResource(id = R.drawable.placeholder_profile),
+                contentDescription = "Profile Image",
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+            )
             var expandedMenu by remember { mutableStateOf(false) }
 
 
@@ -107,9 +112,7 @@ fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
                 }
             }
 
-        } else {
-            CircularProgressIndicator()
-        }
+
 
         val commentText = comment.comment ?: ""
         val truncatedDescription = if (commentText.length > Constant.MAX_COMMENT_SIZE) {
