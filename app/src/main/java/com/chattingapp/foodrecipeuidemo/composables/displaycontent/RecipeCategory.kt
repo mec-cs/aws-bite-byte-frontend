@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.composables.displaycontent
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.ErrorPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryClickViewModel
@@ -60,12 +64,13 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
     val recipeListFavorite by categoryFavoriteViewModel.recipeList.observeAsState(emptyList())
     val isLoadingFavorite by categoryFavoriteViewModel.isLoading.observeAsState(false)
     val isLoadingCountFavorite by categoryFavoriteViewModel.isLoadingCount.observeAsState(false)
+    val errorMessageFavorite by categoryFavoriteViewModel.errorMessage.collectAsState()
     val favoriteCount = categoryFavoriteViewModel.favoriteCount.observeAsState()
 
     val categoryTrendsViewModel: CategoryTrendsViewModel = viewModel()
     val recipeListTrends by categoryTrendsViewModel.recipes.collectAsState(emptyList())
     val isLoadingTrends by categoryTrendsViewModel.isLoading.collectAsState(false)
-    val isLoadingCountTrends by categoryTrendsViewModel.isLoading.collectAsState(false)
+    val errorMessageTrends by categoryTrendsViewModel.errorMessage.collectAsState()
     val allIdSizeTrends by categoryTrendsViewModel.allIdsSize.collectAsState()
 
 
@@ -167,10 +172,11 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         }
                     }
                     if (isLoadingLike && recipesLike.isEmpty()) {
-                        CircularProgressIndicator()
+                        PageLoadingPlaceholder()
                     } else {
                         errorMessageLike?.let {
-                            Text(text = it)
+                            ErrorPlaceholder()
+
                         }
 
 
@@ -209,10 +215,11 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         }
                     }
                     if (isLoadingClick && recipesClick.isEmpty()) {
-                        CircularProgressIndicator()
+                        PageLoadingPlaceholder()
                     } else {
                         errorMessageClick?.let {
-                            Text(text = it)
+                            ErrorPlaceholder()
+
                         }
                         LazyColumn(
                             state = listStateClick,
@@ -252,9 +259,18 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                     }
                     //if(isLoadingFavorite){
                     if(favoriteCount.value == -1L){
-                        CircularProgressIndicator()
+                        Image(
+                            painter = painterResource(id = R.drawable.yumbyte_logo),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+
+                        )
                     }
                     else{
+                        errorMessageFavorite?.let {
+                            ErrorPlaceholder()
+                        }
                         LaunchedEffect(cardId) {
                             cardId?.let {
                                 if(recipeListFavorite.isEmpty() && favoriteCount.value != 0L) {
@@ -264,7 +280,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
 
                         }
                         if(isLoadingFavorite){
-                            CircularProgressIndicator()
+                            PageLoadingPlaceholder()
                         }
                         else{
                             LazyColumn(
@@ -308,10 +324,10 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         }
                     }
                     if (isLoadingTrends && recipeListTrends.isEmpty()) {
-                        CircularProgressIndicator()
+                        PageLoadingPlaceholder()
                     } else {
-                        errorMessageLike?.let {
-                            Text(text = it)
+                        errorMessageTrends?.let {
+                            ErrorPlaceholder()
                         }
                         LazyColumn(
                             state = listStateUserLike,

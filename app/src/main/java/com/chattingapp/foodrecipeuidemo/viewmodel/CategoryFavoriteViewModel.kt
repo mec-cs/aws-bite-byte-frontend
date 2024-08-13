@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,6 +30,8 @@ class CategoryFavoriteViewModel : ViewModel(){
     var recipeListDetail: List<RecipeProjection> = emptyList()
     private var noMoreRecipes = false
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
 
     fun fetchRecipes(userId: Long) {
         if (page == 0 && !isLoadingMore) {
@@ -55,8 +59,10 @@ class CategoryFavoriteViewModel : ViewModel(){
                         }
                     }
                 } catch (e: IOException) {
+                    _errorMessage.value = "Network Error: ${e.message}"
                     Log.e("CategoryFavoriteViewModel", "Network error while fetching recipes", e)
                 } catch (e: HttpException) {
+                    _errorMessage.value = "HTTP Error: ${e.message}"
                     Log.e("CategoryFavoriteViewModel", "HTTP error while fetching recipes", e)
                 } finally {
                     _isLoading.value = false
@@ -94,8 +100,10 @@ class CategoryFavoriteViewModel : ViewModel(){
                     noMoreRecipes = true
                 }
             } catch (e: IOException) {
+                _errorMessage.value = "Network Error: ${e.message}"
                 Log.e("CategoryFavoriteViewModel", "Network error while loading more recipes", e)
             } catch (e: HttpException) {
+                _errorMessage.value = "HTTP Error: ${e.message}"
                 Log.e("CategoryFavoriteViewModel", "HTTP error while loading more recipes", e)
             } finally {
                 isLoadingMore = false
@@ -119,8 +127,12 @@ class CategoryFavoriteViewModel : ViewModel(){
                 _favoriteCount.value = favoriteCount
                 Log.d("FavoriteCountViewModel", "Favorite count: $favoriteCount")
             } catch (e: IOException) {
+                _errorMessage.value = "Network Error: ${e.message}"
+
                 Log.e("FavoriteCountViewModel", "Network error while fetching favorite count", e)
             } catch (e: HttpException) {
+                _errorMessage.value = "HTTP Error: ${e.message}"
+
                 Log.e("FavoriteCountViewModel", "HTTP error while fetching favorite count", e)
             } finally {
                 _isLoadingCount.value = false

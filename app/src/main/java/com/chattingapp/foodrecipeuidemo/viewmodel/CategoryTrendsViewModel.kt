@@ -31,6 +31,8 @@ class CategoryTrendsViewModel: ViewModel() {
     private val _allIdsSize = MutableStateFlow(0) // New StateFlow for size
     val allIdsSize: StateFlow<Int> = _allIdsSize
 
+
+
     fun fetchMostClickedLastTwoIds() {
         viewModelScope.launch {
             _isLoading.value = true

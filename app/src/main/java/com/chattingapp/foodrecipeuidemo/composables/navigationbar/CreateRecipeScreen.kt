@@ -55,11 +55,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper.apiService
@@ -395,9 +397,12 @@ fun CreateRecipeScreen(navController: NavHostController) {
                     .background(Color.Black.copy(alpha = 0.5f)),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(100.dp),
-                    color = MaterialTheme.colorScheme.primary
+                Image(
+                    painter = painterResource(id = R.drawable.yumbyte_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(200.dp)
+
                 )
             }
         }
