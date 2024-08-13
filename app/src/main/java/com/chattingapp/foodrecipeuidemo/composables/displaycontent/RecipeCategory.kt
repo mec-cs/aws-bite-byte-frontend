@@ -43,16 +43,6 @@ import kotlinx.coroutines.delay
 fun RecipeCategory(navController: NavController, cardId: String?) {
 
     val selectedTab = rememberSaveable  { mutableStateOf(cardId) }
-    /*val recipeViewModelLike = RecipeViewModel()
-    val recipeViewModelClick = RecipeViewModel()
-    val recipeViewModelFavorite = RecipeViewModel()
-    val recipeViewModelUserLike = RecipeViewModel()
-
-
-    val userProfileViewModelLike = UserProfileViewModel()
-    val userProfileViewModelClick = UserProfileViewModel()
-    val userProfileViewModelFavorite = UserProfileViewModel()
-    val userProfileViewModelUserLike = UserProfileViewModel()*/
 
     val categoryMostLikedViewModel: CategoryMostLikedViewModel = viewModel()
     val recipesLike by categoryMostLikedViewModel.recipes.collectAsState()
@@ -109,7 +99,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp)
+                .padding(16.dp, 0.dp, 16.dp, 0.dp)
         ) {
             if(selectedTab.value != "Favorites"){
                 Box(

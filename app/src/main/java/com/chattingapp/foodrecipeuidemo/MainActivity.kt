@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
+import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FoodRecipeUiDemoTheme {
+            MyAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

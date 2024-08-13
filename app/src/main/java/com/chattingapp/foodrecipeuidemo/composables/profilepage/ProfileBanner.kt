@@ -343,7 +343,7 @@ fun ProfileBanner(  navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(16.dp, 0.dp, 16.dp, 32.dp)
+                    .padding(16.dp, 0.dp, 16.dp, 0.dp)
             ) {
 
                 items(recipeList) { recipe ->

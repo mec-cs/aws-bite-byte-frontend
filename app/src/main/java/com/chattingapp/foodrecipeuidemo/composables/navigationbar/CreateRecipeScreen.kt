@@ -131,7 +131,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(12.dp)
+                .padding(0.dp)
                 .imePadding()
         ) {
 

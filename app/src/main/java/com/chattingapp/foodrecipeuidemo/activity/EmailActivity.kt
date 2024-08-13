@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.FoodRecipeUiDemoTheme
+import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.CredentialsViewModel
@@ -52,7 +53,7 @@ class EmailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FoodRecipeUiDemoTheme {
+            MyAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -105,8 +106,9 @@ fun VerificationCodeUI(viewModel: CredentialsViewModel) {
 
         OutlinedTextField(
             value = userCode,
-            onValueChange = {
-                userCode = it
+            onValueChange = { newTextFieldValue ->
+                val filteredText = newTextFieldValue.text.filter { it.isDigit() }
+                userCode = newTextFieldValue.copy(text = filteredText)
             },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number

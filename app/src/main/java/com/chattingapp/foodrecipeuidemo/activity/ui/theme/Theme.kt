@@ -2,7 +2,10 @@ package com.chattingapp.foodrecipeuidemo.activity.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -10,6 +13,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -68,3 +73,54 @@ fun FoodRecipeUiDemoTheme(
         content = content
     )
 }
+
+/*@Composable
+fun MyAppTheme(
+    backgroundColor: Color = Color(0xFFFFFDD0), // Default background color
+    content: @Composable () -> Unit
+) {
+    MaterialTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor) // Apply background color
+        ) {
+            content()
+        }
+    }
+}*/
+
+/*@Composable
+fun MyAppTheme(content: @Composable () -> Unit) {
+    val colorScheme = lightColorScheme(
+        primary = Color(0xFF6200EE), // example colors
+        secondary = Color(0xFF03DAC6),
+        background = Color(0xFFFFFDD0) // ensure this is set to the desired background color
+    )
+
+    MaterialTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorScheme.background) // Apply background color
+        ) {
+            content()
+        }
+    }
+}*/
+
+@Composable
+fun MyAppTheme(content: @Composable () -> Unit) {
+    val colorScheme = lightColorScheme(
+        primary = Color(0xFF6200EE), // example colors
+        secondary = Color(0xFF03DAC6),
+        background = Color(0xFFFFFDD0) // ensure this is set to the desired background color
+    )
+
+    MaterialTheme(
+        colorScheme = colorScheme, // Apply the colorScheme here
+        typography = Typography,    // Apply typography if needed
+        content = content
+    )
+}
+

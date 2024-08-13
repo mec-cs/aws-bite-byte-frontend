@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
 import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategory
 import com.chattingapp.foodrecipeuidemo.composables.feednavigator.FeedNavigator
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.AppNavigationBar
@@ -39,7 +40,7 @@ class HomePageActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            FoodRecipeUiDemoTheme {
+            MyAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -91,7 +92,6 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isSearchScreen = false
                                     Constant.isFeedScreen = false
                                     Constant.targetUserProfile = null
-                                    val recipeViewModel = RecipeViewModel()
                                     CreateRecipeScreen(navController)
                                 }
                                 composable("feed") {
@@ -100,7 +100,6 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isSearchScreen = false
                                     Constant.isFeedScreen = false
                                     Constant.targetUserProfile = null
-                                    //Feed(navController)
                                     FeedNavigator(navController = navController)
                                 }
                                 composable("profile") {
