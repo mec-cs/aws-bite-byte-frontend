@@ -24,6 +24,7 @@ class FavoriteViewModel : ViewModel() {
     fun checkFavorite(userId: Long, recipeId: Long) {
         if (_checkedFavoriteStatus.value.contains(recipeId)) return
 
+        isActionInProgress = true
         viewModelScope.launch {
             _loadingState.value =
                 _loadingState.value.toMutableMap().apply { put(recipeId, true) }
@@ -41,6 +42,7 @@ class FavoriteViewModel : ViewModel() {
             } finally {
                 _loadingState.value =
                     _loadingState.value.toMutableMap().apply { put(recipeId, false) }
+                isActionInProgress = false
             }
         }
     }

@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -213,6 +214,7 @@ fun ProfileBanner(  navController: NavController) {
                                 modifier = Modifier
                                     .size(100.dp)
                                     .padding(10.dp, 0.dp, 0.dp, 0.dp)
+                                    .clip(RoundedCornerShape(8.dp))
                                     .clickable {
                                         launcher.launch("image/*")
                                     }
