@@ -201,5 +201,5 @@ interface RetrofitAPICredentials {
     suspend fun sendChangePasswordEmail(@Query("email") email:String) : Int
 
     @POST("credentials/change-password")
-    fun changePassword(@Body request: ChangePasswordRequest): Call<Boolean>
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Boolean
 }

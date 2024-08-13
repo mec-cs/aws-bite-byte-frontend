@@ -2,7 +2,6 @@ package com.chattingapp.foodrecipeuidemo.composables.authorizeuser
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,13 +30,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
-import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
-import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 private fun displayToast(msg:String, context: Context){
     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()

@@ -3,6 +3,8 @@ package com.chattingapp.foodrecipeuidemo.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
+import com.chattingapp.foodrecipeuidemo.entity.ChangePasswordRequest
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +44,24 @@ class ForgotPasswordViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.d("EMAIL SEND ERROR:", e.message.orEmpty())
                 _serverCode.value = 0 // Handle error case appropriately
+            }
+        }
+    }
+
+    fun changePassword(email: String, newPassword: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val hashedPassword = PasswordUtil.hashPassword(newPassword)
+                val request = ChangePasswordRequest(email, hashedPassword)
+                val success = RetrofitHelper.apiService.changePassword(request)
+
+                if (success) {
+                    onSuccess()
+                } else {
+                    onError("Failed to change password.")
+                }
+            } catch (e: Exception) {
+                onError("Something went wrong")
             }
         }
     }

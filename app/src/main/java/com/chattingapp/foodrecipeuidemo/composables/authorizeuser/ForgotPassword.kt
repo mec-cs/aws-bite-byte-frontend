@@ -245,31 +245,18 @@ fun ForgotPassword(navController: NavController) {
                         if(isPasswordMatch.value){
                             //displayToast("pw matches", context)
 
-
-                            val apiService = RetrofitHelper.apiService
-                            val request = ChangePasswordRequest(email.value, PasswordUtil.hashPassword(confirmPassword.value))
-
-                            apiService.changePassword(request).enqueue(object : Callback<Boolean> {
-                                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                                    if (response.isSuccessful) {
-                                        val success = response.body() ?: false
-                                        if (success) {
-                                            // Password change successful
-                                            displayToast("Password changed successfully.", context)
-                                            navController.popBackStack("login", false, true)
-                                        } else {
-                                            // Password change failed
-                                            displayToast("Failed to change password.", context)
-                                        }
-                                    } else {
-                                        displayToast("Something went wrong!", context)
-                                    }
+                            viewModel.changePassword(
+                                email = email.value.trim(),
+                                newPassword = confirmPassword.value.trim(),
+                                onSuccess = {
+                                    displayToast("Password changed successfully.", context)
+                                    navController.popBackStack("login", false, true)
+                                },
+                                onError = { errorMsg ->
+                                    displayToast("Something went wrong!", context)
                                 }
+                            )
 
-                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                    displayToast("Failed to change password!", context)
-                                }
-                            })
                         }
                     }
                     else{
