@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -48,7 +50,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
@@ -131,13 +135,13 @@ fun CreateRecipeScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(0.dp)
-                .imePadding()
+                .padding(top = 16.dp , bottom =  0.dp, end = 0.dp, start = 0.dp)
+                //.imePadding()
         ) {
 
             item {
-                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    val launcherCreate = rememberLauncherForActivityResult(
+                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.GetContent()
                     ) { uri: Uri? ->
                         imageUri = uri
@@ -148,18 +152,21 @@ fun CreateRecipeScreen(navController: NavHostController) {
                         }
                     }
 
-                    Surface(
+                    Box(
                         modifier = Modifier
                             .size(100.dp)
-                            .background(Color.White)
-                            .clickable { launcher.launch("image/*") },
-                        shape = CircleShape
+                            .clickable { launcher.launch("image/*") }
+                            .background(Color.White), // This is applied directly to Box
+                        contentAlignment = Alignment.Center
                     ) {
                         if (imageUri != null) {
                             Image(
                                 painter = rememberAsyncImagePainter(model = imageUri),
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize()
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .height(200.dp)
+                                    .fillMaxWidth()
                             )
                         } else {
                             Box(
@@ -170,7 +177,7 @@ fun CreateRecipeScreen(navController: NavHostController) {
                                     imageVector = Icons.Outlined.Edit,
                                     contentDescription = "Add photo",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(30.dp)
+                                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp))
                                 )
                             }
                         }
@@ -242,7 +249,53 @@ fun CreateRecipeScreen(navController: NavHostController) {
             item {
                 OutlinedTextField(
                     value = prepTime,
-                    onValueChange = { prepTime = it },
+                    onValueChange = {
+                            newValue ->
+                        // Allow digits, dot, and comma
+                        val filteredValue = newValue.filter { char ->
+                            char.isDigit() || char == '.'
+                        }
+
+                        // Remove leading dots or commas
+                        val cleanedValue = if (filteredValue.isNotEmpty() && (filteredValue.first() == '.')) {
+                            filteredValue.drop(1)
+                        } else {
+                            filteredValue
+                        }
+
+                        // Remove consecutive dots and commas
+                        val finalValue = buildString {
+                            var lastChar: Char? = null
+                            for (char in cleanedValue) {
+                                if (char == '.') {
+                                    if (lastChar != char) {
+                                        append(char)
+                                    }
+                                } else {
+                                    append(char)
+                                }
+                                lastChar = char
+                            }
+                        }
+
+                        // Ensure there's only one dot or comma
+                        val formattedValue = buildString {
+                            var seenDotOrComma = false
+                            for (char in finalValue) {
+                                if (char == '.') {
+                                    if (!seenDotOrComma) {
+                                        append(char)
+                                        seenDotOrComma = true
+                                    }
+                                } else {
+                                    append(char)
+                                    seenDotOrComma = false
+                                }
+                            }
+                        }
+
+                        prepTime = formattedValue
+                                    },
                     label = { Text("Preparation Time") },
                     placeholder = { Text("Enter time") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
