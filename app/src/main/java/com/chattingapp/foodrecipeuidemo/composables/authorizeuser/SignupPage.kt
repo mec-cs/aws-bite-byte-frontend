@@ -79,7 +79,10 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { newPassword ->
+                // Remove any spaces from the input
+                password = newPassword.replace(" ", "")
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
@@ -88,7 +91,10 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
 
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = { newPassword ->
+                // Remove any spaces from the input
+                confirmPassword = newPassword.replace(" ", "")
+            },
             label = { Text("Confirm Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
@@ -96,8 +102,8 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-        if(email.isNotBlank() && EmailValidator.isEmailValid(email) && username.isNotBlank() && password.isNotBlank() &&
-            confirmPassword.isNotBlank() && password == confirmPassword && !password.contains("$")){
+        if(email.trim().isNotBlank() && EmailValidator.isEmailValid(email) && username.trim().isNotBlank() && password.trim().isNotBlank() &&
+            confirmPassword.trim().isNotBlank() && password == confirmPassword && !password.contains("$")){
 
             val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
 
@@ -115,7 +121,7 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
             if(!EmailValidator.isEmailValid(email)){
                 displayToast("Invalid email!", context)
             }
-            else if(email.isBlank() || username.isBlank() || password.isBlank() || confirmPassword.isBlank()){
+            else if(email.trim().isBlank() || username.trim().isBlank() || password.trim().isBlank() || confirmPassword.trim().isBlank()){
                 displayToast("Missing information!", context)
             }
             else if(!password.equals(confirmPassword)){

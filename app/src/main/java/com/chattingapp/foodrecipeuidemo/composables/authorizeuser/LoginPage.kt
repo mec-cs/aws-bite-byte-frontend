@@ -71,7 +71,10 @@ fun LoginPage(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { newPassword ->
+                // Remove any spaces from the input
+                password = newPassword.replace(" ", "")
+            },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)

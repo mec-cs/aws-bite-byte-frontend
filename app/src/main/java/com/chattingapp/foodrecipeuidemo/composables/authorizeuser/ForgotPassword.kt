@@ -214,7 +214,10 @@ fun ForgotPassword(navController: NavController) {
 
             OutlinedTextField(
                 value = password.value,
-                onValueChange = { password.value = it },
+                onValueChange = { newPassword ->
+                    // Remove any spaces from the input
+                    password.value = newPassword.replace(" ", "")
+                },
                 label = { Text("New Password") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,7 +227,10 @@ fun ForgotPassword(navController: NavController) {
 
             OutlinedTextField(
                 value = confirmPassword.value,
-                onValueChange = { confirmPassword.value = it },
+                onValueChange = { newPassword ->
+                    // Remove any spaces from the input
+                    confirmPassword.value = newPassword.replace(" ", "")
+                },
                 label = { Text("Confirm New Password") },
                 modifier = Modifier
                     .fillMaxWidth()
