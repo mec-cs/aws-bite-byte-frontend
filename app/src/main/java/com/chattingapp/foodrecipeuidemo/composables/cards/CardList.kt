@@ -15,7 +15,7 @@ fun CardsList(navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp, 16.dp, 16.dp, 0.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
