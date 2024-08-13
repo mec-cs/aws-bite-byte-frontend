@@ -187,7 +187,8 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateLike) {
                             snapshotFlow { listStateLike.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1 && allIdSizeLike > recipesLike.size) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1 && allIdSizeLike > recipesLike.size
+                                        && allIdSizeLike >Constant.PAGE_SIZE_CLICK_LIKE) {
                                         categoryMostLikedViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
@@ -226,7 +227,8 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateClick) {
                             snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1 && allIdSizeClick > recipesClick.size) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1
+                                        && allIdSizeClick > recipesClick.size && allIdSizeClick > Constant.PAGE_SIZE_CLICK_LIKE) {
                                         categoryClickViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
                                         delay(1000)
@@ -243,25 +245,40 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         cardId?.let {
                             if(!isFavoriteFetched){
                                 categoryFavoriteViewModel.fetchFavoriteCount(Constant.userProfile.id)
-                                categoryFavoriteViewModel.fetchRecipes(Constant.userProfile.id)
+                                //categoryFavoriteViewModel.fetchRecipes(Constant.userProfile.id)
                                 isFavoriteFetched = true
                             }
                         }
                     }
-                    if(isLoadingFavorite){
+                    //if(isLoadingFavorite){
+                    if(favoriteCount.value == -1L){
                         CircularProgressIndicator()
                     }
                     else{
-                        LazyColumn(
-                            state = listStateFavorite,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(recipeListFavorite) { recipe ->
-                                Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelFavorite,*/ navController = navController/*, userProfileViewModelFavorite*/)
+                        LaunchedEffect(cardId) {
+                            cardId?.let {
+                                if(recipeListFavorite.isEmpty() && favoriteCount.value != 0L) {
+                                    categoryFavoriteViewModel.fetchRecipes(Constant.userProfile.id)
+                                }
                             }
 
                         }
+                        if(isLoadingFavorite){
+                            CircularProgressIndicator()
+                        }
+                        else{
+                            LazyColumn(
+                                state = listStateFavorite,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(recipeListFavorite) { recipe ->
+                                    Constant.isCardScreen = true
+                                    DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelFavorite,*/ navController = navController/*, userProfileViewModelFavorite*/)
+                                }
+
+                            }
+                        }
+
                     }
 
 
@@ -269,7 +286,8 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         snapshotFlow { listStateFavorite.layoutInfo.visibleItemsInfo.lastOrNull() }
                             .collect { lastVisibleItem ->
                                 if(!isLoadingCountFavorite && favoriteCount.value != -1L){
-                                    if (lastVisibleItem != null && lastVisibleItem.index >= categoryFavoriteViewModel.recipeListDetail.size - 1 && favoriteCount.value!! > recipeListFavorite.size) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index >= categoryFavoriteViewModel.recipeListDetail.size - 1
+                                        && favoriteCount.value!! > recipeListFavorite.size && favoriteCount.value!! > 10) {
                                         Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
                                         categoryFavoriteViewModel.loadMoreRecipes(Constant.userProfile.id)
                                         delay(1000)
@@ -308,10 +326,11 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         LaunchedEffect(listStateUserLike) {
                             snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
                                 .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListTrends.size - 1 && allIdSizeTrends > recipeListTrends.size) {
+                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListTrends.size - 1
+                                        && allIdSizeTrends > recipeListTrends.size && allIdSizeTrends > Constant.PAGE_SIZE_CLICK_LIKE) {
                                         categoryTrendsViewModel.loadMoreRecipes()
                                         Log.d("CALLING API", "FETCHED MORE")
-                                        delay(1000)
+                                        delay(1500)
                                         Log.d("recipes.size", recipeListTrends.size.toString())
                                         Log.d("recipes.size", recipeListTrends.toString())
                                     }

@@ -66,7 +66,6 @@ class CategoryFavoriteViewModel : ViewModel(){
     }
 
 
-
     fun loadMoreRecipes(userId: Long) {
         if (isLoadingMore || noMoreRecipes) return
         isLoadingMore = true
@@ -103,7 +102,6 @@ class CategoryFavoriteViewModel : ViewModel(){
             }
         }
     }
-
 
 
     private val _favoriteCount = MutableLiveData<Long>(-1L)

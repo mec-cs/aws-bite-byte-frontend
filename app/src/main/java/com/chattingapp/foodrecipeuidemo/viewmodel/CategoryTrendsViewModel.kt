@@ -39,7 +39,9 @@ class CategoryTrendsViewModel: ViewModel() {
                 val mostClickedIds = RetrofitHelper.apiService.getMostClickedRecipesLastTwo()
                 allIds = mostClickedIds ?: emptyList()
                 _allIdsSize.value = allIds.size
-                loadMoreRecipes()
+                if(_allIdsSize.value > 0) {
+                    loadMoreRecipes()
+                }
             } catch (e: IOException) {
                 _errorMessage.value = "Network Error: ${e.message}"
             } catch (e: HttpException) {
