@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FeedViewModel
@@ -70,7 +70,7 @@ fun Feed(navController: NavHostController) {
 
 
     if(isLoadingFollowed || isLoadingRecommended || isLoadingCached) {
-        CircularProgressIndicator()
+        PageLoadingPlaceholder()
     }
     else{
 
@@ -87,22 +87,22 @@ fun Feed(navController: NavHostController) {
         }
             if(initializationComplete && mergeComplete){
                 // write your code to display the recommended recipes
-                val recipesClick by feedViewModel.recipes.collectAsState()
-                val isLoadingClick by feedViewModel.isLoadingRecipes.collectAsState()
-                val allIdSizeClick by feedViewModel.allIdsSize.collectAsState()
-                val listStateClick = rememberLazyListState()
+                val recipes by feedViewModel.recipes.collectAsState()
+                val isLoadingRecipes by feedViewModel.isLoadingRecipes.collectAsState()
+                val allIdSizeRecipes by feedViewModel.allIdsSize.collectAsState()
+                val listStateRecipes = rememberLazyListState()
 
                 if(isFirstTimeLoad) {
                     LaunchedEffect(Unit) {
-                        if (recipesClick.isEmpty()) {
+                        if (recipes.isEmpty()) {
                             feedViewModel.loadMoreRecipes()
                         }
                         isFirstTimeLoad = false
                     }
                 }
 
-                if (isLoadingClick && recipesClick.isEmpty()) {
-                    CircularProgressIndicator()
+                if (isLoadingRecipes && recipes.isEmpty()) {
+                    PageLoadingPlaceholder()
                 }
                 else {
                     Column(modifier = Modifier
@@ -117,12 +117,12 @@ fun Feed(navController: NavHostController) {
                         modifier = Modifier.padding(bottom = 32.dp)
                     )
                     LazyColumn(
-                        state = listStateClick,
+                        state = listStateRecipes,
                         modifier = Modifier
                             .fillMaxWidth()
 
                     ) {
-                        items(recipesClick) { recipe ->
+                        items(recipes) { recipe ->
                             Constant.isFeedScreen = true
                             if(recipe.ownerId != Constant.userProfile.id)
                                 DisplayRecipe(recipe = recipe, navController = navController)
@@ -130,15 +130,15 @@ fun Feed(navController: NavHostController) {
 
                     }
 
-                    LaunchedEffect(listStateClick) {
-                        snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
+                    LaunchedEffect(listStateRecipes) {
+                        snapshotFlow { listStateRecipes.layoutInfo.visibleItemsInfo.lastOrNull() }
                             .collect { lastVisibleItem ->
-                                if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1 /*&& allIdSizeClick > recipesClick.size*/) {
+                                if (lastVisibleItem != null && lastVisibleItem.index == recipes.size - 1 /*&& allIdSizeClick > recipesClick.size*/) {
                                     feedViewModel.loadMoreRecipes()
                                     Log.d("CALLING API", "FETCHED MORE")
                                     delay(1000)
-                                    Log.d("recipes.size", recipesClick.size.toString())
-                                    Log.d("recipes.size", allIdSizeClick.toString())
+                                    Log.d("recipes.size", recipes.size.toString())
+                                    Log.d("recipes.size", allIdSizeRecipes.toString())
                                 }
                             }
                     }

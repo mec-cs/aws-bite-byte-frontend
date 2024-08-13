@@ -10,7 +10,7 @@ import com.chattingapp.foodrecipeuidemo.R
 @Composable
 fun PageLoadingPlaceholder(){
     Image(
-        painter = painterResource(id = R.drawable.yumbyte_logo),
+        painter = painterResource(id = R.drawable.yumbyte_logo_loading),
         contentDescription = null,
         modifier = Modifier
             .fillMaxSize()
