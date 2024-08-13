@@ -46,7 +46,7 @@ fun RecipeUserProfile(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(bottom = 10.dp, end = 10.dp, top = 0.dp, start = 0.dp)
+            .padding(end = 10.dp, top = 0.dp, start = 0.dp)
             .fillMaxWidth()
     ) {
         Image(

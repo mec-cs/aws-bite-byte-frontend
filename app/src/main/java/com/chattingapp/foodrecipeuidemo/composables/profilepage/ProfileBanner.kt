@@ -95,7 +95,7 @@ fun ProfileBanner(  navController: NavController) {
     if(isFirstTime){
         LaunchedEffect(userProfile.id) {
             viewModel.fetchFollowersCount(userProfile.id)
-            recipeViewModel.fetchRecipes(userProfile.id)
+            //recipeViewModel.fetchRecipes(userProfile.id)
             isFirstTime = false
         }
     }
@@ -214,7 +214,6 @@ fun ProfileBanner(  navController: NavController) {
                                 modifier = Modifier
                                     .size(100.dp)
                                     .padding(10.dp, 0.dp, 0.dp, 0.dp)
-                                    .clip(RoundedCornerShape(8.dp))
                                     .clickable {
                                         launcher.launch("image/*")
                                     }
@@ -338,7 +337,12 @@ fun ProfileBanner(  navController: NavController) {
 
 
         }
-        if(displayProfileImage){
+        if(displayProfileImage && followCounts != null){
+
+            LaunchedEffect(userProfile.id) {
+                if(followCounts?.recipeCount!! > 0L)
+                recipeViewModel.fetchRecipes(userProfile.id)
+            }
             val listState = rememberLazyListState()
             LazyColumn(
                 state = listState,
@@ -364,7 +368,8 @@ fun ProfileBanner(  navController: NavController) {
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
                     .collect { lastVisibleItem ->
 
-                        if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1 && recipeViewModel.recipeListDetail.size.toLong() != followCounts?.recipeCount) {
+                        if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1 &&
+                            recipeViewModel.recipeListDetail.size.toLong() != followCounts?.recipeCount && followCounts?.recipeCount!! > 10L) {
                             Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
                             recipeViewModel.loadMoreRecipes(userProfile.id)
                             delay(1000)

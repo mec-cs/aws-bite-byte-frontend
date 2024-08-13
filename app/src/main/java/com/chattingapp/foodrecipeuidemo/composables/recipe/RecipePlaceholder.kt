@@ -35,7 +35,7 @@ fun RecipePlaceholder(recipe:RecipeProjection){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(bottom = 10.dp, end = 10.dp, top = 0.dp, start = 0.dp)
+            .padding(end = 10.dp, top = 0.dp, start = 0.dp)
             .fillMaxWidth()
     ){
         Image(
@@ -61,12 +61,14 @@ fun RecipePlaceholder(recipe:RecipeProjection){
 
         )
     }
-    Text(
-        text = "Loading...",
+    recipe.name?.let {
+        Text(
+        text = it,
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 8.dp)
     )
+    }
 
     Image(
         painter = painterResource(id = R.drawable.placeholder_recipe), // Replace with your drawable resource name
@@ -138,5 +140,9 @@ fun RecipePlaceholder(recipe:RecipeProjection){
             modifier = Modifier.clickable {  }
         )
     }
-    Text(text = "Loading...", fontSize = 12.sp)
+    val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
+
+    if (relativeDate != null) {
+        Text(text = relativeDate, fontSize = 12.sp)
+    }
 }
