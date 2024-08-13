@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileFollowPeople
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -142,9 +143,7 @@ fun FollowsPage(
                     }
 
                     if (isLoadingFollower) {
-                        CircularProgressIndicator(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp))
+                        PageLoadingPlaceholder()
                     } else {
                         Column {
 
@@ -186,9 +185,7 @@ fun FollowsPage(
                     }
 
                     if (isLoadingFollowing) {
-                        /*CircularProgressIndicator(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp))*/
+                        PageLoadingPlaceholder()
                     } else {
                         Column {
                             val profileCountsViewModel = FollowCountsViewModel()
