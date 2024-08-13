@@ -2,6 +2,7 @@ package com.chattingapp.foodrecipeuidemo.composables.authorizeuser
 
 import android.content.Context
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,11 +33,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
+import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.entity.ChangePasswordRequest
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import com.chattingapp.foodrecipeuidemo.viewmodel.ForgotPasswordViewModel
 import kotlinx.coroutines.delay
 import retrofit2.Call
 import retrofit2.Callback
@@ -57,6 +62,11 @@ fun ForgotPassword(navController: NavController) {
     val isSendButtonEnabled = remember { mutableStateOf(true) }
     val displayMailSender = remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val viewModel: ForgotPasswordViewModel = viewModel()
+    val userExists by viewModel.userExists.collectAsState()
+    val isFirstTime = remember { mutableStateOf(true) }
+
+
     Column(modifier = Modifier.padding(16.dp)) {
 
         TopAppBar(
@@ -85,53 +95,39 @@ fun ForgotPassword(navController: NavController) {
             enabled = isInputEnabled.value // Disable or enable input based on state
         )
 
+
         if(isSendButtonEnabled.value) {
             ElevatedButton(
                 onClick = {
-                    val apiService = RetrofitHelper.apiService
-
-                    apiService.userExistsByEmail(email.value.trim()).enqueue(object :
-                        Callback<Boolean> {
-
-                        override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                            if (response.isSuccessful) {
-                                val userExists = response.body() ?: false
-                                if (userExists) {
-                                    // User exists, disable the button and text field
-                                    isInputEnabled.value = false
-                                    isSendButtonEnabled.value = false
-                                    displayMailSender.value = true
-                                    displayToast("User exists!", context)
-
-                                    sendEmail(email.value.trim())
-
-                                } else {
-                                    // User does not exist
-                                    displayToast("Email not found!", context)
-                                }
-                            } else {
-                                val errorBody = response.errorBody()?.string()
-                                displayToast("${response.message()} $errorBody", context)
-                            }
-                        }
-
-                        override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                            Log.e("API_CALL_FAILURE", "Failed to check user existence", t)
-                            displayToast(
-                                "Failed to check user existence: Something went wrong!",
-                                context
-                            )
-                        }
-                    })
+                    if(email.value.trim() != "" && EmailValidator.isEmailValid(email.value.trim())){
+                        viewModel.checkUserExistsByEmail(email.value.trim())
+                    }
+                    else{
+                        displayToast("Please enter a valid email!", context)
+                    }
                 },
                 modifier = Modifier.padding(top = 16.dp),
-                enabled = isSendButtonEnabled.value // Disable or enable the button based on state
+                enabled = isInputEnabled.value // Disable or enable the button based on state
             ) {
                 Text("Send a code")
             }
         }
 
-
+        LaunchedEffect(userExists) {
+            if(!isFirstTime.value){
+                userExists?.let {
+                    if (it) {
+                        //displayToast("User exists!", context)
+                        isInputEnabled.value = false
+                        displayMailSender.value = true
+                        viewModel.sendEmail(email.value.trim())
+                    } else {
+                        displayToast("Email not found!", context)
+                    }
+                }
+            }
+            isFirstTime.value = false
+        }
 
         if(displayMailSender.value){
             var userCode by remember { mutableStateOf(TextFieldValue("")) }
@@ -139,6 +135,7 @@ fun ForgotPassword(navController: NavController) {
             var isButtonEnabled by remember { mutableStateOf(false) }
             var timerText by remember { mutableStateOf("Resend code in 60 seconds") }
             val countdownTime = 60 // seconds
+            val serverCode by viewModel.serverCode.collectAsState()
 
             var resendAttempts by remember { mutableStateOf(0) }
 
@@ -162,9 +159,13 @@ fun ForgotPassword(navController: NavController) {
                 )
 
                 OutlinedTextField(
+
                     value = userCode,
-                    onValueChange = {
-                        userCode = it
+                    onValueChange = { newTextFieldValue ->
+                        val filteredText = newTextFieldValue.text.filter { it.isDigit() }
+                        userCode = newTextFieldValue.copy(text = filteredText)
+
+                        //userCode = it
                     },
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number
@@ -196,7 +197,7 @@ fun ForgotPassword(navController: NavController) {
                 Button(
                     onClick = {
                         // Logic to resend the code
-                        sendEmail(email.value.trim())
+                        viewModel.sendEmail(email.value.trim())
                         resendAttempts++
                     },
                     enabled = isButtonEnabled,
@@ -233,39 +234,42 @@ fun ForgotPassword(navController: NavController) {
 
             Button(
                 onClick = {
-                    isPasswordMatch.value = password.value == confirmPassword.value
-                    if(isPasswordMatch.value){
-                        //displayToast("pw matches", context)
+                    if(password.value.trim().isNotBlank() && confirmPassword.value.trim().isNotBlank()){
+                        isPasswordMatch.value = password.value == confirmPassword.value
+                        if(isPasswordMatch.value){
+                            //displayToast("pw matches", context)
 
 
-                        val apiService = RetrofitHelper.apiService
-                        val request = ChangePasswordRequest(email.value, PasswordUtil.hashPassword(confirmPassword.value))
+                            val apiService = RetrofitHelper.apiService
+                            val request = ChangePasswordRequest(email.value, PasswordUtil.hashPassword(confirmPassword.value))
 
-                        apiService.changePassword(request).enqueue(object : Callback<Boolean> {
-                            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                                if (response.isSuccessful) {
-                                    val success = response.body() ?: false
-                                    if (success) {
-                                        // Password change successful
-                                        displayToast("Password changed successfully.", context)
-                                        navController.popBackStack("login", false, true)
+                            apiService.changePassword(request).enqueue(object : Callback<Boolean> {
+                                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                                    if (response.isSuccessful) {
+                                        val success = response.body() ?: false
+                                        if (success) {
+                                            // Password change successful
+                                            displayToast("Password changed successfully.", context)
+                                            navController.popBackStack("login", false, true)
+                                        } else {
+                                            // Password change failed
+                                            displayToast("Failed to change password.", context)
+                                        }
                                     } else {
-                                        // Password change failed
-                                        displayToast("Failed to change password.", context)
+                                        displayToast("Something went wrong!", context)
                                     }
-                                } else {
-                                    displayToast("Something went wrong!", context)
                                 }
-                            }
 
-                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                displayToast("Failed to change password!", context)
-                            }
-                        })
-
-
-
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    displayToast("Failed to change password!", context)
+                                }
+                            })
+                        }
                     }
+                    else{
+                        displayToast("Missing field(s)!", context)
+                    }
+
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -287,24 +291,3 @@ fun ForgotPassword(navController: NavController) {
 }
 
 
-private fun sendEmail(email:String){
-    val apiService = RetrofitHelper.apiService
-
-    apiService.sendChangePasswordEmail(email).enqueue(object : Callback<Int> {
-        override fun onResponse(call: Call<Int>, response: Response<Int>) {
-            serverCode = response.body()!!
-        }
-
-        override fun onFailure(call: Call<Int>, t: Throwable) {
-
-        }
-
-
-    })
-}
-
-//@Preview
-//@Composable
-//fun displayForgotPwdPage() {
-//    ForgotPassword(navController = rememberNavController())
-//}

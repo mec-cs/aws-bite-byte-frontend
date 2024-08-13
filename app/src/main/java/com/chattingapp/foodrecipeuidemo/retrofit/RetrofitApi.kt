@@ -185,15 +185,6 @@ interface RetrofitAPICredentials {
     @POST("profile-api/change-profile-picture")
     suspend fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long) // Use Unit instead of Void for suspend functions
 
-    @GET("email-sender/send-change-password-code/")
-    fun sendChangePasswordEmail(@Query("email") email:String) : Call<Int>
-
-    @GET("credentials/exists-by-email/{email}")
-    fun userExistsByEmail(@Path("email") email: String): Call<Boolean>
-
-    @POST("credentials/change-password")
-    fun changePassword(@Body request: ChangePasswordRequest): Call<Boolean>
-
     @GET("/profile-recipe/{followerId}/followed-recipes")
     suspend fun getFollowedRecipes(@Path("followerId") followerId: Long): List<Long>
 
@@ -202,4 +193,13 @@ interface RetrofitAPICredentials {
 
     @GET("recipe-getter/get-last-ten-percent-of-recipes")
     suspend fun getCachedRecipes(): List<Long>
+
+    @GET("credentials/exists-by-email/{email}")
+    suspend fun userExistsByEmail(@Path("email") email: String): Boolean
+
+    @GET("email-sender/send-change-password-code/")
+    suspend fun sendChangePasswordEmail(@Query("email") email:String) : Int
+
+    @POST("credentials/change-password")
+    fun changePassword(@Body request: ChangePasswordRequest): Call<Boolean>
 }

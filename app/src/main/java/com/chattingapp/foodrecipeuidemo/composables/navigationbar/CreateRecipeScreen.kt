@@ -122,11 +122,6 @@ fun CreateRecipeScreen(navController: NavHostController) {
         }
     }
 
-    fun createRecipe(createRecipeViewModel: CreateRecipeViewModel) {
-
-
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->

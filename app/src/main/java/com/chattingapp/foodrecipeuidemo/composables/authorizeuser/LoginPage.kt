@@ -27,6 +27,7 @@ import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.constant.Constant
+import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.launch
@@ -95,9 +96,15 @@ fun LoginPage(
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-            coroutineScope.launch {
-                loginUser(email, password, rememberMe, context)
+            if(email.isNotBlank() && EmailValidator.isEmailValid(email) && password.isNotBlank()){
+                coroutineScope.launch {
+                    loginUser(email, password, rememberMe, context)
+                }
             }
+            else{
+                displayToast("Please check your email and password!", context)
+            }
+
         }) {
             Text("Login")
         }
@@ -141,7 +148,7 @@ private suspend fun loginUser(
         }
     } catch (e: Exception) {
         deleteToken(context)
-        displayToast("Failed to login: Check your email and password", context)
+        displayToast("Please check your email and password!", context)
         Log.e("API_CALL_FAILURE", "Failed to login", e)
     }
 }

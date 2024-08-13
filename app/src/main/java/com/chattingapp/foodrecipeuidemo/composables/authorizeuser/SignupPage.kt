@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
+import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -41,9 +42,7 @@ import retrofit2.Response
 private fun displayToast(msg:String, context: Context){
     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 }
-private fun isEmailValid(email:String): Boolean{
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-}
+
 @Composable
 fun SignupPage(onSwitchToLogin: () -> Unit) {
     var email by remember { mutableStateOf("") }
@@ -97,8 +96,8 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
-        if(!email.isBlank() && isEmailValid(email) && !username.isBlank() && !password.isBlank() &&
-            !confirmPassword.isBlank() && password.equals(confirmPassword) && !password.contains("$")){
+        if(email.isNotBlank() && EmailValidator.isEmailValid(email) && username.isNotBlank() && password.isNotBlank() &&
+            confirmPassword.isNotBlank() && password == confirmPassword && !password.contains("$")){
 
             val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
 
@@ -108,12 +107,12 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
                     navigateToMainActivity(context)
                 },
                 onError = { error ->
-                    displayToast(error, context)
+                    displayToast("Something went wrong!", context)
                 }
             )
         }
         else{
-            if(!isEmailValid(email)){
+            if(!EmailValidator.isEmailValid(email)){
                 displayToast("Invalid email!", context)
             }
             else if(email.isBlank() || username.isBlank() || password.isBlank() || confirmPassword.isBlank()){
