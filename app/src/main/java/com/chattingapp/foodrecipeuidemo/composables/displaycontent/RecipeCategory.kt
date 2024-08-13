@@ -91,7 +91,10 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             contentDescription = "Back"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent // Make the background transparent
+                )
             )
         }
     ) { innerPadding ->
