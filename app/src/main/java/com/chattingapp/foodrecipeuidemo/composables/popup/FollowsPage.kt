@@ -134,7 +134,9 @@ fun FollowsPage(
                 "Followers" -> {
                     if (isFirstTimeFollower) {
                         LaunchedEffect(userProfile.id) {
-                            profileFollowerViewModel.fetchUsers(userProfile.id)
+                            if(followerCount!!.toInt() != 0){
+                                profileFollowerViewModel.fetchUsers(userProfile.id)
+                            }
                         }
                         isFirstTimeFollower = false
                     }
@@ -161,7 +163,8 @@ fun FollowsPage(
                             LaunchedEffect(listStateFollower) {
                                 snapshotFlow { listStateFollower.layoutInfo.visibleItemsInfo.lastOrNull() }
                                     .collect { lastVisibleItem ->
-                                        if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowerViewModel.userListDetail.size - 1 && userListFollower.size != followerCount!!.toInt()) {
+                                        if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowerViewModel.userListDetail.size - 1
+                                            && userListFollower.size != followerCount!!.toInt() && followerCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
                                             profileFollowerViewModel.loadMoreUsers(userProfile.id)
                                             delay(1000)
                                         }
@@ -175,7 +178,9 @@ fun FollowsPage(
                     if (isFirstTimeFollowing) {
                         Log.d("inside", "isFirstTimeFollowing")
                         LaunchedEffect(userProfile.id) {
-                            profileFollowingViewModel.fetchUsers(userProfile.id)
+                            if(followingCount!!.toInt() != 0){
+                                profileFollowingViewModel.fetchUsers(userProfile.id)
+                            }
                         }
                         isFirstTimeFollowing = false
                     }
@@ -203,7 +208,8 @@ fun FollowsPage(
                             LaunchedEffect(listStateFollowing) {
                                 snapshotFlow { listStateFollowing.layoutInfo.visibleItemsInfo.lastOrNull() }
                                     .collect { lastVisibleItem ->
-                                        if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1 && followingCount!!.toInt() > userListFollowing.size) {
+                                        if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1
+                                            && followingCount!!.toInt() > userListFollowing.size && followingCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
                                             profileFollowingViewModel.loadMoreUsers(userProfile.id)
                                             delay(1000)
                                         }

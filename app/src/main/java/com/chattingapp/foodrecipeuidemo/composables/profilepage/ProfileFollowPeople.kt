@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.Button
@@ -30,10 +31,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
@@ -52,7 +55,6 @@ fun ProfileFollowPeople(
 ) {
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var username by remember { mutableStateOf<String?>("") }
-    var isLoading by remember { mutableStateOf(true) }
 
 
 
@@ -61,7 +63,6 @@ fun ProfileFollowPeople(
             profileFollowerViewModel.fetchImage(user) {
                 bitmap = it
                 username = user.follower.username
-                isLoading = false
             }
         }
     }
@@ -70,7 +71,6 @@ fun ProfileFollowPeople(
             profileFollowingViewModel.fetchImage(user) {
                 bitmap = it
                 username = user.followed.username
-                isLoading = false
             }
         }
     }
@@ -81,9 +81,6 @@ fun ProfileFollowPeople(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -100,7 +97,14 @@ fun ProfileFollowPeople(
                             .size(70.dp)
                             .clip(RoundedCornerShape(8.dp))
                     )
-                }
+                }?: Image(
+                    painter = painterResource(id = R.drawable.placeholder_profile),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(70.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                )
                 Text(
                     text = username!!,
                     fontSize = 18.sp,
@@ -109,6 +113,6 @@ fun ProfileFollowPeople(
                         .padding(start = 8.dp, end = 8.dp)
                 )
             }
-        }
+
     }
 }

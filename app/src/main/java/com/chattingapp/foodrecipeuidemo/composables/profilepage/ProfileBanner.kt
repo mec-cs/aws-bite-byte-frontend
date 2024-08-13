@@ -95,7 +95,6 @@ fun ProfileBanner(  navController: NavController) {
     if(isFirstTime){
         LaunchedEffect(userProfile.id) {
             viewModel.fetchFollowersCount(userProfile.id)
-            //recipeViewModel.fetchRecipes(userProfile.id)
             isFirstTime = false
         }
     }
