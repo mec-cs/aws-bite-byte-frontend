@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -36,16 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
-import com.chattingapp.foodrecipeuidemo.activity.ui.theme.FoodRecipeUiDemoTheme
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.CredentialsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.TokenViewModel
 import kotlinx.coroutines.delay
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 //var serverCode = -761458
 
@@ -137,7 +134,7 @@ fun VerificationCodeUI(viewModel: CredentialsViewModel) {
                     }
                 }
             ) {
-                Text("Verify the account")
+                Text("Verify the account", color = Color.White)
             }
             verificationResult?.let { result ->
                 if (result) {
@@ -156,10 +153,16 @@ fun VerificationCodeUI(viewModel: CredentialsViewModel) {
                 resendAttempts++
             },
             enabled = isButtonEnabled,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = if (isButtonEnabled) ButtonDefaults.buttonColors().backgroundColor(enabled = true).value
+                else Color.Blue.copy(alpha = 0.5f)
+            ),
             modifier = Modifier.padding(top = 16.dp)
         ) {
-            Text(timerText)
+            Text(text = timerText, color = if (isButtonEnabled) Color.White else Color.Black)
         }
+
+
 
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Button(
@@ -177,7 +180,7 @@ fun VerificationCodeUI(viewModel: CredentialsViewModel) {
                 },
                 modifier = Modifier.padding(top = 16.dp)
             ) {
-                Text("Logout")
+                Text("Logout", color = Color.White)
             }
 
         }
