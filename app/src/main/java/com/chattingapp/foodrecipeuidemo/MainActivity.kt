@@ -27,6 +27,7 @@ import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PublicHealthAnnouncement
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
                     if (authToken != null) {
                         val apiService = RetrofitHelper.apiService
+                        PublicHealthAnnouncement()
 
                         LaunchedEffect(authToken) {
                                 try {
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
                                         navigateToEmailPage()
                                     }
                                 } catch (e: Exception) {
+                                    navigateToMainPage()
                                     Log.e("API_CALL_FAILURE", "Failed to fetch user data", e)
                                 }
 
@@ -90,6 +93,11 @@ class MainActivity : ComponentActivity() {
     }
     private fun navigateToHomePage() {
         val intent = Intent(this, HomePageActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+    private fun navigateToMainPage() {
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
     }

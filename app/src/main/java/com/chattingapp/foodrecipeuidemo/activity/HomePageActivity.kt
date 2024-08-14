@@ -29,6 +29,8 @@ import com.chattingapp.foodrecipeuidemo.composables.navigationbar.CreateRecipeSc
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.HomeScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.ProfileScreen
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.SearchScreen
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.PublicHealthAnnouncement
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
@@ -121,6 +123,9 @@ class HomePageActivity : ComponentActivity() {
 
 
                         }
+                    }
+                    else{
+                        PublicHealthAnnouncement()
                     }
 
                 }

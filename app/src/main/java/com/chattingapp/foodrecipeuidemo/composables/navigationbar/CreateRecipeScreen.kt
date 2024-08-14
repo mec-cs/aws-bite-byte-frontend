@@ -28,7 +28,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Button
+import androidx.compose.material.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -365,10 +366,9 @@ fun CreateRecipeScreen(navController: NavHostController) {
                         },
                         enabled = !isLoadingCreateRecipe,
                         modifier = Modifier
-                            .width(150.dp)
                             .padding(bottom = 400.dp)
-                    ) {
-                        Text("Create Recipe")
+                    ){
+                        Text(text = "Create Recipe", color = Color.White)
                     }
 
                 }

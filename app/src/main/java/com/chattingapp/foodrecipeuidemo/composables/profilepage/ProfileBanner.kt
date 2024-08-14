@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +59,6 @@ import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
@@ -68,9 +67,6 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 
@@ -118,7 +114,7 @@ fun ProfileBanner(  navController: NavController) {
                 val context = LocalContext.current
                 val tokenViewModel: TokenViewModel = viewModel()
                 Spacer(modifier = Modifier.weight(1f))
-                Button(
+                androidx.compose.material.Button(
                     onClick = {
                         val token = retrieveToken(context)
                         if (token != null) {
@@ -128,21 +124,10 @@ fun ProfileBanner(  navController: NavController) {
                         navigateToMainActivity(context)
 
 
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF00BCD4), // Cyan background color
-                        contentColor = Color.White // White text color
-                    ),
-                    shape = RoundedCornerShape(12.dp), // Rounded corners
-                    modifier = Modifier
+                    },modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp, end = 16.dp) // Add padding around the button
                 ) {
-                    Text(
-                        text = "Logout",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        letterSpacing = 1.2.sp // Slightly increased spacing for modern feel
-                    )
+                    Text(text = "Logout", color = Color.White)
                 }
             }
 
