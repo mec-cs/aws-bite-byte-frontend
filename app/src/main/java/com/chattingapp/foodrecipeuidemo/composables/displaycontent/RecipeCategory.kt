@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.ErrorPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -38,8 +39,6 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryClickViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryFavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryMostLikedViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.CategoryTrendsViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -179,30 +178,35 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
 
                         }
 
-
-                        LazyColumn(
-                            state = listStateLike,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(recipesLike) { recipe ->
-                                Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelLike,*/ navController = navController/*, userProfileViewModelLike*/)
-                            }
-
+                        if(allIdSizeLike == 0){
+                            NoRecipeUserPlaceholder()
                         }
-                        LaunchedEffect(listStateLike) {
-                            snapshotFlow { listStateLike.layoutInfo.visibleItemsInfo.lastOrNull() }
-                                .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1 && allIdSizeLike > recipesLike.size
-                                        && allIdSizeLike >Constant.PAGE_SIZE_CLICK_LIKE) {
-                                        categoryMostLikedViewModel.loadMoreRecipes()
-                                        Log.d("CALLING API", "FETCHED MORE")
-                                        delay(1000)
-                                        Log.d("recipes.size", recipesLike.size.toString())
-                                        Log.d("recipes.size", recipesLike.toString())
-                                    }
+                        else{
+                            LazyColumn(
+                                state = listStateLike,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(recipesLike) { recipe ->
+                                    Constant.isCardScreen = true
+                                    DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelLike,*/ navController = navController/*, userProfileViewModelLike*/)
                                 }
+
+                            }
+                            LaunchedEffect(listStateLike) {
+                                snapshotFlow { listStateLike.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                    .collect { lastVisibleItem ->
+                                        if (lastVisibleItem != null && lastVisibleItem.index == recipesLike.size - 1 && allIdSizeLike > recipesLike.size
+                                            && allIdSizeLike >Constant.PAGE_SIZE_CLICK_LIKE) {
+                                            categoryMostLikedViewModel.loadMoreRecipes()
+                                            Log.d("CALLING API", "FETCHED MORE")
+                                            delay(1000)
+                                            Log.d("recipes.size", recipesLike.size.toString())
+                                            Log.d("recipes.size", recipesLike.toString())
+                                        }
+                                    }
+                            }
                         }
+
                     }
                 }
                 "Popular" -> {
@@ -221,29 +225,35 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             ErrorPlaceholder()
 
                         }
-                        LazyColumn(
-                            state = listStateClick,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(recipesClick) { recipe ->
-                                Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelClick,*/ navController = navController/*, userProfileViewModelClick*/)
-                            }
-
+                        if(allIdSizeClick == 0){
+                            NoRecipeUserPlaceholder()
                         }
-                        LaunchedEffect(listStateClick) {
-                            snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
-                                .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1
-                                        && allIdSizeClick > recipesClick.size && allIdSizeClick > Constant.PAGE_SIZE_CLICK_LIKE) {
-                                        categoryClickViewModel.loadMoreRecipes()
-                                        Log.d("CALLING API", "FETCHED MORE")
-                                        delay(1000)
-                                        Log.d("recipes.size", recipesClick.size.toString())
-                                        Log.d("recipes.size", allIdSizeClick.toString())
-                                    }
+                        else{
+                            LazyColumn(
+                                state = listStateClick,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(recipesClick) { recipe ->
+                                    Constant.isCardScreen = true
+                                    DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelClick,*/ navController = navController/*, userProfileViewModelClick*/)
                                 }
+
+                            }
+                            LaunchedEffect(listStateClick) {
+                                snapshotFlow { listStateClick.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                    .collect { lastVisibleItem ->
+                                        if (lastVisibleItem != null && lastVisibleItem.index == recipesClick.size - 1
+                                            && allIdSizeClick > recipesClick.size && allIdSizeClick > Constant.PAGE_SIZE_CLICK_LIKE) {
+                                            categoryClickViewModel.loadMoreRecipes()
+                                            Log.d("CALLING API", "FETCHED MORE")
+                                            delay(1000)
+                                            Log.d("recipes.size", recipesClick.size.toString())
+                                            Log.d("recipes.size", allIdSizeClick.toString())
+                                        }
+                                    }
+                            }
                         }
+
                     }
 
                 }
@@ -271,47 +281,56 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         errorMessageFavorite?.let {
                             ErrorPlaceholder()
                         }
-                        LaunchedEffect(cardId) {
-                            cardId?.let {
-                                if(recipeListFavorite.isEmpty() && favoriteCount.value != 0L) {
-                                    categoryFavoriteViewModel.fetchRecipes(Constant.userProfile.id)
-                                }
-                            }
-
-                        }
-                        if(isLoadingFavorite){
-                            PageLoadingPlaceholder()
+                        if(favoriteCount.value!! == 0L){
+                            NoRecipeUserPlaceholder()
                         }
                         else{
-                            LazyColumn(
-                                state = listStateFavorite,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(recipeListFavorite) { recipe ->
-                                    Constant.isCardScreen = true
-                                    DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelFavorite,*/ navController = navController/*, userProfileViewModelFavorite*/)
-                                }
-
-                            }
-                        }
-
-                    }
-
-
-                    LaunchedEffect(listStateFavorite) {
-                        snapshotFlow { listStateFavorite.layoutInfo.visibleItemsInfo.lastOrNull() }
-                            .collect { lastVisibleItem ->
-                                if(!isLoadingCountFavorite && favoriteCount.value != -1L){
-                                    if (lastVisibleItem != null && lastVisibleItem.index >= categoryFavoriteViewModel.recipeListDetail.size - 1
-                                        && favoriteCount.value!! > recipeListFavorite.size && favoriteCount.value!! > 10) {
-                                        Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
-                                        categoryFavoriteViewModel.loadMoreRecipes(Constant.userProfile.id)
-                                        delay(1000)
+                            LaunchedEffect(cardId) {
+                                cardId?.let {
+                                    if(recipeListFavorite.isEmpty() && favoriteCount.value != 0L) {
+                                        categoryFavoriteViewModel.fetchRecipes(Constant.userProfile.id)
                                     }
                                 }
 
                             }
+                            if(isLoadingFavorite){
+                                PageLoadingPlaceholder()
+                            }
+                            else{
+                                LazyColumn(
+                                    state = listStateFavorite,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    items(recipeListFavorite) { recipe ->
+                                        Constant.isCardScreen = true
+                                        DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelFavorite,*/ navController = navController/*, userProfileViewModelFavorite*/)
+                                    }
+
+                                }
+                                LaunchedEffect(listStateFavorite) {
+                                    snapshotFlow { listStateFavorite.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                        .collect { lastVisibleItem ->
+                                            if(!isLoadingCountFavorite && favoriteCount.value != -1L){
+                                                if (lastVisibleItem != null && lastVisibleItem.index >= categoryFavoriteViewModel.recipeListDetail.size - 1
+                                                    && favoriteCount.value!! > recipeListFavorite.size && favoriteCount.value!! > 10) {
+                                                    Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
+                                                    categoryFavoriteViewModel.loadMoreRecipes(Constant.userProfile.id)
+                                                    delay(1000)
+                                                }
+                                            }
+
+                                        }
+                                }
+                            }
+
+
+                        }
+
+
                     }
+
+
+
 
                 }
                 "Trends" -> {
@@ -329,29 +348,35 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         errorMessageTrends?.let {
                             ErrorPlaceholder()
                         }
-                        LazyColumn(
-                            state = listStateUserLike,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(recipeListTrends) { recipe ->
-                                Constant.isCardScreen = true
-                                DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelUserLike,*/ navController = navController/*, userProfileViewModelUserLike*/)
-                            }
-
+                        if(allIdSizeTrends == 0){
+                            NoRecipeUserPlaceholder()
                         }
-                        LaunchedEffect(listStateUserLike) {
-                            snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
-                                .collect { lastVisibleItem ->
-                                    if (lastVisibleItem != null && lastVisibleItem.index == recipeListTrends.size - 1
-                                        && allIdSizeTrends > recipeListTrends.size && allIdSizeTrends > Constant.PAGE_SIZE_CLICK_LIKE) {
-                                        categoryTrendsViewModel.loadMoreRecipes()
-                                        Log.d("CALLING API", "FETCHED MORE")
-                                        delay(1500)
-                                        Log.d("recipes.size", recipeListTrends.size.toString())
-                                        Log.d("recipes.size", recipeListTrends.toString())
-                                    }
+                        else{
+                            LazyColumn(
+                                state = listStateUserLike,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(recipeListTrends) { recipe ->
+                                    Constant.isCardScreen = true
+                                    DisplayRecipe(recipe = recipe, /*viewModel = recipeViewModelUserLike,*/ navController = navController/*, userProfileViewModelUserLike*/)
                                 }
+
+                            }
+                            LaunchedEffect(listStateUserLike) {
+                                snapshotFlow { listStateUserLike.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                    .collect { lastVisibleItem ->
+                                        if (lastVisibleItem != null && lastVisibleItem.index == recipeListTrends.size - 1
+                                            && allIdSizeTrends > recipeListTrends.size && allIdSizeTrends > Constant.PAGE_SIZE_CLICK_LIKE) {
+                                            categoryTrendsViewModel.loadMoreRecipes()
+                                            Log.d("CALLING API", "FETCHED MORE")
+                                            delay(1500)
+                                            Log.d("recipes.size", recipeListTrends.size.toString())
+                                            Log.d("recipes.size", recipeListTrends.toString())
+                                        }
+                                    }
+                            }
                         }
+
                     }
 
                 }

@@ -6,13 +6,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.chattingapp.foodrecipeuidemo.composables.popup.FollowsPage
+import com.chattingapp.foodrecipeuidemo.composables.follow.FollowsPage
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileBanner
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
-import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileImageViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
 

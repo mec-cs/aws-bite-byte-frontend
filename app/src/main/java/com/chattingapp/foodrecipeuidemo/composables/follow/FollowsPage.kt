@@ -1,4 +1,4 @@
-package com.chattingapp.foodrecipeuidemo.composables.popup
+package com.chattingapp.foodrecipeuidemo.composables.follow
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileFollowPeople
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -145,29 +146,34 @@ fun FollowsPage(
                         PageLoadingPlaceholder()
                     } else {
                         Column {
+                            if(userListFollower.isEmpty()){
+                                NoRecipeUserPlaceholder()
+                            }
+                            else{
+                                LazyColumn(
+                                    state = listStateFollower,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp, 0.dp, 16.dp, 32.dp)
+                                ) {
+                                    items(userListFollower) { user ->
+                                        profileFollowerViewModel.userListDetail = userListFollower
+                                        ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, null)
+                                    }
+                                }
 
-                            LazyColumn(
-                                state = listStateFollower,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp, 0.dp, 16.dp, 32.dp)
-                            ) {
-                                items(userListFollower) { user ->
-                                    profileFollowerViewModel.userListDetail = userListFollower
-                                    ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, null)
+                                LaunchedEffect(listStateFollower) {
+                                    snapshotFlow { listStateFollower.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                        .collect { lastVisibleItem ->
+                                            if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowerViewModel.userListDetail.size - 1
+                                                && userListFollower.size != followerCount!!.toInt() && followerCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
+                                                profileFollowerViewModel.loadMoreUsers(userProfile.id)
+                                                delay(1000)
+                                            }
+                                        }
                                 }
                             }
 
-                            LaunchedEffect(listStateFollower) {
-                                snapshotFlow { listStateFollower.layoutInfo.visibleItemsInfo.lastOrNull() }
-                                    .collect { lastVisibleItem ->
-                                        if (lastVisibleItem != null && lastVisibleItem.index >= profileFollowerViewModel.userListDetail.size - 1
-                                            && userListFollower.size != followerCount!!.toInt() && followerCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
-                                            profileFollowerViewModel.loadMoreUsers(userProfile.id)
-                                            delay(1000)
-                                        }
-                                    }
-                            }
                         }
                     }
                 }
@@ -187,30 +193,36 @@ fun FollowsPage(
                         PageLoadingPlaceholder()
                     } else {
                         Column {
-                            val profileCountsViewModel = FollowCountsViewModel()
-                            LazyColumn(
-                                state = listStateFollowing,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp, 0.dp, 16.dp, 32.dp)
-                            ) {
-                                items(userListFollowing) { user ->
+                            if(userListFollowing.isEmpty()){
+                                NoRecipeUserPlaceholder()
+                            }
+                            else{
+                                val profileCountsViewModel = FollowCountsViewModel()
+                                LazyColumn(
+                                    state = listStateFollowing,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp, 0.dp, 16.dp, 32.dp)
+                                ) {
+                                    items(userListFollowing) { user ->
 
 
-                                    ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, profileCountsViewModel)
+                                        ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, profileCountsViewModel)
+                                    }
+                                }
+
+                                LaunchedEffect(listStateFollowing) {
+                                    snapshotFlow { listStateFollowing.layoutInfo.visibleItemsInfo.lastOrNull() }
+                                        .collect { lastVisibleItem ->
+                                            if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1
+                                                && followingCount!!.toInt() > userListFollowing.size && followingCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
+                                                profileFollowingViewModel.loadMoreUsers(userProfile.id)
+                                                delay(1000)
+                                            }
+                                        }
                                 }
                             }
 
-                            LaunchedEffect(listStateFollowing) {
-                                snapshotFlow { listStateFollowing.layoutInfo.visibleItemsInfo.lastOrNull() }
-                                    .collect { lastVisibleItem ->
-                                        if (lastVisibleItem != null && lastVisibleItem.index == userListFollowing.size - 1
-                                            && followingCount!!.toInt() > userListFollowing.size && followingCount.toInt() > Constant.PAGE_SIZE_PROFILE) {
-                                            profileFollowingViewModel.loadMoreUsers(userProfile.id)
-                                            delay(1000)
-                                        }
-                                    }
-                            }
                         }
                     }
                 }

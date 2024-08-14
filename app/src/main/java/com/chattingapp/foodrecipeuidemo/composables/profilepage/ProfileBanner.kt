@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -57,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
@@ -322,44 +322,48 @@ fun ProfileBanner(  navController: NavController) {
 
         }
         if(displayProfileImage && followCounts != null){
-
-            LaunchedEffect(userProfile.id) {
-                if(followCounts?.recipeCount!! > 0L)
-                recipeViewModel.fetchRecipes(userProfile.id)
+            if(followCounts?.recipeCount!! <= 0L){
+                NoRecipeUserPlaceholder()
             }
-            val listState = rememberLazyListState()
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(16.dp, 0.dp, 16.dp, 0.dp)
-            ) {
+            else{
+                LaunchedEffect(userProfile.id) {
+                    recipeViewModel.fetchRecipes(userProfile.id)
+                }
+                val listState = rememberLazyListState()
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(16.dp, 0.dp, 16.dp, 0.dp)
+                ) {
 
-                items(recipeList) { recipe ->
-                    Log.d("SIZE:  ", recipeList.size.toString())
-                    recipeViewModel.listSize = recipeList.size
-                    Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
+                    items(recipeList) { recipe ->
+                        Log.d("SIZE:  ", recipeList.size.toString())
+                        recipeViewModel.listSize = recipeList.size
+                        Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
 
-                    recipeViewModel.recipeListDetail = recipeList
-                    Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
-                    Constant.isProfilePage = true
-                    DisplayRecipe(recipe, navController)
+                        recipeViewModel.recipeListDetail = recipeList
+                        Log.d("SIZE:  VIEW MODEL:  ", recipeViewModel.recipeListDetail.size.toString())
+                        Constant.isProfilePage = true
+                        DisplayRecipe(recipe, navController)
+                    }
+                }
+
+                LaunchedEffect(listState) {
+                    snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
+                        .collect { lastVisibleItem ->
+
+                            if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1 &&
+                                recipeViewModel.recipeListDetail.size.toLong() != followCounts?.recipeCount && followCounts?.recipeCount!! > 10L) {
+                                Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
+                                recipeViewModel.loadMoreRecipes(userProfile.id)
+                                delay(1000)
+                            }
+                        }
                 }
             }
 
-            LaunchedEffect(listState) {
-                snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull() }
-                    .collect { lastVisibleItem ->
-
-                        if (lastVisibleItem != null && lastVisibleItem.index >= recipeViewModel.recipeListDetail.size - 1 &&
-                            recipeViewModel.recipeListDetail.size.toLong() != followCounts?.recipeCount && followCounts?.recipeCount!! > 10L) {
-                            Log.d("LOAD MORE RECIPES", "ProfileBanner: ")
-                            recipeViewModel.loadMoreRecipes(userProfile.id)
-                            delay(1000)
-                        }
-                    }
-            }
         }
 
     }
