@@ -22,5 +22,5 @@ object Constant {
     const val NULL_EXCEPTION_ERROR = "Invalid request, please fill crucial parts!"
     var deletedCommentCount = 0
     val PAGE_SIZE_PROFILE = 20
-
+    val MINIMUM_PASSWORD_SIZE = 8
 }

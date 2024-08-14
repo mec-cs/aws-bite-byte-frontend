@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
+import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.viewmodel.ForgotPasswordViewModel
 import kotlinx.coroutines.delay
@@ -93,7 +95,7 @@ fun ForgotPassword(navController: NavController) {
 
 
             if(isSendButtonEnabled.value) {
-                ElevatedButton(
+                Button(
                     onClick = {
                         if(email.value.trim() != "" && EmailValidator.isEmailValid(email.value.trim())){
                             viewModel.checkUserExistsByEmail(email.value.trim())
@@ -102,10 +104,14 @@ fun ForgotPassword(navController: NavController) {
                             displayToast("Please enter a valid email!", context)
                         }
                     },
-                    modifier = Modifier.padding(top = 16.dp),
-                    enabled = isInputEnabled.value // Disable or enable the button based on state
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
+                    enabled = isInputEnabled.value, // Disable or enable the button based on state
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (isInputEnabled.value) ButtonDefaults.buttonColors().backgroundColor(enabled = true).value
+                        else Color.Blue.copy(alpha = 0.5f)
+                    ),
                 ) {
-                    Text("Send a code")
+                    Text("Send a code", color = if (isInputEnabled.value) Color.White else Color.Black)
                 }
             }
 
@@ -173,7 +179,7 @@ fun ForgotPassword(navController: NavController) {
                         .padding(bottom = 16.dp)
                 )
 
-                ElevatedButton(
+                Button(
                     onClick = {
                         if (userCode.text == serverCode.toString()) {
 
@@ -187,7 +193,7 @@ fun ForgotPassword(navController: NavController) {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Verify my account")
+                    Text("Verify my account", color = Color.White)
                 }
 
                 Button(
@@ -197,9 +203,13 @@ fun ForgotPassword(navController: NavController) {
                         resendAttempts++
                     },
                     enabled = isButtonEnabled,
-                    modifier = Modifier.padding(top = 16.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (isButtonEnabled) ButtonDefaults.buttonColors().backgroundColor(enabled = true).value
+                        else Color.Blue.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth()
                 ) {
-                    Text(timerText)
+                    Text(timerText, color = if (isButtonEnabled) Color.White else Color.Black)
                 }
             }
 
@@ -236,9 +246,10 @@ fun ForgotPassword(navController: NavController) {
 
                 Button(
                     onClick = {
-                        if(password.value.trim().isNotBlank() && confirmPassword.value.trim().isNotBlank()){
-                            isPasswordMatch.value = password.value == confirmPassword.value
-                            if(isPasswordMatch.value){
+                        isPasswordMatch.value = password.value == confirmPassword.value
+                        if(password.value.trim().isNotBlank() && confirmPassword.value.trim().isNotBlank() && isPasswordMatch.value &&
+                            password.value.length >= Constant.MINIMUM_PASSWORD_SIZE){
+
                                 //displayToast("pw matches", context)
 
                                 viewModel.changePassword(
@@ -253,10 +264,18 @@ fun ForgotPassword(navController: NavController) {
                                     }
                                 )
 
-                            }
+
                         }
                         else{
-                            displayToast("Missing field(s)!", context)
+                            if(password.value.trim().isBlank() || confirmPassword.value.trim().isBlank()){
+                                displayToast("Missing field(s)!", context)
+                            }
+                            else if(!isPasswordMatch.value){
+                                displayToast("Passwords should match!", context)
+                            }
+                            else if(password.value.length < Constant.MINIMUM_PASSWORD_SIZE){
+                                displayToast("Password should contain minimum ${Constant.MINIMUM_PASSWORD_SIZE} characters!", context)
+                            }
                         }
 
                     },
@@ -264,7 +283,7 @@ fun ForgotPassword(navController: NavController) {
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 10.dp)
                 ) {
-                    Text(text = "Change Password")
+                    Text(text = "Change Password", color = Color.White)
                 }
 
                 if (!isPasswordMatch.value) {

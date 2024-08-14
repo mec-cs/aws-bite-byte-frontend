@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
+import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
@@ -97,7 +98,8 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
 
         Button(onClick = {
         if(email.trim().isNotBlank() && EmailValidator.isEmailValid(email) && username.trim().isNotBlank() && password.trim().isNotBlank() &&
-            confirmPassword.trim().isNotBlank() && password == confirmPassword && !password.contains("$")){
+            confirmPassword.trim().isNotBlank() && password == confirmPassword && !password.contains("$") && password.length >= Constant.MINIMUM_PASSWORD_SIZE){
+
 
             val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
 
@@ -123,6 +125,9 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
             }
             else if(password.contains("$")){
                 displayToast("Password cannot contain $ sign!", context)
+            }
+            else if(password.length < Constant.MINIMUM_PASSWORD_SIZE){
+                displayToast("Password should contain minimum ${Constant.MINIMUM_PASSWORD_SIZE} characters", context)
             }
         }
 
