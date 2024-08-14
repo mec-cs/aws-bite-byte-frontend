@@ -56,7 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
-import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
@@ -323,7 +323,7 @@ fun ProfileBanner(  navController: NavController) {
         }
         if(displayProfileImage && followCounts != null){
             if(followCounts?.recipeCount!! <= 0L){
-                NoRecipeUserPlaceholder()
+                NoRecipeUserCommentPlaceholder()
             }
             else{
                 LaunchedEffect(userProfile.id) {

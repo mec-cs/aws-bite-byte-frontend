@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.ErrorPlaceholder
-import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -179,7 +179,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         }
 
                         if(allIdSizeLike == 0){
-                            NoRecipeUserPlaceholder()
+                            NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LazyColumn(
@@ -226,7 +226,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
 
                         }
                         if(allIdSizeClick == 0){
-                            NoRecipeUserPlaceholder()
+                            NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LazyColumn(
@@ -282,7 +282,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             ErrorPlaceholder()
                         }
                         if(favoriteCount.value!! == 0L){
-                            NoRecipeUserPlaceholder()
+                            NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LaunchedEffect(cardId) {
@@ -349,7 +349,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             ErrorPlaceholder()
                         }
                         if(allIdSizeTrends == 0){
-                            NoRecipeUserPlaceholder()
+                            NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LazyColumn(

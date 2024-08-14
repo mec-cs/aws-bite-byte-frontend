@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.chattingapp.foodrecipeuidemo.R
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import kotlinx.coroutines.delay
@@ -53,6 +54,9 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
     var textState by remember { mutableStateOf(TextFieldValue()) }
 
     val isTextNotEmpty = textState.text.trim().isNotEmpty()
+
+    var isNoCommentContent by remember { mutableStateOf(false) }
+
 
     // Determine which icon to display based on text input
     val iconResId = if (isTextNotEmpty) {
@@ -154,13 +158,29 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
                     }
 
                 }
+                if(!isNoCommentContent){
+                    items(comments) { comment ->
 
-                items(comments) { comment ->
+                        CommentItem(
+                            comment = comment,
+                            commentViewModel
+                        )
+                    }
+                }
+                if(isNoCommentContent){
+                    item {
+                        NoRecipeUserCommentPlaceholder()
+                    }
+                }
 
-                    CommentItem(
-                        comment = comment,
-                        commentViewModel
-                    )
+            }
+
+            LaunchedEffect(commentCount) {
+                if(commentCount == 0L){
+                    isNoCommentContent = true
+                }
+                else{
+                    isNoCommentContent = false
                 }
             }
 

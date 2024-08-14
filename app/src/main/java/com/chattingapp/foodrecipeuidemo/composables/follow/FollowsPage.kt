@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
-import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.PageLoadingPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.profilepage.ProfileFollowPeople
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -147,7 +147,7 @@ fun FollowsPage(
                     } else {
                         Column {
                             if(userListFollower.isEmpty()){
-                                NoRecipeUserPlaceholder()
+                                NoRecipeUserCommentPlaceholder()
                             }
                             else{
                                 LazyColumn(
@@ -194,7 +194,7 @@ fun FollowsPage(
                     } else {
                         Column {
                             if(userListFollowing.isEmpty()){
-                                NoRecipeUserPlaceholder()
+                                NoRecipeUserCommentPlaceholder()
                             }
                             else{
                                 val profileCountsViewModel = FollowCountsViewModel()

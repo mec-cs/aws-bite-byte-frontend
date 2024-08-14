@@ -8,7 +8,7 @@ import androidx.compose.ui.res.painterResource
 import com.chattingapp.foodrecipeuidemo.R
 
 @Composable
-fun NoRecipeUserPlaceholder(){
+fun NoRecipeUserCommentPlaceholder(){
     Image(
         painter = painterResource(id = R.drawable.empty_recipe_favorite_user),
         contentDescription = null,
