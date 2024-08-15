@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.MainActivity
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.ProfilePhotoPlaceholder
 import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
@@ -145,11 +146,7 @@ fun ProfileBanner(  navController: NavController) {
                 profileImage?.let {
                     displayProfileImage = true
                 } ?: run {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp),
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
+                    ProfilePhotoPlaceholder()
                 }
             } else {
                 displayProfileImage = true
