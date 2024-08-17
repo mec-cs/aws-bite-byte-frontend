@@ -1,6 +1,7 @@
 package com.chattingapp.foodrecipeuidemo.composables.search
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -52,7 +54,7 @@ fun SearchPageCall(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp, 0.dp, 16.dp, 0.dp)
+            .padding(16.dp, 32.dp, 16.dp, 0.dp)
     ){
             TextField(
                 value = if(selectedTab.value == "Recipe") searchRecipeQuery else searchUserQuery, // Observed state from ViewModel
@@ -66,7 +68,7 @@ fun SearchPageCall(navController: NavController) {
                 },
                 placeholder = {
                     Text(
-                        text = if (selectedTab.value == "Recipe") "Search recipe" else "Search user"
+                        text = if (selectedTab.value == "Recipe") "Search for a recipe" else "Search for a user"
                     )
                 },
                 trailingIcon = {
@@ -92,8 +94,12 @@ fun SearchPageCall(navController: NavController) {
                     .padding(bottom = 16.dp)
             )
 
-
-            LazyRow {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        )
+        {
+            LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
                 item {
                     Text(
                         text = "Recipe",
@@ -128,6 +134,7 @@ fun SearchPageCall(navController: NavController) {
                 }
 
             }
+        }
         if(selectedTab.value == "Recipe"){
             if(searchRecipeResults.isNotEmpty()){
                 LazyColumn(
