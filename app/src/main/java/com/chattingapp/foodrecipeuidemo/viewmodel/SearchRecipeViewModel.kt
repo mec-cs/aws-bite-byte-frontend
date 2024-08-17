@@ -1,23 +1,18 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSearchResult
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-class SearchViewModel: ViewModel() {
+class SearchRecipeViewModel: ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
@@ -37,8 +32,6 @@ class SearchViewModel: ViewModel() {
                         performSearch(query)
                     }
             }
-
-
     }
 
     fun updateSearchQuery(query: String) {

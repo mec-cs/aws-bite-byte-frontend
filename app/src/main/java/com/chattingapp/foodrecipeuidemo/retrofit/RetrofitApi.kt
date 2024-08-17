@@ -191,7 +191,7 @@ interface RetrofitAPICredentials {
 
     // SEARCH API
     @POST("search-profile/search")
-    fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
+    suspend fun searchUsers(@Query("query") query: String) : List<UserProfile>
 
     @POST("search-recipe/search")
     suspend fun searchRecipes(@Query("query") query: String): List<RecipeSearchResult>

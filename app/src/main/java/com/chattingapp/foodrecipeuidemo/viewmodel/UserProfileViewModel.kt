@@ -55,25 +55,6 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    /*fun fetchUserProfile() {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val userProfile = apiService.getUserProfileByEmail(Constant.user.email)
-
-                // Handle the successful response
-                withContext(Dispatchers.Main) {
-                    Constant.userProfile = userProfile
-
-                    val profileImageViewModel = ProfileImageViewModel()
-                    profileImageViewModel.fetchProfileImage(userProfile.profilePicture)
-                }
-            } catch (e: Exception) {
-                // Handle failure (e.g., network error, non-200 HTTP status)
-                Log.e("API_CALL_FAILURE", "Failed to fetch user profile", e)
-            }
-        }
-    }*/
-
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> get() = _userProfile
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -26,19 +27,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.chattingapp.foodrecipeuidemo.composables.recipe.DisplayRecipe
+import com.chattingapp.foodrecipeuidemo.composables.profilepage.SearchUserDisplay
 import com.chattingapp.foodrecipeuidemo.composables.recipe.SearchRecipeDisplay
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.viewmodel.SearchViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.SearchRecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.SearchUserViewModel
 
 @Composable
 fun SearchPageCall(navController: NavController) {
     val selectedTab = rememberSaveable  { mutableStateOf("Recipe") }
 
-    val viewModel: SearchViewModel = viewModel()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val searchResults by viewModel.searchResults.collectAsState()
+    val searchRecipeViewModel: SearchRecipeViewModel = viewModel()
+    val searchRecipeQuery by searchRecipeViewModel.searchQuery.collectAsState()
+    val searchRecipeResults by searchRecipeViewModel.searchResults.collectAsState()
 
+    val searchUserViewModel: SearchUserViewModel = viewModel()
+    val searchUserQuery by searchUserViewModel.searchQuery.collectAsState()
+    val searchUserResults by searchUserViewModel.searchResults.collectAsState()
+
+    val listStateRecipe = rememberLazyListState()
+    val listStateUser = rememberLazyListState()
 
 
     Column(
@@ -47,9 +55,14 @@ fun SearchPageCall(navController: NavController) {
             .padding(16.dp, 0.dp, 16.dp, 0.dp)
     ){
             TextField(
-                value = searchQuery, // Observed state from ViewModel
+                value = if(selectedTab.value == "Recipe") searchRecipeQuery else searchUserQuery, // Observed state from ViewModel
                 onValueChange = { newQuery ->
-                    viewModel.updateSearchQuery(newQuery) // Update the query in ViewModel
+                    if(selectedTab.value == "Recipe"){
+                        searchRecipeViewModel.updateSearchQuery(newQuery) // Update the query in ViewModel
+                    }
+                    else{
+                        searchUserViewModel.updateSearchQuery(newQuery) // Update the query in ViewModel
+                    }
                 },
                 placeholder = {
                     Text(
@@ -57,8 +70,16 @@ fun SearchPageCall(navController: NavController) {
                     )
                 },
                 trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.updateSearchQuery("") }) {
+                    if (searchRecipeQuery.isNotEmpty() && selectedTab.value == "Recipe") {
+                        IconButton(onClick = { searchRecipeViewModel.updateSearchQuery("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear text"
+                            )
+                        }
+                    }
+                    else if(searchUserQuery.isNotEmpty() && selectedTab.value == "User"){
+                        IconButton(onClick = { searchUserViewModel.updateSearchQuery("") }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear text"
@@ -80,8 +101,8 @@ fun SearchPageCall(navController: NavController) {
                             .padding(end = 16.dp)
                             .clickable {
                                 selectedTab.value = "Recipe"
-                                viewModel.updateSearchQuery("")
-                                       },
+                                //viewModel.updateSearchQuery("")
+                            },
                         style = if (selectedTab.value == "Recipe") {
                             TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
                         } else {
@@ -96,8 +117,8 @@ fun SearchPageCall(navController: NavController) {
                             .padding(horizontal = 16.dp)
                             .clickable {
                                 selectedTab.value = "User"
-                                viewModel.updateSearchQuery("")
-                                       },
+                                //viewModel.updateSearchQuery("")
+                            },
                         style = if (selectedTab.value == "User") {
                             TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
                         } else {
@@ -107,18 +128,35 @@ fun SearchPageCall(navController: NavController) {
                 }
 
             }
-
-            if(searchResults.isNotEmpty()){
+        if(selectedTab.value == "Recipe"){
+            if(searchRecipeResults.isNotEmpty()){
                 LazyColumn(
+                    state = listStateRecipe,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(searchResults) { recipe ->
+                    items(searchRecipeResults) { recipe ->
                         Constant.isSearchScreen = true
                         SearchRecipeDisplay(recipe, navController)
                     }
 
                 }
             }
+        }
+        else if(selectedTab.value == "User"){
+            if(searchUserResults.isNotEmpty()){
+                LazyColumn(
+                    state = listStateUser,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(searchUserResults) { user ->
+                        Constant.isSearchScreen = true
+                        SearchUserDisplay(user, navController, searchUserViewModel)
+                    }
+
+                }
+            }
+        }
+
 
 
     }

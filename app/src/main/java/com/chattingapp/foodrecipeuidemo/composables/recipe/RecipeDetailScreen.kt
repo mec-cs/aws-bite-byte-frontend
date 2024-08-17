@@ -37,15 +37,9 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
 
     val clickHistoryViewModel = ClickHistoryViewModel()
 
-
-
     LaunchedEffect(Constant.userProfile.id, Constant.recipeDetailProjection!!.id!!) {
         clickHistoryViewModel.addClick(Constant.userProfile.id, Constant.recipeDetailProjection!!.id!!)
     }
-
-
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -55,12 +49,13 @@ fun RecipeDetailScreen(navController: NavController, toggleStatus:String) {
                 navigationIcon = {
                     IconButton(onClick = {
                         Constant.recipeSpecificDTO = null
-                        if (Constant.isSearchScreen) {
-                            Constant.isSearchScreen = false
-                            navController.popBackStack("search", false, true)
-                        } else if (Constant.isProfilePage) {
+                        if (Constant.isProfilePage) {
                             Constant.isProfilePage = false
                             navController.popBackStack("profile", false, true)
+                        }
+                        else if (Constant.isSearchScreen) {
+                            Constant.isSearchScreen = false
+                            navController.popBackStack("search", false, true)
                         }
                         else if(Constant.isCardScreen){
                             Constant.isCardScreen = false

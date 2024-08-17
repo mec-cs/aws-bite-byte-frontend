@@ -1,23 +1,28 @@
-package com.chattingapp.foodrecipeuidemo.composables.recipe
+package com.chattingapp.foodrecipeuidemo.composables.profilepage
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,41 +36,44 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.SearchRecipePlaceholder
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.SearchUserPlaceholder
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
-import com.chattingapp.foodrecipeuidemo.entity.RecipeSearchResult
+import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.RecipeViewModel
+import com.chattingapp.foodrecipeuidemo.viewmodel.SearchUserViewModel
 
 @Composable
-fun SearchRecipeDisplay(recipe: RecipeSearchResult, navController: NavController){
+fun SearchUserDisplay(user: UserProfile, navController: NavController, viewModel: SearchUserViewModel){
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    val viewModel: RecipeViewModel = viewModel()
     var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(recipe.id) {
+    LaunchedEffect(user.id) {
         //Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
-        viewModel.fetchImage(recipe.image) {
+        viewModel.fetchImage(user.profilePicture) {
             bitmap = it
             isLoading = false
             //Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
         }
     }
+
     if(!isLoading){
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
                 .clickable {
-                    val recipeProObj = RecipeProjection(id = recipe.id, name = recipe.name, description = recipe.description, dateCreated = recipe.dateCreated, image = recipe.image, ownerId = recipe.ownerId, bmRecipe = bitmap)
-                    val relDate = CalculateDate.formatDateForUser(recipe.dateCreated)
-                    recipeProObj.relativeDate = relDate
+                    if(Constant.userProfile.id != user.id){
+                        Constant.targetUserProfile = user
+                    }
 
-                    Constant.recipeDetailProjection = recipeProObj
-                    Constant.isSearchScreen = true
-                    navController.navigate("recipeDetail/${"Details"}")
+                    Constant.isProfilePage = true
 
-                }
+                    navController.navigate("profile")
+
+                },verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             bitmap?.let {
                 Image(
@@ -78,35 +86,30 @@ fun SearchRecipeDisplay(recipe: RecipeSearchResult, navController: NavController
                         .padding(bottom = 8.dp)
                         .clip(RoundedCornerShape(8.dp))
                 )
-                Column(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
+
+                // Use alignBy to center the text vertically with respect to the Image
+
                     Text(
-                        text = recipe.name,
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        text = user.username,
+                        modifier = Modifier.padding(start = 8.dp).weight(1f),
                         style = TextStyle(
-                            fontWeight = FontWeight.Bold, // Make the text bold
-                            fontSize = 18.sp // You can adjust the font size as needed
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
                         )
                     )
-                    Text(
-                        text = "By "+ recipe.ownerUsername,
-                        style = TextStyle(
-                            fontStyle = FontStyle.Italic, // Make the text italic
-                            fontSize = 15.sp, // Set the font size to 15sp
-                            color = Color.Gray
-                        ),
-                    )
-                }
-
+                    /*Text(
+                        text = user.username,
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp, end = 8.dp)
+                    )*/
 
             }
-
         }
+
     }
     else{
-        SearchRecipePlaceholder(recipe)
+        SearchUserPlaceholder(user)
     }
-
-
 }

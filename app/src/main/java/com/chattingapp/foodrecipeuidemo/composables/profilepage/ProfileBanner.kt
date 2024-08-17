@@ -29,7 +29,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,8 +74,9 @@ import okhttp3.RequestBody
 import java.io.File
 import java.io.FileOutputStream
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileBanner(  navController: NavController) {
+fun ProfileBanner(navController: NavController) {
     val recipeViewModel: RecipeViewModel = viewModel()
     val viewModel: FollowCountsViewModel = viewModel()
     val profileImageViewModel: ProfileImageViewModel = viewModel()
@@ -97,6 +103,30 @@ fun ProfileBanner(  navController: NavController) {
     var displayProfileImage by remember { mutableStateOf(false) }
 
     Column {
+        if(Constant.isSearchScreen){
+            TopAppBar(
+                title = { Text(text = "Profile") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        Constant.isProfilePage = false
+                        Constant.targetUserProfile = null
+                        navController.navigateUp()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_back),
+                            contentDescription = "Back",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent // Make the background transparent
+                )
+            )
+        }
+
+
+
         Row(
             modifier = Modifier
                 .fillMaxWidth() // Fill the entire width of the screen

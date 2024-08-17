@@ -3,6 +3,7 @@ package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,6 +48,7 @@ fun ProfileScreen(navController: NavController) {
 
                 FollowsPage(navControllerRecipe, followType, followerCount, followingCount)
             }
+
         }
         //ProfileBanner(vmFollow, vmProfilePic, vmRecipePic)
     }
