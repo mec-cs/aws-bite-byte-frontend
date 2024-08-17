@@ -157,7 +157,7 @@ fun SearchPageCall(navController: NavController) {
                 ) {
                     items(searchUserResults) { user ->
                         Constant.isSearchScreen = true
-                        SearchUserDisplay(user, navController, searchUserViewModel)
+                        SearchUserDisplay(user, navController)
                     }
 
                 }

@@ -39,7 +39,7 @@ class CategoryTrendsViewModel: ViewModel() {
             try {
                 // Directly call the suspend function
                 val mostClickedIds = RetrofitHelper.apiService.getMostClickedRecipesLastTwo()
-                allIds = mostClickedIds ?: emptyList()
+                allIds = mostClickedIds
                 _allIdsSize.value = allIds.size
                 if(_allIdsSize.value > 0) {
                     loadMoreRecipes()
@@ -67,7 +67,7 @@ class CategoryTrendsViewModel: ViewModel() {
                 val fetchedRecipes = withContext(Dispatchers.IO) {
                     RetrofitHelper.apiService.getRecipes(idsToFetch)
                 }
-                _recipes.value = _recipes.value + fetchedRecipes // Append new recipes to the existing list
+                _recipes.value += fetchedRecipes // Append new recipes to the existing list
                 currentPage++
             } catch (e: Exception) {
                 _errorMessage.value = "Error: ${e.message}"

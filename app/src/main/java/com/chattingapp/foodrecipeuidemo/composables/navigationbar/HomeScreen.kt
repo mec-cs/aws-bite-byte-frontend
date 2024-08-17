@@ -1,7 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.navigationbar
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -10,7 +9,7 @@ import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategor
 import com.chattingapp.foodrecipeuidemo.composables.recipe.RecipeDetailScreen
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen() {
     // Your home screen UI
     val navControllerCategory = rememberNavController()
 
@@ -22,7 +21,7 @@ fun HomeScreen(navController: NavController) {
             RecipeDetailScreen(navControllerCategory, backStackEntry.arguments?.getString("toggleStatus") ?: "Details")
         }
         // Add other destinations if needed
-        composable("cardlist") { backStackEntry ->
+        composable("cardlist") { _ ->
             CardsList(navControllerCategory)
         }
 

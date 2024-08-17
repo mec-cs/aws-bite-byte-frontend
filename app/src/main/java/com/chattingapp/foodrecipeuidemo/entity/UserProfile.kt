@@ -8,5 +8,4 @@ class UserProfile(
     var id: Long = 0L, // Add an ID to identify users
     var bm: Bitmap? = null
 
-) {
-}
+)

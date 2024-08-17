@@ -21,19 +21,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import coil.Coil
 import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
-import com.chattingapp.foodrecipeuidemo.coil.CoilSetup
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.ForgotPassword
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.LoginPage
 import com.chattingapp.foodrecipeuidemo.composables.authorizeuser.SignupPage
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.PublicHealthAnnouncement
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
-import com.chattingapp.foodrecipeuidemo.theme.FoodRecipeUiDemoTheme
-
 
 
 class MainActivity : ComponentActivity() {

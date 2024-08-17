@@ -79,7 +79,7 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isProfilePage = false
                                     Constant.isSearchScreen = false
                                     Constant.isFeedScreen = false
-                                    HomeScreen(navController)
+                                    HomeScreen()
                                 }
                                 composable("search") {
                                     Constant.isCardScreen = false
@@ -87,7 +87,7 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isSearchScreen = false
                                     Constant.isFeedScreen = false
                                     Constant.targetUserProfile = null
-                                    SearchScreen(navController)
+                                    SearchScreen()
                                 }
                                 composable("create recipe") {
                                     Constant.isCardScreen = false
@@ -103,7 +103,7 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isSearchScreen = false
                                     Constant.isFeedScreen = false
                                     Constant.targetUserProfile = null
-                                    FeedNavigator(navController = navController)
+                                    FeedNavigator()
                                 }
                                 composable("profile") {
                                     Constant.targetUserProfile = null
@@ -113,7 +113,7 @@ class HomePageActivity : ComponentActivity() {
                                     Constant.isProfilePage = false
                                     Constant.isSearchScreen = false
 
-                                    ProfileScreen(navController)
+                                    ProfileScreen()
                                 }
                                 composable("recipeCategory/{cardId}") { backStackEntry ->
                                     val cardId = backStackEntry.arguments?.getString("cardId")

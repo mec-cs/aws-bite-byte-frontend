@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -259,7 +258,7 @@ fun ForgotPassword(navController: NavController) {
                                         displayToast("Password changed successfully.", context)
                                         navController.popBackStack("login", false, true)
                                     },
-                                    onError = { errorMsg ->
+                                    onError = { _ ->
                                         displayToast("Something went wrong!", context)
                                     }
                                 )

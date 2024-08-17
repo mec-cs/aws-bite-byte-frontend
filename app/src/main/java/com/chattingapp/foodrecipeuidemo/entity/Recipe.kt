@@ -17,6 +17,4 @@ data class Recipe(
     var ownerId: Long? = null,
     var type: Boolean? = null,
     var bm: Bitmap? = null
-) {
-    // Additional methods if necessary
-}
+)

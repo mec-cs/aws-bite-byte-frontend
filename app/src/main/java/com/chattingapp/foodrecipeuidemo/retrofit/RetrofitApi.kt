@@ -12,7 +12,6 @@ import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSearchResult
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
-import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -20,7 +19,6 @@ import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -111,7 +109,7 @@ interface RetrofitAPICredentials {
 
     @GET("comment/count/{recipeId}")
     suspend fun countCommentsByRecipeId(@Path("recipeId") recipeId: Long): Long
-    
+
     @GET("comment/get-comments/{recipeId}/{page}")
     suspend fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): List<CommentProjection>
 

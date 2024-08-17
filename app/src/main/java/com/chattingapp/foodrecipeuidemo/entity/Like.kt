@@ -1,4 +1,3 @@
 package com.chattingapp.foodrecipeuidemo.entity
 
-class Like(var id:Long, var userId:Long, var recipeId:Long) {
-}
+class Like(var id:Long, var userId:Long, var recipeId:Long)

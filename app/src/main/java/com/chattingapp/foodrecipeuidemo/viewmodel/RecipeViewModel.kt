@@ -1,8 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -16,11 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
 class RecipeViewModel : ViewModel() {
     private val apiService = RetrofitHelper.apiService
-    private val imageCache = ConcurrentHashMap<String, Bitmap>()
     var listSize = 0
     var recipeListDetail: List<RecipeProjection> = emptyList()
 
@@ -28,49 +23,10 @@ class RecipeViewModel : ViewModel() {
     val recipeList: StateFlow<List<RecipeProjection>> get() = _recipeList
 
     private val _displayRecipes = MutableStateFlow(false)
-    val displayRecipes: StateFlow<Boolean> get() = _displayRecipes
 
-
-
-    var page = 0
+    private var page = 0
     private var isLoading = false
 
-    /*fun fetchImage(recipeImage: String, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[recipeImage]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
-
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    // Directly call the suspend function
-                    val imageString = apiService.getImageRecipe(recipeImage)
-                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            if (response != null) {
-                imageCache[recipeImage] = response
-            }
-
-            onImageLoaded(response)
-        }
-    }*/
-
-    private fun getCurrentRecipeIds(): Set<Long?> {
-        return _recipeList.value.map { it.id }.toSet()
-    }
-
-    // Function to filter out duplicates
-    private fun filterUniqueRecipes(newRecipes: List<RecipeProjection>): List<RecipeProjection> {
-        val currentIds = getCurrentRecipeIds()
-        return newRecipes.filterNot { it.id in currentIds }
-    }
 
     fun fetchRecipes(userId: Long) {
         if (page == 0) {

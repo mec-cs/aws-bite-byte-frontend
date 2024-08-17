@@ -1,19 +1,12 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.constant.Constant
-import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.entity.UserProfileDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +14,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MultipartBody
 import retrofit2.HttpException
-import java.util.concurrent.ConcurrentHashMap
 
 class UserProfileViewModel : ViewModel() {
 
@@ -70,11 +62,9 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    private val _updateResult = MutableStateFlow<Boolean>(false)
-    val updateResult: StateFlow<Boolean> get() = _updateResult
+    private val _updateResult = MutableStateFlow(false)
 
     private val _isLoadingChangeImage = MutableStateFlow(false)
-    val isLoadingChangeImage: StateFlow<Boolean> get() = _isLoadingChangeImage
 
     fun changeProfilePicture(file: MultipartBody.Part, userProfileId: Long) {
         if(!_isLoadingChangeImage.value) {

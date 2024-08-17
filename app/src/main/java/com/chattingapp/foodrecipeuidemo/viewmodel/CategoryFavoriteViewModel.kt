@@ -10,10 +10,7 @@ import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
 
 class CategoryFavoriteViewModel : ViewModel(){
@@ -24,7 +21,7 @@ class CategoryFavoriteViewModel : ViewModel(){
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    var page = 0
+    private var page = 0
     private var isLoadingMore = false
 
     var recipeListDetail: List<RecipeProjection> = emptyList()
@@ -112,7 +109,7 @@ class CategoryFavoriteViewModel : ViewModel(){
     }
 
 
-    private val _favoriteCount = MutableLiveData<Long>(-1L)
+    private val _favoriteCount = MutableLiveData(-1L)
     val favoriteCount: LiveData<Long> get() = _favoriteCount
 
     private val _isLoadingCount = MutableLiveData(false)

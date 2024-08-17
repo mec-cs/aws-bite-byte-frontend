@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -192,14 +191,6 @@ fun VerificationCodeUI(viewModel: CredentialsViewModel) {
 private fun displayToast(msg:String, context: Context){
     Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 }
-
-
-
-//@Preview
-//@Composable
-//private fun displayEmailAct() {
-//    VerificationCodeUI()
-//}
 
 
 private fun navigateToHomePageActivity(context: Context) {

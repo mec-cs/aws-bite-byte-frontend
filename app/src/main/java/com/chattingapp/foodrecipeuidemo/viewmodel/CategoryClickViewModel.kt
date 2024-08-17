@@ -37,7 +37,7 @@ class CategoryClickViewModel: ViewModel() {
             try {
                 // Directly call the suspend function
                 val mostClickedIds = RetrofitHelper.apiService.getMostClickedRecipes()
-                allIds = mostClickedIds ?: emptyList()
+                allIds = mostClickedIds
                 _allIdsSize.value = allIds.size // Update the size
                 if(_allIdsSize.value > 0){
                     loadMoreRecipes()
@@ -66,7 +66,7 @@ class CategoryClickViewModel: ViewModel() {
                     Log.d("CATEGORY_CLICK_VIEW_MODEL", "IDs to fetch: ${idsToFetch.joinToString(", ")}")
                     RetrofitHelper.apiService.getRecipes(idsToFetch)
                 }
-                _recipes.value = _recipes.value + fetchedRecipes // Append new recipes to the existing list
+                _recipes.value += fetchedRecipes // Append new recipes to the existing list
 
 
                 currentPage++

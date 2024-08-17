@@ -1,39 +1,22 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
-import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitAPICredentials
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.await
-import retrofit2.awaitResponse
-import androidx.compose.runtime.State
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class LikeViewModel() : ViewModel() {
+class LikeViewModel : ViewModel() {
 
-    private val _likeCount = MutableLiveData<LikeCountResponse>()
-    val likeCount: LiveData<LikeCountResponse> get() = _likeCount
-
-    private val _isLiked = MutableLiveData<Boolean>(false)
-    val isLiked: LiveData<Boolean> get() = _isLiked
 
     private val _loadingState = MutableStateFlow<Map<Long, Boolean>>(emptyMap()) // New loading state
     val loadingState: StateFlow<Map<Long, Boolean>> = _loadingState
 
-    private var isLoading = false
     private val _isLikedMap = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
     val isLikedMap: StateFlow<Map<Long, Boolean>> = _isLikedMap
 
@@ -56,7 +39,7 @@ class LikeViewModel() : ViewModel() {
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
                     put(recipeId, response)
                 }
-                _checkedLikeStatus.value = _checkedLikeStatus.value + recipeId // Mark as checked
+                _checkedLikeStatus.value += recipeId // Mark as checked
             } catch (e: Exception) {
                 e.printStackTrace()
                 _isLikedMap.value = _isLikedMap.value.toMutableMap().apply {
@@ -144,10 +127,10 @@ class LikeViewModel() : ViewModel() {
             try {
                 // Directly call the suspend function
                 val response = RetrofitHelper.apiService.getLikeCounts(recipeId)
-                _likeCounts.value = _likeCounts.value + (recipeId to response)
+                _likeCounts.value += (recipeId to response)
             } catch (e: Exception) {
                 // Handle the exception here
-                _likeCounts.value = _likeCounts.value + (recipeId to null)
+                _likeCounts.value += (recipeId to null)
                 e.printStackTrace() // Optional: log the exception for debugging
             }
         }

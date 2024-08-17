@@ -11,18 +11,16 @@ object Constant {
     var targetUserProfile: UserProfile? = null
     var recipeSpecificDTO: RecipeSpecificDTO? = null
     var isProfilePage = false
-    val MAX_DESCRIPTION_SIZE = 60
-    val MAX_COMMENT_SIZE = 30
-    val PAGE_SIZE_CLICK_LIKE = 10
+    const val MAX_DESCRIPTION_SIZE = 60
+    const val MAX_COMMENT_SIZE = 60
+    const val PAGE_SIZE_CLICK_LIKE = 10
     var recipeDetailProjection: RecipeProjection? = null
     var isSearchScreen = false
     var isCardScreen = false
     var isFeedScreen = false
-    const val CREATE_ERROR_DIALOG = "Please fill the necessary parts!"
-    const val NULL_EXCEPTION_ERROR = "Invalid request, please fill crucial parts!"
     var deletedCommentCount = 0
-    val PAGE_SIZE_PROFILE = 20
-    val MINIMUM_PASSWORD_SIZE = 8
-    val RECIPE_IMAGE_URL = "https://bytebite-recipe.s3.eu-central-1.amazonaws.com/"
-    val USER_IMAGE_URL = "https://bytebite-profile.s3.eu-central-1.amazonaws.com/"
+    const val PAGE_SIZE_PROFILE = 20
+    const val MINIMUM_PASSWORD_SIZE = 8
+    const val RECIPE_IMAGE_URL = "https://bytebite-recipe.s3.eu-central-1.amazonaws.com/"
+    const val USER_IMAGE_URL = "https://bytebite-profile.s3.eu-central-1.amazonaws.com/"
 }

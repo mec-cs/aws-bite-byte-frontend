@@ -6,7 +6,6 @@ import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.await
 
 class FavoriteViewModel : ViewModel() {
 
@@ -33,7 +32,7 @@ class FavoriteViewModel : ViewModel() {
                 val response = RetrofitHelper.apiService.checkFavorite(userId, recipeId)
                 _isFavoriteMap.value =
                     _isFavoriteMap.value.toMutableMap().apply { put(recipeId, response) }
-                _checkedFavoriteStatus.value = _checkedFavoriteStatus.value + recipeId
+                _checkedFavoriteStatus.value += recipeId
 
             } catch (e: Exception) {
                 e.printStackTrace()

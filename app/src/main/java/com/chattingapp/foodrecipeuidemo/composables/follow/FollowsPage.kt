@@ -158,7 +158,7 @@ fun FollowsPage(
                                 ) {
                                     items(userListFollower) { user ->
                                         profileFollowerViewModel.userListDetail = userListFollower
-                                        ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, null)
+                                        ProfileFollowPeople(user, selectedTab.value)
                                     }
                                 }
 
@@ -207,7 +207,7 @@ fun FollowsPage(
                                     items(userListFollowing) { user ->
 
 
-                                        ProfileFollowPeople(user, profileFollowerViewModel, profileFollowingViewModel, selectedTab.value, profileCountsViewModel)
+                                        ProfileFollowPeople(user, selectedTab.value)
                                     }
                                 }
 

@@ -332,9 +332,9 @@ class FeedViewModel : ViewModel() {
     private var currentSmallestNumber: Long? = null
     private val generatedNumbersList = mutableListOf<Long>()
 
-    fun getNumbersBasedOnCachedRecipes() {
+    private fun getNumbersBasedOnCachedRecipes() {
         if (currentSmallestNumber != 1L) {
-            val cachedRecipesList = _cachedRecipes.value ?: emptyList()
+            val cachedRecipesList = _cachedRecipes.value
             val startNumber = currentSmallestNumber ?: cachedRecipesList.firstOrNull()
 
             if (startNumber == null) {
@@ -360,7 +360,7 @@ class FeedViewModel : ViewModel() {
     val mergeComplete: StateFlow<Boolean> = _mergeComplete
 
     fun initializeCurrentSmallestNumber() {
-        val cachedRecipesList = _cachedRecipes.value ?: emptyList()
+        val cachedRecipesList = _cachedRecipes.value
         Log.d("initializeCurrentSmallestNumber", "bad")
 
         currentSmallestNumber = cachedRecipesList.firstOrNull()
@@ -377,31 +377,31 @@ class FeedViewModel : ViewModel() {
         Log.d("mergeAndInterleaveRecipes", "Starting merge")
 
         val mergedRecipes = mutableListOf<Long>()
-        val cachedList = _cachedRecipes.value?.toMutableList() ?: mutableListOf()
-        val followedList = _followedRecipes.value?.toMutableList() ?: mutableListOf()
+        val cachedList = _cachedRecipes.value.toMutableList()
+        val followedList = _followedRecipes.value.toMutableList()
 
         while (cachedList.isNotEmpty() || followedList.isNotEmpty()) {
-            val followedBatch = mutableListOf<Long>()
-            repeat(20) {
-                if (followedList.isNotEmpty()) {
-                    followedBatch.add(followedList.removeAt(0))
+                    val followedBatch = mutableListOf<Long>()
+                    repeat(20) {
+                        if (followedList.isNotEmpty()) {
+                            followedBatch.add(followedList.removeAt(0))
+                        }
+                    }
+
+                    val cachedBatch = mutableListOf<Long>()
+                    repeat(20) {
+                        if (cachedList.isNotEmpty()) {
+                            cachedBatch.add(cachedList.removeAt(0))
+                        }
+                    }
+
+                    val combinedBatch = (followedBatch + cachedBatch).toMutableList()
+                    combinedBatch.shuffle()
+
+                    mergedRecipes.addAll(combinedBatch)
                 }
-            }
 
-            val cachedBatch = mutableListOf<Long>()
-            repeat(20) {
-                if (cachedList.isNotEmpty()) {
-                    cachedBatch.add(cachedList.removeAt(0))
-                }
-            }
-
-            val combinedBatch = (followedBatch + cachedBatch).toMutableList()
-            combinedBatch.shuffle()
-
-            mergedRecipes.addAll(combinedBatch)
-        }
-
-        allIds = (_recommendedRecipes.value ?: emptyList()) + mergedRecipes
+        allIds = (_recommendedRecipes.value ) + mergedRecipes
         Log.d("allIds", "allIds size BEFORE linked map: ${allIds.size}")
 
         allIds = LinkedHashSet(allIds).toList()

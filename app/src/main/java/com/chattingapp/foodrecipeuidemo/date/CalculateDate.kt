@@ -1,6 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.date
 
-import android.util.Log
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,9 +29,9 @@ object CalculateDate {
         val durationHours = durationMinutes / 60
         val durationDays = durationHours / 24
         return when {
-            durationDays > 0 -> "${durationDays} day(s) ago"
-            durationHours > 0 -> "${durationHours} hour(s) ago"
-            durationMinutes > 0 -> "${durationMinutes} minute(s) ago"
+            durationDays > 0 -> "$durationDays day(s) ago"
+            durationHours > 0 -> "$durationHours hour(s) ago"
+            durationMinutes > 0 -> "$durationMinutes minute(s) ago"
             else -> "Just now"
         }
     }

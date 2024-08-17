@@ -1,8 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.entity
 
-import java.time.LocalDateTime
-
-
 class CommentProjection(
 
     val id: Long? = null,
@@ -17,6 +14,4 @@ class CommentProjection(
 
     val profilePicture: String? = null
 
-    ) {
-
-}
+    )

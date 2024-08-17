@@ -13,5 +13,4 @@ class Comment(
     val recipeId: Long? = null,
 
 
-) {
-}
+)

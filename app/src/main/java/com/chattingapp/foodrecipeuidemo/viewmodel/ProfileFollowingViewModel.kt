@@ -1,26 +1,20 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
-import java.util.concurrent.ConcurrentHashMap
 
 class ProfileFollowingViewModel: ViewModel() {
 
 
-    var page = 0
+    private var page = 0
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
 
@@ -28,9 +22,8 @@ class ProfileFollowingViewModel: ViewModel() {
     val userList: StateFlow<List<UserFollowsResponse>> get() = _userList
 
     private val _displayUser = MutableStateFlow(false)
-    val displayUser: StateFlow<Boolean> get() = _displayUser
 
-    var userListDetail: List<UserFollowsResponse> = emptyList()
+    private var userListDetail: List<UserFollowsResponse> = emptyList()
 
     fun fetchUsers(userId: Long) {
         if (page == 0 && !_isLoading.value) {

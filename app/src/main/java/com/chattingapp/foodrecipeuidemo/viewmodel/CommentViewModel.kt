@@ -1,8 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,16 +12,10 @@ import com.chattingapp.foodrecipeuidemo.entity.CommentProjection
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
 import java.io.IOException
-import java.util.concurrent.ConcurrentHashMap
 
 class CommentViewModel : ViewModel() {
 
@@ -44,21 +36,17 @@ class CommentViewModel : ViewModel() {
     }
 
     private val _userProfilesComment = MutableLiveData<List<UserProfile>>(emptyList())
-    val userProfilesComment: LiveData<List<UserProfile>> get() = _userProfilesComment
 
     private val _profileImageCacheComment = MutableLiveData<MutableMap<Long, Bitmap?>>(mutableMapOf())
-    val profileImageCacheComment: LiveData<MutableMap<Long, Bitmap?>> get() = _profileImageCacheComment
 
-    private val _loadingStateComment = MutableLiveData<MutableMap<Long, Boolean>>(mutableMapOf())
-    val loadingStateComment: LiveData<MutableMap<Long, Boolean>> get() = _loadingStateComment
 
 
 
     private val _comments = MutableLiveData<List<CommentProjection>>(emptyList())
     val comments: LiveData<List<CommentProjection>> get() = _comments
 
-    private val _hasMorePages = MutableLiveData<Boolean>(true)
-    val hasMorePages: LiveData<Boolean> get() = _hasMorePages
+    private val _hasMorePages = MutableLiveData(true)
+    private val hasMorePages: LiveData<Boolean> get() = _hasMorePages
 
     var currentPage = 0
     private var isLoading = false

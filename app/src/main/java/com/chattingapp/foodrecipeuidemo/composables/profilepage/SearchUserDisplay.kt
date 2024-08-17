@@ -22,10 +22,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
-import com.chattingapp.foodrecipeuidemo.viewmodel.SearchUserViewModel
 
 @Composable
-fun SearchUserDisplay(user: UserProfile, navController: NavController, viewModel: SearchUserViewModel){
+fun SearchUserDisplay(user: UserProfile, navController: NavController){
 
 
         Row(

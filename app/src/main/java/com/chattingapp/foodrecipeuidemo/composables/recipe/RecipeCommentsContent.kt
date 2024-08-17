@@ -1,7 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.composables.recipe
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,7 +28,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -50,8 +47,6 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel, listState: LazyLis
     val comments by commentViewModel.comments.observeAsState(emptyList())
 
     Constant.deletedCommentCount = 0
-    val userProfiles by commentViewModel.userProfilesComment.observeAsState(emptyList())
-    val profileImageCache by commentViewModel.profileImageCacheComment.observeAsState(emptyMap())
 
     var textState by remember { mutableStateOf(TextFieldValue()) }
 
@@ -177,12 +172,7 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel, listState: LazyLis
             }
 
             LaunchedEffect(commentCount) {
-                if(commentCount == 0L){
-                    isNoCommentContent = true
-                }
-                else{
-                    isNoCommentContent = false
-                }
+                isNoCommentContent = commentCount == 0L
             }
 
             LaunchedEffect(listState) {

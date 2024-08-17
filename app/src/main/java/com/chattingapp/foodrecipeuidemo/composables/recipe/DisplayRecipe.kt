@@ -1,6 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.composables.recipe
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +34,6 @@ import com.chattingapp.foodrecipeuidemo.date.CalculateDate
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
-import com.chattingapp.foodrecipeuidemo.viewmodel.UserProfileViewModel
 
 @Composable
 fun DisplayRecipe(
@@ -47,34 +44,18 @@ fun DisplayRecipe(
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val likeViewModel: LikeViewModel = viewModel()
-    val isLikeMap by likeViewModel.isLikedMap.collectAsState()
-    val isLike = isLikeMap[recipe.id] ?: false
 
     val favoriteViewModel: FavoriteViewModel = viewModel()
-    val isFavoriteMap by favoriteViewModel.isFavoriteMap.collectAsState()
-    val isFavorite = isFavoriteMap[recipe.id] ?: false
 
     val relativeDate = recipe.dateCreated?.let { CalculateDate.formatDateForUser(it) }
-
-    val userProfileViewModel: UserProfileViewModel = viewModel()
-
-    //Log.d("RECIPE USERNAME", recipe.username.toString())
-    // Fetch recipe image
-    // Determine username and profile picture only if not in profile page
 
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
 
 
-            val displayedProfileBitmap = when {
-                Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
-                Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
 
-                else -> profileBitmap
-            }
 
 
             RecipeUserProfile(recipe.ownerImage!!, recipe.username!!, recipe.id!!, favoriteViewModel)

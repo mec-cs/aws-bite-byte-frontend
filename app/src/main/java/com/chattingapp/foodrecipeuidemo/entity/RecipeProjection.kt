@@ -1,8 +1,6 @@
 package com.chattingapp.foodrecipeuidemo.entity
 
 import android.graphics.Bitmap
-import com.chattingapp.foodrecipeuidemo.viewmodel.LikeViewModel
-import java.time.LocalDateTime
 
 
 data class RecipeProjection (

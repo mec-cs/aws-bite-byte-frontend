@@ -20,23 +20,7 @@ class FollowCountsViewModel : ViewModel() {
 
     private var isActionInProgress = false
 
-    /*fun fetchFollowersCount(userId: Long) {
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    val response = apiService.getFollowersCount(userId).execute()
-                    if (response.isSuccessful) {
-                        response.body()
-                    } else {
-                        null
-                    }
-                } catch (e: Exception) {
-                    null
-                }
-            }
-            response?.let { _followCounts.value = it }
-        }
-    }*/
+
 
     fun fetchFollowersCount(userId: Long) {
         viewModelScope.launch {
@@ -97,7 +81,6 @@ class FollowCountsViewModel : ViewModel() {
 
 
     private val _isUnfollowing = MutableStateFlow(false)
-    val isUnfollowing: StateFlow<Boolean> = _isUnfollowing
 
     fun unfollowUser(followerId: Long, followedId: Long) {
         if(!isActionInProgress) {
