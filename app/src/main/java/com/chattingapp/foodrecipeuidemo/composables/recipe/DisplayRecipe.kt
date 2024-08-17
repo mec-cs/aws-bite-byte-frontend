@@ -52,7 +52,6 @@ fun DisplayRecipe(
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    var isProfileLoading by remember { mutableStateOf(true) }
     var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val likeViewModel: LikeViewModel = viewModel()
@@ -69,23 +68,12 @@ fun DisplayRecipe(
 
     //Log.d("RECIPE USERNAME", recipe.username.toString())
     // Fetch recipe image
-    LaunchedEffect(recipe.id) {
-        //Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
-
-        userProfileViewModel.fetchImage(recipe){
-            profileBitmap = it
-            isProfileLoading = false
-        }
-    }
-
     // Determine username and profile picture only if not in profile page
 
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
 
-        if (isProfileLoading) {
-            RecipePlaceholder(recipe)
-        } else {
+
             val displayedProfileBitmap = when {
                 Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm
                 Constant.userProfile.id == recipe.ownerId -> Constant.userProfile.bm
@@ -93,9 +81,9 @@ fun DisplayRecipe(
                 else -> profileBitmap
             }
 
-            displayedProfileBitmap?.let {
-                RecipeUserProfile(it.asImageBitmap(), recipe.username!!, recipe.id!!, favoriteViewModel)
-            }
+
+            RecipeUserProfile(recipe.ownerImage!!, recipe.username!!, recipe.id!!, favoriteViewModel)
+
 
             Text(
                 text = recipe.name ?: "",
@@ -124,7 +112,7 @@ fun DisplayRecipe(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        LikeRecipe(recipeId = recipe.id!!, likeViewModel)
+                        LikeRecipe(recipeId = recipe.id, likeViewModel)
                         IconButton(
                             modifier = Modifier
                                 .size(30.dp) // Adjust the size of the button
@@ -171,6 +159,6 @@ fun DisplayRecipe(
                     }
                 }
 
-        }
+
     }
 }

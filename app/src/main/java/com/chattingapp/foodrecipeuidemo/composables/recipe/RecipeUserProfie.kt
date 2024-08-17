@@ -1,6 +1,5 @@
 package com.chattingapp.foodrecipeuidemo.composables.recipe
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,16 +15,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.FavoriteViewModel
 
 @Composable
 fun RecipeUserProfile(
-    bm: ImageBitmap,
+    ownerImage: String,
     username: String,
     recipeId: Long,
     favoriteViewModel: FavoriteViewModel = viewModel() // Use default viewModel if not provided
@@ -49,8 +48,8 @@ fun RecipeUserProfile(
             .padding(end = 10.dp, top = 0.dp, start = 0.dp)
             .fillMaxWidth()
     ) {
-        Image(
-            bitmap = bm,
+        AsyncImage(
+            model = "${Constant.USER_IMAGE_URL}${ownerImage}",
             contentDescription = null,
             modifier = Modifier
                 .size(30.dp)
