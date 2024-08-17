@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.activity.EmailActivity
 import com.chattingapp.foodrecipeuidemo.activity.HomePageActivity
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.LoginLogo
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
 import com.chattingapp.foodrecipeuidemo.entity.AuthenticationDTO
@@ -61,16 +62,7 @@ fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.yumbyte_logo),
-                contentDescription = "Yumbyte Logo",
-                modifier = Modifier.height(250.dp)
-            )
-        }
+        LoginLogo()
 
         OutlinedTextField(
             value = email,

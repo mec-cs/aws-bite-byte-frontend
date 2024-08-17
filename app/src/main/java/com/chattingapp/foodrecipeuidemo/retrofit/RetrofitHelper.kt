@@ -10,7 +10,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitHelper {
 
-    private const val BASE_URL = "http://192.168.1.100:8765/"
+    private const val BASE_URL = "http://192.168.1.103:8765/"
     private const val API_TOKEN = "f57d10a3-f19e-4e17-8e77-c058ab937156"
 
     // Create an OkHttpClient with an Interceptor to add the API token to requests
@@ -40,7 +40,7 @@ object RetrofitHelper {
 
 object RetrofitHelperRecommendation {
 
-    private const val BASE_URL = "http://192.168.1.100:5000/"
+    private const val BASE_URL = "http://192.168.1.103:5000/"
     private const val API_KEY = "f57d10a3-f19e-4e17-8e77-c058ab937156"
 
     private val gson = GsonBuilder()

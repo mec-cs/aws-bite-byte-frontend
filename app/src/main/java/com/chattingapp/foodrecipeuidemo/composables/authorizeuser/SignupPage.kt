@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chattingapp.foodrecipeuidemo.MainActivity
+import com.chattingapp.foodrecipeuidemo.composables.placeholder.LoginLogo
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.credentials.PasswordUtil
 import com.chattingapp.foodrecipeuidemo.emailvalidator.EmailValidator
@@ -48,106 +50,114 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
     val context = LocalContext.current
     val viewModel: UserProfileViewModel = viewModel()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(text = "Sign Up", style = MaterialTheme.typography.h4)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { newPassword ->
-                // Remove any spaces from the input
-                password = newPassword.replace(" ", "")
-            },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { newPassword ->
-                // Remove any spaces from the input
-                confirmPassword = newPassword.replace(" ", "")
-            },
-            label = { Text("Confirm Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = {
-        if(email.trim().isNotBlank() && EmailValidator.isEmailValid(email) && username.trim().isNotBlank() && password.trim().isNotBlank() &&
-            confirmPassword.trim().isNotBlank() && password == confirmPassword && !password.contains("$") && password.length >= Constant.MINIMUM_PASSWORD_SIZE){
+    LazyColumn {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                LoginLogo()
 
 
-            val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
+                Text(text = "Sign Up", style = MaterialTheme.typography.h4)
+                Spacer(modifier = Modifier.height(16.dp))
 
-            viewModel.saveUser(userProfileDTO,
-                onSuccess = { responseBody ->
-                    displayToast(responseBody, context)
-                    navigateToMainActivity(context)
-                },
-                onError = { error ->
-                    displayToast("Something went wrong!", context)
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { newPassword ->
+                        // Remove any spaces from the input
+                        password = newPassword.replace(" ", "")
+                    },
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { newPassword ->
+                        // Remove any spaces from the input
+                        confirmPassword = newPassword.replace(" ", "")
+                    },
+                    label = { Text("Confirm Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(onClick = {
+                    if(email.trim().isNotBlank() && EmailValidator.isEmailValid(email) && username.trim().isNotBlank() && password.trim().isNotBlank() &&
+                        confirmPassword.trim().isNotBlank() && password == confirmPassword && !password.contains("$") && password.length >= Constant.MINIMUM_PASSWORD_SIZE){
+
+
+                        val userProfileDTO = UserProfileDTO(email, PasswordUtil.hashPassword(password), username)
+
+                        viewModel.saveUser(userProfileDTO,
+                            onSuccess = { responseBody ->
+                                displayToast(responseBody, context)
+                                navigateToMainActivity(context)
+                            },
+                            onError = { error ->
+                                displayToast("Something went wrong!", context)
+                            }
+                        )
+                    }
+                    else{
+                        if(!EmailValidator.isEmailValid(email)){
+                            displayToast("Invalid email!", context)
+                        }
+                        else if(email.trim().isBlank() || username.trim().isBlank() || password.trim().isBlank() || confirmPassword.trim().isBlank()){
+                            displayToast("Missing information!", context)
+                        }
+                        else if(!password.equals(confirmPassword)){
+                            displayToast("Check your passwords!", context)
+                        }
+                        else if(password.contains("$")){
+                            displayToast("Password cannot contain $ sign!", context)
+                        }
+                        else if(password.length < Constant.MINIMUM_PASSWORD_SIZE){
+                            displayToast("Password should contain minimum ${Constant.MINIMUM_PASSWORD_SIZE} characters", context)
+                        }
+                    }
+
+
+
+                }) {
+                    Text("Sign Up")
                 }
-            )
-        }
-        else{
-            if(!EmailValidator.isEmailValid(email)){
-                displayToast("Invalid email!", context)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TextButton(onClick = onSwitchToLogin) {
+                    Text("Already have an account? Login")
+                }
+
+                errorMessage?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = it, color = MaterialTheme.colors.error)
+                }
             }
-            else if(email.trim().isBlank() || username.trim().isBlank() || password.trim().isBlank() || confirmPassword.trim().isBlank()){
-                displayToast("Missing information!", context)
-            }
-            else if(!password.equals(confirmPassword)){
-                displayToast("Check your passwords!", context)
-            }
-            else if(password.contains("$")){
-                displayToast("Password cannot contain $ sign!", context)
-            }
-            else if(password.length < Constant.MINIMUM_PASSWORD_SIZE){
-                displayToast("Password should contain minimum ${Constant.MINIMUM_PASSWORD_SIZE} characters", context)
-            }
-        }
-
-
-
-        }) {
-            Text("Sign Up")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(onClick = onSwitchToLogin) {
-            Text("Already have an account? Login")
-        }
-
-        errorMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it, color = MaterialTheme.colors.error)
         }
     }
+
 }
 
 private fun navigateToMainActivity(context: Context) {
