@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.date.CalculateDate
@@ -44,13 +45,8 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 @Composable
 fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
     var expanded by remember { mutableStateOf(false) }
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    LaunchedEffect(comment.id) {
-        viewModel.fetchImage(comment) {
-            bitmap = it
-        }
-    }
+
 
     Column(
         modifier = Modifier
@@ -59,21 +55,14 @@ fun CommentItem(comment: CommentProjection, viewModel: CommentViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-            bitmap?.let {
-                Image(
-                    bitmap = it.asImageBitmap(),
+        AsyncImage(
+            model = "${Constant.USER_IMAGE_URL}${comment.profilePicture}",
                     contentDescription = "Profile Image",
                     modifier = Modifier
                         .size(50.dp)
                         .clip(CircleShape)
                 )
-            } ?: Image(
-                painter = painterResource(id = R.drawable.placeholder_profile),
-                contentDescription = "Profile Image",
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-            )
+
             var expandedMenu by remember { mutableStateOf(false) }
 
 

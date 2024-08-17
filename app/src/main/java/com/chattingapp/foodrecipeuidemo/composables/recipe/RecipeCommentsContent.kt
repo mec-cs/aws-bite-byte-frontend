@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.NoRecipeUserCommentPlaceholder
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -41,7 +43,7 @@ import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
+fun RecipeCommentsContent(commentViewModel: CommentViewModel, listState: LazyListState) {
 
     val commentCount by commentViewModel.commentCount.observeAsState(-1)
 
@@ -85,7 +87,6 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            val listState = rememberLazyListState()
 
             LazyColumn(state = listState) {
                 item {
@@ -106,8 +107,8 @@ fun RecipeCommentsContent(commentViewModel: CommentViewModel) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     )
                     {
-                        Image(
-                            bitmap = Constant.userProfile.bm!!.asImageBitmap(),
+                        AsyncImage(
+                            model = "${Constant.USER_IMAGE_URL}${Constant.userProfile.profilePicture}",
                             contentDescription = "Profile Image",
                             modifier = Modifier
                                 .size(50.dp)

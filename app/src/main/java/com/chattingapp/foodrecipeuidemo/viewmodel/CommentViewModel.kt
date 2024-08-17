@@ -54,35 +54,6 @@ class CommentViewModel : ViewModel() {
 
 
 
-    private val imageCache = ConcurrentHashMap<String, Bitmap>()
-
-    fun fetchImage(comment: CommentProjection, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[comment.profilePicture]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
-
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    // Directly call the suspend function
-                    val response = RetrofitHelper.apiService.getImage(comment.profilePicture!!)
-                    val decodedBytes = Base64.decode(response, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            if (response != null) {
-                imageCache[comment.profilePicture!!] = response
-            }
-
-            onImageLoaded(response)
-        }
-    }
-
     private val _comments = MutableLiveData<List<CommentProjection>>(emptyList())
     val comments: LiveData<List<CommentProjection>> get() = _comments
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -36,9 +37,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
+import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.viewmodel.FollowCountsViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileFollowerViewModel
 import com.chattingapp.foodrecipeuidemo.viewmodel.ProfileFollowingViewModel
@@ -53,26 +56,15 @@ fun ProfileFollowPeople(
     selectedTab:String?,
     viewModel: FollowCountsViewModel?
 ) {
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var username by remember { mutableStateOf<String?>("") }
+    var userProfile by remember { mutableStateOf<UserProfile?>(null) }
 
 
 
     if(selectedTab == "Followers"){
-        LaunchedEffect(user.follower.profilePicture) {
-            profileFollowerViewModel.fetchImage(user) {
-                bitmap = it
-                username = user.follower.username
-            }
-        }
+        userProfile = user.follower
     }
     else{
-        LaunchedEffect(user.followed.profilePicture) {
-            profileFollowingViewModel.fetchImage(user) {
-                bitmap = it
-                username = user.followed.username
-            }
-        }
+        userProfile = user.followed
     }
 
     Column(
@@ -88,25 +80,17 @@ fun ProfileFollowPeople(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                bitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(70.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }?: Image(
-                    painter = painterResource(id = R.drawable.placeholder_profile),
+                AsyncImage(
+                    model = "${Constant.USER_IMAGE_URL}${userProfile!!.profilePicture}",
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(70.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                        .clip(RoundedCornerShape(8.dp)))
+
+
                 Text(
-                    text = username!!,
+                    text = userProfile!!.username,
                     fontSize = 18.sp,
                     modifier = Modifier
                         .weight(1f)

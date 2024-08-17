@@ -24,4 +24,5 @@ object Constant {
     val PAGE_SIZE_PROFILE = 20
     val MINIMUM_PASSWORD_SIZE = 8
     val RECIPE_IMAGE_URL = "https://bytebite-recipe.s3.eu-central-1.amazonaws.com/"
+    val USER_IMAGE_URL = "https://bytebite-profile.s3.eu-central-1.amazonaws.com/"
 }

@@ -22,32 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class ProfileFollowerViewModel : ViewModel() {
 
-    fun fetchImage(user: UserFollowsResponse, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[user.follower.profilePicture]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
 
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    // Directly call the suspend function
-                    val imageString = RetrofitHelper.apiService.getImage(user.follower.profilePicture)
-                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            if (response != null) {
-                imageCache[user.follower.profilePicture] = response
-            }
-
-            onImageLoaded(response)
-        }
-    }
 
     var page = 0
     private val _isLoading = MutableStateFlow(false)
@@ -60,7 +35,6 @@ class ProfileFollowerViewModel : ViewModel() {
     val displayUser: StateFlow<Boolean> get() = _displayUser
 
     var userListDetail: List<UserFollowsResponse> = emptyList()
-    private val imageCache = ConcurrentHashMap<String, Bitmap>()
 
     fun fetchUsers(userId: Long) {
         if (page == 0 && !_isLoading.value) {
