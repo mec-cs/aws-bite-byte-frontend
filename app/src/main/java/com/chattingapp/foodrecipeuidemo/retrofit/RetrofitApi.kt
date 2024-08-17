@@ -61,10 +61,6 @@ interface RetrofitAPICredentials {
     @GET("/profile-picture-downloader/download/{fileName}")
     suspend fun getImage(@Path("fileName") imageName:String): String
 
-    // RECIPE PICTURE DOWNLOADER API
-    /*@GET("/recipe-picture-downloader/download/{fileName}")
-    suspend fun getImageRecipe(@Path("fileName") imageName:String): String*/
-
     // RECIPE API
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
     suspend fun getRecipeDisplay(@Path("ownerId") ownerId: Long, @Path("page") page: Int): List<RecipeProjection>
@@ -115,7 +111,7 @@ interface RetrofitAPICredentials {
 
     @GET("comment/count/{recipeId}")
     suspend fun countCommentsByRecipeId(@Path("recipeId") recipeId: Long): Long
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     @GET("comment/get-comments/{recipeId}/{page}")
     suspend fun getComments(@Path("recipeId") recipeId: Long, @Path("page") page: Int): List<CommentProjection>
 
