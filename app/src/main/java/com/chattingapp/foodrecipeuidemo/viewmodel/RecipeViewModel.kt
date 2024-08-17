@@ -8,7 +8,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
@@ -17,14 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class RecipeViewModel : ViewModel() {
@@ -44,8 +35,8 @@ class RecipeViewModel : ViewModel() {
     var page = 0
     private var isLoading = false
 
-    fun fetchImage(recipe: RecipeProjection, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[recipe.image]
+    fun fetchImage(recipeImage: String, onImageLoaded: (Bitmap?) -> Unit) {
+        val cachedImage = imageCache[recipeImage]
         if (cachedImage != null) {
             onImageLoaded(cachedImage)
             return
@@ -55,7 +46,7 @@ class RecipeViewModel : ViewModel() {
             val response = withContext(Dispatchers.IO) {
                 try {
                     // Directly call the suspend function
-                    val imageString = apiService.getImageRecipe(recipe.image!!)
+                    val imageString = apiService.getImageRecipe(recipeImage)
                     val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
                     BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 } catch (e: Exception) {
@@ -64,7 +55,7 @@ class RecipeViewModel : ViewModel() {
             }
 
             if (response != null) {
-                imageCache[recipe.image!!] = response
+                imageCache[recipeImage] = response
             }
 
             onImageLoaded(response)
@@ -156,7 +147,7 @@ class RecipeViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoadingRecipe.value = true
             try {
-                val response = apiService.getRecipeById(id)
+                val response = apiService.getRecipeSpecificById(id)
                 _recipe.value = response
                 Log.d("RecipeViewModel", "Recipe fetched: ${response.diet}")
             } catch (e: Exception) {

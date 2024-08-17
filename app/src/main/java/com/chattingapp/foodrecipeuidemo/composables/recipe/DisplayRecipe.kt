@@ -73,7 +73,7 @@ fun DisplayRecipe(
     // Fetch recipe image
     LaunchedEffect(recipe.id) {
         //Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
-        viewModel.fetchImage(recipe) {
+        viewModel.fetchImage(recipe.image!!) {
             bitmap = it
             isLoading = false
             //Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
@@ -90,22 +90,7 @@ fun DisplayRecipe(
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
 
         if (isLoading || isProfileLoading) {
-            //Log.d("DisplayRecipe", "Recipe image is loading for recipe: ${recipe.id}")
-            /*Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(64.dp),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }*/
             RecipePlaceholder(recipe)
-
-
         } else {
             val displayedProfileBitmap = when {
                 Constant.isProfilePage && Constant.targetUserProfile != null -> Constant.targetUserProfile!!.bm

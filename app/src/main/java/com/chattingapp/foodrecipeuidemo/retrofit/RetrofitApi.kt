@@ -10,9 +10,9 @@ import com.chattingapp.foodrecipeuidemo.entity.Like
 import com.chattingapp.foodrecipeuidemo.entity.LikeCountResponse
 import com.chattingapp.foodrecipeuidemo.entity.Recipe
 import com.chattingapp.foodrecipeuidemo.entity.RecipeProjection
+import com.chattingapp.foodrecipeuidemo.entity.RecipeSearchResult
 import com.chattingapp.foodrecipeuidemo.entity.RecipeSpecificDTO
 import com.chattingapp.foodrecipeuidemo.entity.SearchCriteria
-import com.chattingapp.foodrecipeuidemo.entity.SearchRecipeDTO
 import com.chattingapp.foodrecipeuidemo.entity.User
 import com.chattingapp.foodrecipeuidemo.entity.UserFollowsResponse
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
@@ -58,26 +58,12 @@ interface RetrofitAPICredentials {
     @GET("/profile-api/user/{id}/followers-followings/count")
     suspend fun getFollowersCount(@Path("id") id: Long): FollowCountsDTO
 
-    // SEARCH API
-    @POST("search-profile/search")
-    fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
-
-    @POST("search-recipe/search")
-    fun getRecipesByNames(@Body searchRecipeDTO: SearchRecipeDTO) : Call<List<Recipe>>
-
-    // PROFILE-PHOTO DOWNLOADER API
-    @POST("/profile-picture-downloader/download/images")
-    fun getProfilePicturesList(@Body ppList: List<String>) : Call<List<String>>
-
     @GET("/profile-picture-downloader/download/{fileName}")
     suspend fun getImage(@Path("fileName") imageName:String): String
 
     // RECIPE PICTURE DOWNLOADER API
     @GET("/recipe-picture-downloader/download/{fileName}")
     suspend fun getImageRecipe(@Path("fileName") imageName:String): String
-
-    @POST("/recipe-picture-downloader/download/images")
-    fun getRecipeImagesList(@Body recipeList: List<String>) : Call<List<String>>
 
     // RECIPE API
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")
@@ -122,7 +108,7 @@ interface RetrofitAPICredentials {
     ): Recipe
 
     @GET("recipe-getter/specific-fields/{id}")
-    suspend fun getRecipeById(@Path("id") id: Long): RecipeSpecificDTO
+    suspend fun getRecipeSpecificById(@Path("id") id: Long): RecipeSpecificDTO
 
     @POST("click/add-click")
     suspend fun addClick(@Query("userId") userId: Long, @Query("recipeId") recipeId: Long)
@@ -202,4 +188,12 @@ interface RetrofitAPICredentials {
 
     @POST("credentials/change-password")
     suspend fun changePassword(@Body request: ChangePasswordRequest): Boolean
+
+    // SEARCH API
+    @POST("search-profile/search")
+    fun getUsersByUsername(@Body searchCriteria: SearchCriteria) : Call<List<UserProfile>>
+
+    @POST("search-recipe/search")
+    suspend fun searchRecipes(@Query("query") query: String): List<RecipeSearchResult>
+
 }
