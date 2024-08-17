@@ -26,34 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 class UserProfileViewModel : ViewModel() {
 
     private val apiService = RetrofitHelper.apiService
-    private val imageCache = ConcurrentHashMap<String, Bitmap>()
 
-    fun fetchImage(recipe: RecipeProjection, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[recipe.image]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
-
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    // Directly call the suspend function
-                    val imageString = apiService.getImage(recipe.ownerImage!!)
-                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            if (response != null) {
-                imageCache[recipe.image!!] = response
-            }
-
-            onImageLoaded(response)
-        }
-    }
 
     private val _userProfile = MutableStateFlow<UserProfile?>(null)
     val userProfile: StateFlow<UserProfile?> get() = _userProfile
@@ -70,8 +43,7 @@ class UserProfileViewModel : ViewModel() {
                     _userProfile.value = profile
                     Constant.userProfile = profile
                     // Assuming ProfileImageViewModel is also managed by a dependency injection or similar
-                    val profileImageViewModel = ProfileImageViewModel()
-                    profileImageViewModel.fetchProfileImage(profile.profilePicture)
+
                 }
             } catch (e: Exception) {
                 Log.e("API_CALL_FAILURE", "Failed to fetch user profile", e)
