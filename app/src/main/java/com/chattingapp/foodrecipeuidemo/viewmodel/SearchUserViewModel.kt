@@ -1,23 +1,16 @@
 package com.chattingapp.foodrecipeuidemo.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chattingapp.foodrecipeuidemo.entity.RecipeSearchResult
 import com.chattingapp.foodrecipeuidemo.entity.UserProfile
 import com.chattingapp.foodrecipeuidemo.retrofit.RetrofitHelper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.concurrent.ConcurrentHashMap
 
 class SearchUserViewModel: ViewModel() {
 
@@ -33,7 +26,6 @@ class SearchUserViewModel: ViewModel() {
             _searchQuery
                 .debounce(300) // Add a debounce to avoid rapid API calls
                 .filter { it.isNotEmpty() }
-                .distinctUntilChanged()
                 .collect { query ->
                     Log.d("SearchViewModel", "Search query updated: $query") // Log the search query
                     performSearch(query)
@@ -60,35 +52,5 @@ class SearchUserViewModel: ViewModel() {
             _searchResults.value = emptyList()
         }
     }
-
-    private val imageCache = ConcurrentHashMap<String, Bitmap>()
-
-    fun fetchImage(profileImage: String, onImageLoaded: (Bitmap?) -> Unit) {
-        val cachedImage = imageCache[profileImage]
-        if (cachedImage != null) {
-            onImageLoaded(cachedImage)
-            return
-        }
-
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                try {
-                    // Directly call the suspend function
-                    val imageString = RetrofitHelper.apiService.getImage(profileImage)
-                    val decodedBytes = Base64.decode(imageString, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-                } catch (e: Exception) {
-                    null
-                }
-            }
-
-            if (response != null) {
-                imageCache[profileImage] = response
-            }
-
-            onImageLoaded(response)
-        }
-    }
-
 
 }

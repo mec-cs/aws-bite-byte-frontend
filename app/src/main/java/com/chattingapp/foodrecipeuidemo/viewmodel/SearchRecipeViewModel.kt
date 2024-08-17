@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
-class SearchRecipeViewModel: ViewModel() {
+class SearchRecipeViewModel : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
@@ -21,37 +21,34 @@ class SearchRecipeViewModel: ViewModel() {
     val searchResults: StateFlow<List<RecipeSearchResult>> = _searchResults
 
     init {
-        // Observe search query changes and perform search
-            viewModelScope.launch {
-                _searchQuery
-                    .debounce(300) // Add a debounce to avoid rapid API calls
-                    .filter { it.isNotEmpty() }
-                    .distinctUntilChanged()
-                    .collect { query ->
-                        Log.d("SearchViewModel", "Search query updated: $query") // Log the search query
-                        performSearch(query)
-                    }
-            }
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(300) // Add a debounce to avoid rapid API calls
+                .filter { it.isNotEmpty() }
+                .collect { query ->
+                    Log.d("SearchViewModel", "Search query updated: $query")
+                    performSearch(query)
+                }
+        }
     }
 
     fun updateSearchQuery(query: String) {
-        Log.d("SearchViewModel", "Updating search query to: $query") // Log when the query is updated
+        Log.d("SearchViewModel", "Updating search query to: $query")
         _searchQuery.value = query
-        if(_searchQuery.value == ""){
+        if (query.isEmpty()) {
             _searchResults.value = emptyList()
         }
     }
 
     private suspend fun performSearch(query: String) {
-        Log.d("SearchViewModel", "Performing search for query: $query") // Log before making the API call
+        Log.d("SearchViewModel", "Performing search for query: $query")
         try {
             val result = RetrofitHelper.apiService.searchRecipes(query)
             _searchResults.value = result
-            Log.d("SearchViewModel", "Search results received: ${result.size} recipes found") // Log the result size
+            Log.d("SearchViewModel", "Search results received: ${result.size} recipes found")
         } catch (e: Exception) {
-            Log.e("SearchViewModel", "Error performing search: ${e.message}", e) // Log the error
+            Log.e("SearchViewModel", "Error performing search: ${e.message}", e)
             _searchResults.value = emptyList()
         }
     }
-
 }
