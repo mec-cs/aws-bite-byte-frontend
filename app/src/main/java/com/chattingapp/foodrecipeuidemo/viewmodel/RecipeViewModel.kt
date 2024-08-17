@@ -35,7 +35,7 @@ class RecipeViewModel : ViewModel() {
     var page = 0
     private var isLoading = false
 
-    fun fetchImage(recipeImage: String, onImageLoaded: (Bitmap?) -> Unit) {
+    /*fun fetchImage(recipeImage: String, onImageLoaded: (Bitmap?) -> Unit) {
         val cachedImage = imageCache[recipeImage]
         if (cachedImage != null) {
             onImageLoaded(cachedImage)
@@ -60,7 +60,7 @@ class RecipeViewModel : ViewModel() {
 
             onImageLoaded(response)
         }
-    }
+    }*/
 
     private fun getCurrentRecipeIds(): Set<Long?> {
         return _recipeList.value.map { it.id }.toSet()

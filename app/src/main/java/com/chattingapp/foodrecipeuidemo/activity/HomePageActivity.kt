@@ -21,7 +21,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.Coil
 import com.chattingapp.foodrecipeuidemo.activity.ui.theme.MyAppTheme
+import com.chattingapp.foodrecipeuidemo.coil.CoilSetup
 import com.chattingapp.foodrecipeuidemo.composables.displaycontent.RecipeCategory
 import com.chattingapp.foodrecipeuidemo.composables.feednavigator.FeedNavigator
 import com.chattingapp.foodrecipeuidemo.composables.navigationbar.AppNavigationBar
@@ -48,6 +50,9 @@ class HomePageActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val imageLoaderProvider = CoilSetup(this)
+                    Coil.setImageLoader(imageLoaderProvider.imageLoader)
+
                     val userProfileViewModel:UserProfileViewModel = viewModel()
                     var isFirstTime by remember { mutableStateOf(true) }
                     val userProfile by userProfileViewModel.userProfile.collectAsState()

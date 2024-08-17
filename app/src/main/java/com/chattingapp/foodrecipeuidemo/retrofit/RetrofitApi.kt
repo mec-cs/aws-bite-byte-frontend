@@ -62,8 +62,8 @@ interface RetrofitAPICredentials {
     suspend fun getImage(@Path("fileName") imageName:String): String
 
     // RECIPE PICTURE DOWNLOADER API
-    @GET("/recipe-picture-downloader/download/{fileName}")
-    suspend fun getImageRecipe(@Path("fileName") imageName:String): String
+    /*@GET("/recipe-picture-downloader/download/{fileName}")
+    suspend fun getImageRecipe(@Path("fileName") imageName:String): String*/
 
     // RECIPE API
     @GET("profile-recipe/get-recipe/{ownerId}/{page}")

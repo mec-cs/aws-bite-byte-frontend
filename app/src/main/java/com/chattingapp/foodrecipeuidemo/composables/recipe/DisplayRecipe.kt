@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.composables.placeholder.RecipePlaceholder
 import com.chattingapp.foodrecipeuidemo.constant.Constant
@@ -49,11 +50,8 @@ fun DisplayRecipe(
     navController: NavController
 
 ) {
-    val viewModel: RecipeViewModel = viewModel()
 
     var expanded by remember { mutableStateOf(false) }
-    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
     var isProfileLoading by remember { mutableStateOf(true) }
     var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
@@ -73,11 +71,7 @@ fun DisplayRecipe(
     // Fetch recipe image
     LaunchedEffect(recipe.id) {
         //Log.d("DisplayRecipe", "Fetching image for recipe: ${recipe.id}")
-        viewModel.fetchImage(recipe.image!!) {
-            bitmap = it
-            isLoading = false
-            //Log.d("DisplayRecipe", "Image fetched for recipe: ${recipe.id}")
-        }
+
         userProfileViewModel.fetchImage(recipe){
             profileBitmap = it
             isProfileLoading = false
@@ -89,7 +83,7 @@ fun DisplayRecipe(
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
 
-        if (isLoading || isProfileLoading) {
+        if (isProfileLoading) {
             RecipePlaceholder(recipe)
         } else {
             val displayedProfileBitmap = when {
@@ -110,15 +104,13 @@ fun DisplayRecipe(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             //Log.d("DisplayRecipe", "Recipe image loaded for recipe: ${recipe.id}")
-            bitmap?.let {
                 Column(modifier = Modifier.clickable {
                     Constant.recipeDetailProjection = recipe
-                    Constant.recipeDetailProjection!!.bmRecipe = bitmap
                     Constant.recipeDetailProjection!!.relativeDate = relativeDate
                     navController.navigate("recipeDetail/${"Details"}")
                 }) {
-                    Image(
-                        bitmap = it.asImageBitmap(),
+                    AsyncImage(
+                        model = "${Constant.RECIPE_IMAGE_URL}${recipe.image}",
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -139,7 +131,6 @@ fun DisplayRecipe(
                                 .clip(RoundedCornerShape(8.dp)),
                             onClick = {
                                 Constant.recipeDetailProjection = recipe
-                                Constant.recipeDetailProjection!!.bmRecipe = bitmap
                                 Constant.recipeDetailProjection!!.relativeDate = relativeDate
                                 navController.navigate("recipeDetail/${"Comments"}")
                             }
@@ -179,7 +170,7 @@ fun DisplayRecipe(
                         Text(text = it, fontSize = 12.sp)
                     }
                 }
-            }
+
         }
     }
 }

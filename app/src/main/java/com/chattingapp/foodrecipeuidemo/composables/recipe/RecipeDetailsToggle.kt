@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.chattingapp.foodrecipeuidemo.R
 import com.chattingapp.foodrecipeuidemo.constant.Constant
 import com.chattingapp.foodrecipeuidemo.viewmodel.CommentViewModel
@@ -74,8 +75,8 @@ fun RecipeDetailsToggle(recipeViewModel: RecipeViewModel){
                         fontSize = 13.sp,
                         modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
                     )
-                    Image(
-                        bitmap = Constant.recipeDetailProjection!!.bmRecipe!!.asImageBitmap(),
+                    AsyncImage(
+                        model = "${Constant.RECIPE_IMAGE_URL}${Constant.recipeDetailProjection!!.image}",
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -84,6 +85,7 @@ fun RecipeDetailsToggle(recipeViewModel: RecipeViewModel){
                             .padding(bottom = 8.dp)
                             .clip(RoundedCornerShape(8.dp))
                     )
+
                     Text(text = Constant.recipeDetailProjection!!.relativeDate!!,
                         fontSize = 13.sp,
                         modifier = Modifier.padding(bottom = 8.dp, top = 8.dp))
