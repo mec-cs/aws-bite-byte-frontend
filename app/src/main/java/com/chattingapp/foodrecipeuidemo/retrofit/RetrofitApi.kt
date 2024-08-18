@@ -163,7 +163,7 @@ interface RetrofitAPICredentials {
 
     @Multipart
     @POST("profile-api/change-profile-picture")
-    suspend fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long) // Use Unit instead of Void for suspend functions
+    suspend fun changeProfilePicture(@Part file: MultipartBody.Part, @Query("userId") userProfileId: Long): String // Use Unit instead of Void for suspend functions
 
     @GET("/profile-recipe/{followerId}/followed-recipes")
     suspend fun getFollowedRecipes(@Path("followerId") followerId: Long): List<Long>

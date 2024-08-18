@@ -156,6 +156,9 @@ fun SignupPage(onSwitchToLogin: () -> Unit) {
                 }
             }
         }
+        item{
+            Spacer(modifier = Modifier.padding(bottom = 350.dp))
+        }
     }
 
 }

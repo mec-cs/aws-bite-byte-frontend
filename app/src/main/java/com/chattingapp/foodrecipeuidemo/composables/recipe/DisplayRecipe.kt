@@ -13,10 +13,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -53,20 +55,13 @@ fun DisplayRecipe(
 
 
     Column(modifier = Modifier.padding(bottom = 70.dp)) {
+            if(!Constant.isProfilePage){
+                RecipeUserProfile(recipe.ownerImage!!, recipe.username!!, recipe.id!!, favoriteViewModel)
+            }
+
+            RecipeNameBar(recipe.name!!, recipe.id!!, favoriteViewModel)
 
 
-
-
-
-            RecipeUserProfile(recipe.ownerImage!!, recipe.username!!, recipe.id!!, favoriteViewModel)
-
-
-            Text(
-                text = recipe.name ?: "",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
             //Log.d("DisplayRecipe", "Recipe image loaded for recipe: ${recipe.id}")
                 Column(modifier = Modifier.clickable {
                     Constant.recipeDetailProjection = recipe

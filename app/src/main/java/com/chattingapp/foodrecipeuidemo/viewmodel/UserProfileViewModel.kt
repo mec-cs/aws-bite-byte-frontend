@@ -71,7 +71,10 @@ class UserProfileViewModel : ViewModel() {
             _isLoadingChangeImage.value = true
             viewModelScope.launch {
                 try {
-                    apiService.changeProfilePicture(file, userProfileId)
+                    val response = apiService.changeProfilePicture(file, userProfileId)
+                    if(response != ""){
+                        Constant.userProfile.profilePicture = response
+                    }
                     _updateResult.value = true
                 } catch (e: HttpException) {
                     Log.d("PROFILE PICTURE ERROR:", e.message.orEmpty())
