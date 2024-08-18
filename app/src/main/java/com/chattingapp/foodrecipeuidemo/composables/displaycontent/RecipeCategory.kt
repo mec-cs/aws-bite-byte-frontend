@@ -179,7 +179,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                         }
 
                         if(allIdSizeLike == 0){
-                            NoRecipeUserCommentPlaceholder()
+                            //NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LazyColumn(
@@ -226,7 +226,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
 
                         }
                         if(allIdSizeClick == 0){
-                            NoRecipeUserCommentPlaceholder()
+                            //NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LazyColumn(
@@ -282,7 +282,7 @@ fun RecipeCategory(navController: NavController, cardId: String?) {
                             ErrorPlaceholder()
                         }
                         if(favoriteCount.value!! == 0L){
-                            NoRecipeUserCommentPlaceholder()
+                            //NoRecipeUserCommentPlaceholder()
                         }
                         else{
                             LaunchedEffect(cardId) {
